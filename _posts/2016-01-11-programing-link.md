@@ -1,5 +1,5 @@
 ---
-layout: links
+layout: post
 tilte: "memo"
 ---
 
