@@ -9,9 +9,12 @@
 title: Cloudmind7
 email: cloudmind7@gmail.com
 description: > # this means to ignore newlines until "baseurl:"
-  Write an awesome description for your new site here. You can edit this
-  line in _config.yml. It will appear in your document head meta (for
-  Google search results) and in your feed.xml site description.
+  “달의
+  산 너머에,
+  저 아래 그림자의 골짜기에,
+  달려가요, 대담하게 달려가요.”
+  그늘은 대답했다,-
+  “당신이 엘도라도를 찾으신다면!”
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "http://cloudmind7.github.io" # the base hostname & protocol for your site
 twitter_username: cloudmind7
