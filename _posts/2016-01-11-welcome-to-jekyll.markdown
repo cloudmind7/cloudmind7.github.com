@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Welcome to My Home"
+title:  "Generate"
 date:   2016-01-11 23:11:48 +0900
 categories: jekyll update
 ---
