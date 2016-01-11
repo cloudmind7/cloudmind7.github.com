@@ -1,5 +1,5 @@
 ---
-layout: link
+layout: links
 tilte: "memo"
 ---
 
