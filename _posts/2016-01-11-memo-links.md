@@ -19,6 +19,7 @@ categories: memo
 
 - Git:
 
+[`Pro Git`](https://git-scm.com/book/ko/v2)
 [`Atlassian Tutorials`](https://www.atlassian.com/git/tutorials)
 [`Git with SublimeText`](http://unikys.tistory.com/331)
 
