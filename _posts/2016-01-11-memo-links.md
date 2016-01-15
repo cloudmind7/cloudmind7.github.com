@@ -9,6 +9,10 @@ categories: memo
 [`번역글 wiki`](https://github.com/nolboo/nolboo.github.io/wiki)
 
 
+- 볼거리
+[`데이터시각화도구`](http://keshif.me/demo/VisTools)
+
+
 - Jekyll:
 
 [`Jekyll 번역사이트`](http://jekyllrb-ko.github.io)
