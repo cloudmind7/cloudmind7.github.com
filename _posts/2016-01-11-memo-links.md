@@ -7,7 +7,8 @@ categories: memo
 - 읽을거리:
 
 [`번역글 wiki`](https://github.com/nolboo/nolboo.github.io/wiki)
-[`heroku`](http://blog.naver.com/clxm300/220109065465)
+[`heroku+node.js`](http://blog.naver.com/clxm300/220109065465)
+[`heroku+eclipse`](http://truehoop.blog.me/110180823652)
 
 
 - 볼거리:
