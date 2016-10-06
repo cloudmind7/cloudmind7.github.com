@@ -310,6 +310,12 @@ textarea.form-control {
 	margin: 10px auto;
 }
 
+.pfblock-line-15 {
+	background: rgba(255, 255, 255, 1);
+	width: 15px;
+	height: 2px;
+	margin: 10px auto;
+}
 
 .pfblock-icon {
 	font-size: 32px;
