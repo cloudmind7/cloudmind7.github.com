@@ -394,6 +394,9 @@ textarea.form-control {
     top: 0;
     width: 100%;
     z-index: 0;
+	background-color:rgba(255, 255, 255, 0.3);
+	filter: alpha(opacity=30);
+    opacity: 0.3;
 }
 
 .intro {
