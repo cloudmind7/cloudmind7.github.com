@@ -562,11 +562,10 @@
 	    markerPosition = new daum.maps.LatLng(37.3960886726, 126.9646880128);
 
 	var marker = new daum.maps.Marker({
+		//image: markerImage,
 	    position: markerPosition,
-	    image: markerImage
+		map: map
 	});
-
-	marker.setMap(map);
 
 	// 커스텀 오버레이
 	var content = '<div class="wrap">' +
