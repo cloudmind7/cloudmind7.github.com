@@ -196,7 +196,7 @@ textarea.form-control {
 .btn-group-lg > .btn {
 	padding: 10px 25px;
 	font-size: 13px;
-    background: rgba(17, 17, 17, 0.8);
+    background: rgba(17, 17, 17, 0.5);
     color: #fff;
 }
 .btn-lg:hover,
@@ -303,7 +303,7 @@ textarea.form-control {
     text-align: center;
 }
 .calltoaction {
-    background: url(../images/item-3.jpg);
+    background: url(../images/wedding_hall.gif);
 	background-color: #222;
 	background-repeat: no-repeat;
 	background-position: 0 0;

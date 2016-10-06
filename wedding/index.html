@@ -260,12 +260,12 @@
 						</p>
 					</div>
 					<div class="col-sm-6 col-md-3 text-center">
-						<span id="confuse_w_1" data-percent="50" class="chart easyPieChart" style="width: 140px; height: 140px; line-height: 140px;">
-							<span id="confuse_w_2" class="percent">50</span>
+						<span id="attend_1" data-percent="100" class="chart easyPieChart" style="width: 140px; height: 140px; line-height: 140px;">
+							<span id="attend_2" class="percent">100</span>
 						</span>
 						<p class="heart">
 							<span class="fa fa-heart fa-2x animated pulse" style="color:#ff5252;font:normal normal normal 14px/1 FontAwesome"></span>
-							<h3 class="text-center">신부의 심경 복잡도</h3>
+							<h3 class="text-center">당신의 참석 의지</h3>
 						</p>
 					</div>
 				</div>
@@ -275,6 +275,29 @@
     </section>
 
     <!-- Skills end -->
+
+	<!-- CallToAction start -->
+
+	<section class="calltoaction" id="wedding_hall">
+		<div class="container">
+
+			<div class="row">
+
+				<div class="col-md-12 col-lg-12">
+					<div class="calltoaction-decription wow slideInRight" data-wow-delay=".2s"></div>
+					<h2 class="wow slideInRight" data-wow-delay=".1s">Wedding Hall</h2>
+					<div class="calltoaction-decription wow slideInRight" data-wow-delay=".2s"></div>
+				</div>
+
+				<div class="col-md-12 col-lg-12 calltoaction-btn wow slideInRight" data-wow-delay=".3s">
+					<a href="http://www.artewedding.co.kr/wedding/chapel/" target="_blank" class="btn btn-lg">Go</a>
+				</div>
+
+			</div><!-- .row -->
+		</div><!-- .container -->
+	</section>
+
+	<!-- CallToAction end -->
 
     <!-- Services start -->
 
@@ -367,30 +390,6 @@
 	</section>
 
 	<!-- Services end -->
-
-	<!-- CallToAction start -->
-
-	<section class="calltoaction">
-		<div class="container">
-
-			<div class="row">
-
-				<div class="col-md-12 col-lg-12">
-					<h2 class="wow slideInRight" data-wow-delay=".1s">ARE YOU READY TO START?</h2>
-					<div class="calltoaction-decription wow slideInRight" data-wow-delay=".2s">
-						I'm available for freelance projects.
-					</div>
-				</div>
-
-				<div class="col-md-12 col-lg-12 calltoaction-btn wow slideInRight" data-wow-delay=".3s">
-					<a href="#contact" class="btn btn-lg">Hire Me</a>
-				</div>
-
-			</div><!-- .row -->
-		</div><!-- .container -->
-	</section>
-
-	<!-- CallToAction end -->
 
 	<!-- Testimonials start -->
 
@@ -600,6 +599,11 @@
 		var confuse_w_percent = parseInt(Math.random()*100);
 		$('#confuse_w_1').attr('data-percent', confuse_w_percent);
 		$('#confuse_w_2').text(confuse_w_percent);
+
+		var attend_percent = parseInt(Math.random()*100);
+		$('#attend_1').attr('data-percent', attend_percent);
+		$('#attend_2').text(attend_percent);
+		attend_2
 	}
 	CountDownTimer('12/11/2016 01:30 PM', 'countdown');
 	</script>
