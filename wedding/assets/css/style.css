@@ -1060,7 +1060,6 @@ figure.effect-bubba:hover p {
 	z-index: 999;
 
 	color:rgba(255, 255, 255, 0.8);
-	font-size: 25px;
 	filter: alpha(opacity=80);
     opacity: 0.8;
 	text-shadow:0 0 5px rgba(0, 0, 0, 0.4) !important;
@@ -1068,7 +1067,7 @@ figure.effect-bubba:hover p {
 .btn-map {
 	display: block;
 	cursor: pointer;
-	font-size: 16px;
+	font-size: 14px;
 	padding: 1px 15px;
 	border: 1px solid lightgray;
 }
