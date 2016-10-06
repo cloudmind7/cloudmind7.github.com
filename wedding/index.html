@@ -533,14 +533,15 @@
     <script src="assets/js/jquery.cbpQTRotator.js"></script>
 	<script src="assets/js/custom.js"></script>
 
-	<!-- naver map -->
-	<script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?clientId=LRmpRG8RZQJGW1STI7Ii"></script>
+	<!-- map -->
+	<script type="text/javascript" src="//apis.daum.net/maps/maps3.js?apikey=fce61da58c407e32680cb435c602567c"></script>
 
 	<script type="text/javascript">
-	var map = new naver.maps.Map('map', {
-	    center: new naver.maps.LatLng('cd29756ea188c6853cdd0feaa7acf622','db5ad6b0ab5a04584429c53bc0060099'),
-	    zoom: 10
-	});
+	var container = document.getElementById('map');
+	var options = {
+		center: new daum.maps.LatLng(37.3960886726, 126.9646880128),
+		level: 3
+	};
 
 	function CountDownTimer(dt, id) {
 		var end = new Date(dt);
