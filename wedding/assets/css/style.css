@@ -841,6 +841,10 @@ textarea.form-control {
 .grid figure h2 {
 	word-spacing: -0.15em;
 	font-weight: 300;
+
+	color:rgba(255, 255, 255, 0.3);
+	filter: alpha(opacity=30);
+	opacity: 0.4;
 }
 
 .grid figure h2 span {
@@ -900,6 +904,10 @@ figure.effect-bubba figcaption::after {
 	border-left: 1px solid #fff;
 	-webkit-transform: scale(1,0);
 	transform: scale(1,0);
+
+	color:rgba(255, 255, 255, 0.9);
+	filter: alpha(opacity=90);
+	opacity: 0.9;
 }
 
 figure.effect-bubba h2 {
@@ -1026,4 +1034,9 @@ figure.effect-bubba:hover p {
 		width: 80px;
 	}
 
+}
+
+.map {
+	width: 100%;
+	height: 400px;
 }

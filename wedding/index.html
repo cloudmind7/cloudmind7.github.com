@@ -106,7 +106,7 @@
 								<span class="fa fa-heart fa-2x animated pulse" style="color:#ff5252;font:normal normal normal 14px/1 FontAwesome"></span>
 								김진영
 							</p>
-							저희들의 결혼식에 소중한 당신을 초대합니다.
+							두 사람의 결혼식에 소중한 당신을 초대합니다
 						</div>
 					</div>
 
@@ -286,6 +286,9 @@
 						<div class="pfblock-header wow fadeInUp">
 							<h2 class="pfblock-title">Preparation</h2>
 							<div class="pfblock-line"></div>
+							<p class="heart">
+								<span class="fa fa-heart fa-2x animated pulse" style="color:#ff5252;font:normal normal normal 14px/1 FontAwesome"></span>
+							</p>
 							<div class="pfblock-subtitle">
 								신랑 신부의 결혼준비 현황입니다.
 							</div>
@@ -410,6 +413,15 @@
 
 	</section>
 
+	<section>
+		<div class="container">
+			<div class="row">
+				<div class="map" id="map">
+
+				</div>
+			</div>
+		</div>
+	</section>
 	<!-- Contact end -->
 
 	<!-- Testimonials start -->
@@ -515,7 +527,15 @@
     <script src="assets/js/jquery.cbpQTRotator.js"></script>
 	<script src="assets/js/custom.js"></script>
 
+	<!-- naver map -->
+	<script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?clientId=LRmpRG8RZQJGW1STI7Ii"></script>
+
 	<script type="text/javascript">
+	var map = new naver.maps.Map('map', {
+	    center: new naver.maps.LatLng(37.3595704, 127.105399),
+	    zoom: 10
+	});
+
 	function CountDownTimer(dt, id) {
 		var end = new Date(dt);
 		var _second = 1000;
