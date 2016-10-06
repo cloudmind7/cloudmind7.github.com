@@ -419,11 +419,19 @@ textarea.form-control {
 	text-shadow:0 0 5px rgba(0, 0, 0, 0.4) !important;
 }
 
-.intro .msg, .intro .start {
+.intro .msg {
 	color:rgba(255, 255, 255, 0.8);
 	font-size: 15px;
 	filter: alpha(opacity=80);
     opacity: 0.8;
+	text-shadow:0 0 5px rgba(0, 0, 0, 0.4) !important;
+}
+
+.intro .start {
+	color:rgba(255, 255, 255, 0.9);
+	font-size: 15px;
+	filter: alpha(opacity=90);
+    opacity: 0.9;
 	text-shadow:0 0 5px rgba(0, 0, 0, 0.4) !important;
 }
 
