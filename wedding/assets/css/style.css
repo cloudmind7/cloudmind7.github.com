@@ -70,7 +70,7 @@ a,
 
 h1, h2, h3, h4, h5, h6 {
 	font: 700 40px/1.2 Raleway, sans-serif;
-#	text-transform: uppercase;
+/*	text-transform: uppercase;*/
 	letter-spacing: 5px;
 	margin: 5px 0 5px;
 	color: #222;
@@ -209,7 +209,7 @@ textarea.form-control {
 	padding: 10px 25px;
 	font-size: 13px;
 	border: 1px solid white;
-#    background: rgba(17, 17, 17, 1);
+/*   background: rgba(17, 17, 17, 1);*/
     color: white;
 }
 
@@ -385,7 +385,7 @@ textarea.form-control {
 }
 
 .home-overlay {
-    #background-color: rgba(44, 62, 80, 0.3);
+/*    background-color: rgba(44, 62, 80, 0.3);*/
     background-image: url("../images/pattern.png");
     background-repeat: repeat;
     height: 100%;
@@ -411,12 +411,29 @@ textarea.form-control {
 }
 
 .intro h1{
-	color:rgba(255, 255, 255, 0.6);
-	font: 600 60px/1.5 Raleway, sans-serif;
+	color:rgba(255, 255, 255, 0.8);
+	font: 200 60px/1.5 Raleway, sans-serif;
 	font-family: 'Tangerine', cursive;
-	filter: alpha(opacity=60);
-    opacity: 0.6;
+	filter: alpha(opacity=80);
+    opacity: 0.8;
 	text-shadow:0 0 5px rgba(0, 0, 0, 0.4) !important;
+}
+
+.intro .msg, .intro .start {
+	color:rgba(255, 255, 255, 0.8);
+	font-size: 15px;
+	filter: alpha(opacity=80);
+    opacity: 0.8;
+	text-shadow:0 0 5px rgba(0, 0, 0, 0.4) !important;
+}
+
+.countdown {
+	color:rgba(255, 255, 255, 0.8);
+	font-size: 15px;
+	filter: alpha(opacity=80);
+    opacity: 0.8;
+	text-shadow:0 0 5px rgba(0, 0, 0, 0.4) !important;
+	margin-top:-20px;
 }
 
 .start {
@@ -588,7 +605,7 @@ textarea.form-control {
 .navbar-custom .navbar-brand {
 	font-weight: 700;
 	font-size: 22px;
-    #font-family: Lobster, cursive;
+/*    font-family: Lobster, cursive;*/
 }
 
 .navbar-custom .dropdown-menu {
@@ -648,7 +665,7 @@ textarea.form-control {
 	position: absolute;
 	left: 50%;
 	bottom: 40px;
-	border: 2px solid #fff;
+	border: 2px solid rgba(255, 255, 255, 0.6);
 	border-radius: 50%;
 	height: 50px;
 	width: 50px;
@@ -660,7 +677,7 @@ textarea.form-control {
 
 .scroll-down span{
     position: relative;
-    color: #fff;
+    color: rgba(255, 255, 255, 0.6);
     -webkit-animation-name: drop;
 	-webkit-animation-duration: 1s;
 	-webkit-animation-timing-function: linear;
