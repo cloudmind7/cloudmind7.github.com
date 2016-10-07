@@ -650,6 +650,7 @@
 				//$('#prepare_i').addClass(weather_re[idx]);
 				src = $('#prepare_i').attr('src');
 				src = src.replace(/weather-[\d]/, weather_re[idx]);
+				console.log(src);
 				$('#prepare_i').attr('src', src).show();
 			}
 		}
