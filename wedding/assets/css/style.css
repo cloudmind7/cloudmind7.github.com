@@ -795,6 +795,7 @@ textarea.form-control {
 	max-width: 100%;
 	height: auto;
 	background: #3085a3;
+	/*background: #3085a3;*/
 	text-align: center;
 	cursor: pointer;
 }
@@ -846,7 +847,7 @@ textarea.form-control {
 
 	color:rgba(255, 255, 255, 0.3);
 	filter: alpha(opacity=30);
-	opacity: 0.4;
+	opacity: 0;
 }
 
 .grid figure h2 span {
@@ -860,7 +861,8 @@ textarea.form-control {
 
 .grid figure p {
 	letter-spacing: 1px;
-	font-size: 68.5%;
+	/*font-size: 68.5%;*/
+	font-size: 80%;
 }
 
 /*---------------*/
@@ -872,7 +874,7 @@ figure.effect-bubba {
 }
 
 figure.effect-bubba img {
-	opacity: 0.7;
+	opacity: 0.9;
 	-webkit-transition: opacity 0.35s;
 	transition: opacity 0.35s;
 }
@@ -922,7 +924,7 @@ figure.effect-bubba h2 {
 }
 
 figure.effect-bubba p {
-	padding: 20px 2.5em;
+	padding: 10px 2.5em;
 	opacity: 0;
 	-webkit-transition: opacity 0.35s, -webkit-transform 0.35s;
 	transition: opacity 0.35s, transform 0.35s;
