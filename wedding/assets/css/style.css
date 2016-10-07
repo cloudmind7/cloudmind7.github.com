@@ -795,7 +795,6 @@ textarea.form-control {
 	max-width: 100%;
 	height: auto;
 	background: #3085a3;
-	/*background: #3085a3;*/
 	text-align: center;
 	cursor: pointer;
 }
@@ -870,6 +869,7 @@ textarea.form-control {
 /*---------------*/
 
 figure.effect-bubba {
+	/*background: #9e5406;*/
 	background: #9e5406;
 }
 
