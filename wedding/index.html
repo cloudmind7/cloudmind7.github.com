@@ -680,7 +680,7 @@
 		//$('#attend_i').addClass(weather_re[idx]);
 		src = $('#attend_i').attr('src');
 		src = src.replace(/weather-[\d]/, weather_re[idx]);
-		$('#attend_i').attr('src', src).show();
+		$('#attend_i').attr({'src': src, 'display': ''});
 	}
 	CountDownTimer('12/11/2016 01:30 PM', 'countdown');
 	</script>
