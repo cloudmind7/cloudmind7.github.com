@@ -115,25 +115,25 @@
 
 			</div>
 
-			<div class="row">
-
 				<div class="col-sm-3">
 					<div class="iconbox wow slideInLeft">
 						<div class="iconbox-icon">
-							<span class="icon-emoticon-smile"></span>
+							<span class="icon-envelope-open"></span>
 						</div>
 						<div class="iconbox-text">
 							<h3 class="iconbox-title">신랑의 모시는 글</h3>
 							<div class="iconbox-desc">
-								부디 참석하시어 자리를 빛내주시길 부탁드립니다<br/>
-								감사합니다
+								매년 인사말로 '결혼은 언제 하니?'란 말을 들어오다 많은 분들의 도움으로 좋은 사람을 만났습니다.<br/>
+								이제는 제가 여러 유부남들의 안타까운 우려를 뒤로 한채 결혼을 하려 합니다.<br/>
+								부디 참석하시어 자리를 빛내주시길 부탁드립니다.<br/>
+								감사합니다.
 							</div>
 						</div>
 					</div>
 				</div>
 
 				<div class="col-sm-3">
-					<div class="iconbox wow slideInLeft">
+					<div class="iconbox wow slideInRight">
 						<div class="iconbox-icon">
 							<span class="icon-envelope-open"></span>
 						</div>
@@ -370,9 +370,12 @@
 		<div class="map_wrap">
 			<div id="map" class="map"></div>
 			<div class="btn-group btn-map-group" role="group" aria-label="...">
-				<button type="button" class="btn btn-default btn-map" onclick="panTo()" style="text-transform:none;">Wedding Hall</button>
-			  <button type="button" class="btn btn-default btn-map" onclick="zoomIn()">+</button>
-			  <button type="button" class="btn btn-default btn-map" onclick="zoomOut()">-</button>
+				<a href="http://map.daum.net/?urlX=492231&urlY=1082477&itemId=26929876" style="float:left;" target="_blank">
+					<button type="button" class="btn btn-default btn-map btn-ext" style="text-transform:none;">큰지도</button>
+				</a>
+				<button type="button" class="btn btn-default btn-map btn-ext" onclick="panTo()">웨딩홀</button>
+			  	<button type="button" class="btn btn-default btn-map btn-ext" onclick="zoomIn()">+</button>
+			  	<button type="button" class="btn btn-default btn-map btn-ext" onclick="zoomOut()">-</button>
 			</div>
 		</div>
 	</section>
@@ -563,7 +566,7 @@
 	}
 
 	// map marker
-	var imageSrc = './assets/images/icon/pin.png',
+	var imageSrc = './assets/images/icon/map-marker.png',
     imageSize = new daum.maps.Size(36, 64), // 마커이미지의 크기
     imageOption = {offset: new daum.maps.Point(27, 69)}; // 마커의 좌표와 일치시킬 이미지 안에서의 좌표를 설정
 

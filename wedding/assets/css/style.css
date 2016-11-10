@@ -311,10 +311,11 @@ textarea.form-control {
 }
 
 .pfblock-line-15 {
-	background: rgba(255, 255, 255, 1);
+	background: rgba(255, 255, 255, 0.9);
 	width: 15px;
-	height: 2px;
+	height: 1px;
 	margin: 10px auto;
+	filter: alpha(opacity=80);
 }
 
 .pfblock-icon {
@@ -395,7 +396,7 @@ textarea.form-control {
     width: 100%;
     z-index: 0;
 	filter: alpha(opacity=70);
-    opacity: 0.7;
+    opacity: 0.2;
 }
 
 .intro {
@@ -418,7 +419,7 @@ textarea.form-control {
 	font-family: 'Tangerine', cursive;
 	filter: alpha(opacity=80);
     opacity: 0.8;
-	text-shadow:0 0 5px rgba(0, 0, 0, 0.4) !important;
+	text-shadow:0 0 5px rgba(0, 0, 0, 0.6) !important;
 }
 
 .intro .msg {
@@ -430,27 +431,36 @@ textarea.form-control {
 }
 
 .intro .start {
+	font-family: 'Droid Sans Mono',Gotham, "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-style: inherit;
+	font-weight: inherit;
 	color:rgba(255, 255, 255, 0.9);
-	font-size: 15px;
+	font-size: 14px;
 	filter: alpha(opacity=90);
     opacity: 0.9;
-	text-shadow:0 0 5px rgba(0, 0, 0, 0.4) !important;
+	text-shadow:0 0 5px rgba(0, 0, 0, 0.6) !important;
 }
 
 .countdown {
+	font-family: 'Droid Sans Mono',Gotham, "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-style: inherit;
+	font-weight: inherit;
 	color:rgba(255, 255, 255, 0.8);
-	font-size: 15px;
+	font-size: 14px;
 	filter: alpha(opacity=80);
     opacity: 0.8;
-	text-shadow:0 0 5px rgba(0, 0, 0, 0.4) !important;
+	text-shadow:0 0 5px rgba(0, 0, 0, 0.6) !important;
 	margin-top:-20px;
 }
 
 .start {
-	font-family: Raleway, "Times New Roman", Times, sans-serif;
-	font-size: 16px;
-	font-style: normal;
+	/*font-family: Raleway, "Times New Roman", Times, sans-serif;*/
+	/*font-style: normal;*/
+	font-family: 'Droid Sans Mono',Gotham, "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-style: inherit;
+	font-weight: inherit;
 	text-transform: none;
+	font-size: 14px;
 	margin: 15px 0;
 }
 
@@ -1049,7 +1059,7 @@ figure.effect-bubba:hover p {
 }
 
 /* map */
-.map_wrap {position:relative;overflow:hidden;width:100%;height:450px;}
+.map_wrap {position:relative;overflow:hidden;width:100%;height:400px;}
 .radius_border{border:1px solid #919191;border-radius:5px;}
 
 .custom_zoomcontrol {position:absolute;top:50px;right:10px;width:36px;height:80px;overflow:hidden;z-index:1;background-color:#f5f5f5;}
@@ -1063,9 +1073,9 @@ figure.effect-bubba:hover p {
 	right: 10px;
 	z-index: 1;
 
-	color:rgba(255, 255, 255, 0.8);
-	filter: alpha(opacity=80);
-    opacity: 0.8;
+	color:rgba(255, 255, 255, 0.9);
+	filter: alpha(opacity=90);
+    opacity: 0.9;
 	text-shadow:0 0 5px rgba(0, 0, 0, 0.4) !important;
 }
 .btn-map {
@@ -1076,3 +1086,10 @@ figure.effect-bubba:hover p {
 	border: 1px solid lightgray;
 	text-transform:;
 }
+.btn-ext {
+	font-family: 'Droid Sans Mono',Gotham, "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size: 14px;
+	font-style: inherit;
+	font-weight: inherit;
+}
+.iconbox-desc {text-align:left;}
