@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <title>Excel to MindMap</title>
+    <meta charset="UTF-8">
+    <meta name="Author" content="정재욱">
+</head>
+<style>
+    header { position:fixed;padding:5px;top:0;left:0;right:0;display:flex;background: white; }
+    body { padding-top:35px;font-size:.9em;font-family:Arial,Dotum,"돋움",sans-serif; }
+    hr { height:1px;background-color: #bebebe;border:none; }
+    .select { height:30px;padding-left:5px;padding-right:5px; }
+    .input { height:30px;width:400px;padding:0;margin:0;vertical-align: middle; }
+    .btn { height:30px;cursor:pointer }
+    .view { padding:10px }
+    .view pre { line-height:20px; }
+</style>
+<body>
+<header>
+    <div>
+        <textarea id="dataInput" placeholder="엑셀 시트의 내용을 복사 후 입력해주세요." cols="80" class="input"></textarea>
+        <label for="viewType">뷰어: </label>
+        <select id="viewType" class="select">
+            <option>plantUML</option>
+        </select>
+        <label for="umlType">타입: </label>
+        <select id="umlType" class="select">
+            <option selected>wbs</option>
+            <option>mindmap</option>
+        </select>
+        <label for="umlScale">크기: </label>
+        <select id="umlScale" class="select">
+            <option value="8">1</option>
+            <option value="10">2</option>
+            <option value="12" selected>3</option>
+            <option value="14">4</option>
+            <option value="16">5</option>
+            <option value="18">6</option>
+            <option value="20">7</option>
+            <option value="25">8</option>
+            <option value="30">9</option>
+            <option value="45">10</option>
+        </select>
+        <label for="nodeDepth">노드 레벨: </label>
+        <select id="nodeDepth" class="select">
+            <option value=""> - </option>
+        </select>
+        <label for="showDepth">출력 레벨: </label>
+        <select id="showDepth" class="select">
+            <option value=""> - </option>
+        </select>
+
+        <button id="execBtn" class="btn"> 실행 </button>
+        <button id="resetBtn" class="btn"> 초기화 </button>
+        <button id="sampleBtn" class="btn"> 샘플데이터 실행 </button>
+    </div>
+    <hr>
+</header>
+<main id="view" class="view"></main>
+<script src="https://code.jquery.com/jquery.min.js"></script>
+<script src="https://cdn.rawgit.com/jmnote/plantuml-encoder/d133f316/dist/plantuml-encoder.min.js"></script>
+<script>
+    $(function() {
+        $('#viewType, #umlType, #umlScale, #nodeDepth, #showDepth').change(function(){
+            $('#dataInput').val() && $('#execBtn').trigger('click');
+        });
+
+        $('#execBtn').click(function() {
+            if (!validate()) {
+                return;
+            }
+
+            let nodeDepth = $('#nodeDepth').val() || 1;
+            let showDepth = $('#showDepth').val() || Infinity;
+
+            const opts = {
+                orgnData: '',
+                display: '#view',
+                view: {
+                    type: $('#viewType').val(),
+                    umlType: $('#umlType').val(),
+                    umlScale: $('#umlScale').val(),
+                    nodeDepth,
+                    showDepth
+                }
+            };
+
+            opts.orgnData = $('#dataInput').val();
+            const data = opts.data = parseData(opts);
+
+            if (data && 1 < data[0].depth) {
+                alert("잘못된 데이터입니다. 문자열이 Tab으로 시작할 수 없습니다.");
+                $('#dataInput').focus();
+                return;
+            }
+
+            const max = data.reduce((a, b) => Math.max(a, b.depth), -Infinity);
+
+            if (showDepth === Infinity || showDepth > max) {
+                showDepth = opts.showDepth = max;
+            }
+
+            const $nodeDepth = $('#nodeDepth').html('');
+            const $showDepth = $('#showDepth').html('');
+
+            for (let i = 1; i <= max; i++) {
+                if (i == 1) $nodeDepth.append($(`<option ${0 == nodeDepth? 'selected' : ''}>${0}</option>`));
+                $nodeDepth.append($(`<option ${i == nodeDepth? 'selected' : ''}>${i}</option>`));
+                $showDepth.append($(`<option ${i == showDepth? 'selected' : ''}>${i}</option>`));
+            }
+
+            viewer.show(opts);
+        });
+
+        $('#resetBtn').click(function() {
+            $('#dataInput').val("");
+            $('#viewType option:eq(0)').prop('selected', true);
+            $('#umlType option:eq(0)').prop('selected', true);
+            $('#umlScale option:eq(2)').prop('selected', true);
+            $('#nodeDepth, #showDepth').html($('<option value=""> - </option>'));
+            $('#view').html(`
+            <pre>
+            * IA 정의서 엑셀시트의 내용을 복사 후 상단 입력란에 넣고 실행 버튼을 클릭하여 마인드맵으로 변환합니다.
+            * 개선 및 문의: 정재욱
+            </pre>
+        `.replace(/^[ ]+([^ ].+)/gm, '$1'));
+        });
+
+        $('#sampleBtn').click(function() {
+            const samples = {
+                plantUML: () => {
+                    const sampleData = "%EA%B3%BC%EB%AA%A9%20%EA%B4%80%EB%A6%AC%09%EB%AA%A9%EB%A1%9D%09%09%09%0A%09%09%EA%B2%80%EC%83%89%09%ED%85%8D%EC%8A%A4%ED%8A%B8%09%EA%B3%BC%EB%AA%A9%EB%AA%85%2F%EB%8B%B4%EB%8B%B9%EC%9E%90%0A%09%09%09%EA%B5%AC%EB%B6%84%09%EB%82%B4%EC%9D%BC%EB%B0%B0%EC%9B%80%EC%B9%B4%EB%93%9C%EA%B3%BC%EC%A0%95%2F%EC%9D%BC%EB%B0%98%EA%B3%BC%EC%A0%95%0A%09%09%09%EC%83%81%ED%83%9C%09%EC%A4%80%EB%B9%84%EC%A4%91%2F%EA%B5%90%EC%9C%A1%EC%A4%91%0A%09%09%09%EC%9C%A0%ED%98%95%09%EA%B0%95%EC%9D%98%ED%98%95%2C%20%EC%8B%A4%EC%8A%B5%ED%98%95%2C%20%EC%9C%B5%ED%95%A9%ED%98%95%0A%09%09%09%EB%8C%80%EB%B6%84%EB%A5%98%09%EC%8B%9C%EC%84%A4%EC%9B%90%EC%98%88%2F%EB%85%B8%EC%A7%80%2F%EC%B6%95%EC%82%B0%2F%EC%9E%84%EC%97%85%2F%EC%88%98%EC%82%B0%E2%80%A6%0A%09%09%09%EC%86%8C%EB%B6%84%EB%A5%98%09%EC%9E%AC%EB%B0%B0%2F%EC%A0%9C%EC%96%B4%2F%EB%8D%B0%EC%9D%B4%ED%84%B0%2F%EA%B2%BD%EC%98%81%E2%80%A6%0A%09%09%09%EB%82%9C%EC%9D%B4%EB%8F%84%09%EC%9E%85%EB%AC%B8%2F%EA%B8%B0%EC%B4%88%2F%EC%8B%AC%ED%99%94%20%0A%09%09%EC%8D%B8%EB%84%A4%EC%9D%BC%ED%98%95%20%EB%A6%AC%EC%8A%A4%ED%8A%B8%09%EC%8D%B8%EB%84%A4%EC%9D%BC%20%EC%9D%B4%EB%AF%B8%EC%A7%80%09%0A%09%09%09%EA%B3%BC%EB%AA%A9%EB%AA%85%09%0A%09%09%09%EA%B3%BC%EB%AA%A9%20%EA%B0%9C%EC%9A%94%09%0A%09%09%09%EB%8B%B4%EB%8B%B9%EC%9E%90%09%0A%09%09%09%EA%B5%AC%EB%B6%84%09%0A%09%09%09%EC%83%81%ED%83%9C%09%0A%09%09%09%EC%9C%A0%ED%98%95%09%0A%09%09%09%EB%8C%80%EB%B6%84%EB%A5%98%09%0A%09%09%09%EC%86%8C%EB%B6%84%EB%A5%98%09%0A%09%09%09%EB%82%9C%EC%9D%B4%EB%8F%84";
+                    $('#dataInput').val(decodeURIComponent(sampleData));
+                    $('#execBtn').trigger('click');
+                }
+            };
+
+            samples['plantUML']();
+        });
+
+        /* init & reset page */
+        $('#resetBtn').trigger('click');
+    });
+
+    function validate() {
+        let isValid = true;
+        const $input = $('#dataInput');
+
+        if (!$input.val().replace(/[\t\s\n]/g, '')) {
+            alert('내용을 입력해주세요.');
+            $input.val('').focus();
+            isValid = false;
+        }
+        return isValid;
+    }
+
+    function parseData({ orgnData, view: { showDepth } }) {
+        const replaceMultiBlockLFToSingleLF = (txt) =>
+            txt ? txt.replace(/(?<=")([\w\W\n]+)(?=")/g, (v) => v.replace(/\n/g, '\\n'))
+                : '';
+
+        const notEmpty = (s) => s && !/^[ \t\n]+$/.test(s);
+        const removeTabTails = (s) => s.replace(/(.+[^\t])\t*$/, '$1');
+
+        const reducer = (arr, txt) => {
+            const str = removeTabTails(txt);
+            const tabs = str.match(/^\t+/);
+            const level = tabs ? tabs[0].length + 1 : 1;
+            if (level == 1) ++topCnt;
+
+            str.split(/\t+/).filter(notEmpty).forEach((val, idx) => {
+                const depth = level + idx;
+                arr.push({
+                    show: depth <= showDepth || false,
+                    depth,
+                    value: val
+                });
+            });
+
+            return arr;
+        }
+
+        let topCnt = 0;
+        let data =
+            replaceMultiBlockLFToSingleLF(orgnData)
+                .split(/\n/)
+                .filter(notEmpty)
+                .reduce(reducer, []);
+
+        return (topCnt > 1)
+            ? [{ show: true, depth: 0, value: 'Root' }, ...data]
+            : data;
+    }
+
+    const viewer = {
+        default: plantUML,
+        show: function (opts) {
+            this[opts.view.type || this.default](opts);
+        },
+        plantUML
+    };
+
+    function plantUML(opts) {
+        let uml = formatPlantUML(opts);
+        window.uml = uml;
+        const src = "https://www.plantuml.com/plantuml/svg/" + window.plantumlEncoder.encode(uml);
+        $(opts.display).html($('<img>').attr('src', src));
+    }
+
+    function formatPlantUML(opts) {
+        const { type, umlType, umlScale, nodeDepth} = opts.view;
+        const umlStyle = getPlantUmlStyle(opts);
+
+        const formatData = (_data) => {
+            const addStar = _data[0].depth == 0? 1 : 0;
+            return _data.filter(d => d.show)
+                .map(d => {
+                    let star = new Array(d.depth + addStar).fill('*').join('');
+                    if (nodeDepth < d.depth) {
+                        star += '_';
+                    }
+                    if (d.value.indexOf('\\n') > -1) {
+                        d.value = '\\n' + d.value.replace(/^"([^"]+)"$/, '$1');
+                    }
+                    let value = (d.value.indexOf('\\n') > -1)
+                        ? '\\n' + d.value.replace(/^"([^"]+)"$/, '$1')
+                        : d.value;
+
+                    const depth = d.depth > 0? ` <color:#9d9d9d>${d.depth}</color>` : '';
+                    return `${star} ${depth}${d.value} [[{${d.value}}]] <<d${d.depth}>>`;
+                    // return `${star} ${d.depth} ${value} <<d${d.depth}>>`;
+                })
+                .join('\n');
+        };
+
+        const uml =
+            `@start${umlType}
+            skinparam defaultFontSize ${umlScale}
+            ${umlStyle}
+            ${formatData(opts.data)}
+            @end${umlType}`;
+
+        return uml;
+    };
+
+    function getPlantUmlStyle (opts) {
+        const { umlScale } = opts.view;
+        const rootFontColor = opts.data[0].depth == 0 ? 'white' : 'black';
+        const thickness = umlScale <= 12 ? 0.3 : umlScale * 0.012 + 0.3;
+
+        return `
+            <style>
+            node {
+                Padding 6
+                LineColor #919191
+                LineThickness 0.5
+                BackgroundColor #FFFFFF
+                RoundCorner 15
+                Shadowing 1
+            }
+
+            rootNode {
+                BackgroundColor #3D3D3D
+                FontColor ${rootFontColor}
+            }
+
+            arrow {
+                LineThickness ${thickness}
+                LineColor gray
+            }
+
+            d1 {
+                BackgroundColor #ABBFFF
+            }
+
+            d2 {
+                BackgroundColor #E8BEFA
+            }
+
+            d3 {
+                BackgroundColor #FBCDF2
+            }
+
+            d4 {
+                BackgroundColor #FEE3E2
+            }
+
+            d5 {
+                BackgroundColor #FCF4C9
+            }
+
+            d6 {
+                BackgroundColor #FFFAE5
+            }
+
+            d7 {
+                BackgroundColor #FFFBEF
+            }
+            </style>
+        `;
+
+        /* 적용시 mindmap 에서 Depth가 낮을때 오류가 발생하는 버그
+        leafNode {
+            BackgroundColor #FBF1D6
+        }
+        */
+    };
+
+    /* Polyfill */
+    Array.prototype.fill||Object.defineProperty(Array.prototype,"fill",{value:function(t){if(null==this)throw new TypeError("this is null or not defined");for(var r=Object(this),e=r.length>>>0,i=arguments[1]>>0,n=i<0?Math.max(e+i,0):Math.min(i,e),i=arguments[2],i=void 0===i?e:i>>0,o=i<0?Math.max(e+i,0):Math.min(i,e);n<o;)r[n]=t,n++;return r}});
+</script>
+</body>
+</html>
