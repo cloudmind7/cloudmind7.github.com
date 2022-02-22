@@ -227,8 +227,7 @@
                         : d.value;
 
                     const depth = d.depth > 0? ` <color:#9d9d9d>${d.depth}</color>` : '';
-                    return `${star} ${depth}${d.value} [[{${d.value}}]] <<d${d.depth}>>`;
-                    // return `${star} ${d.depth} ${value} <<d${d.depth}>>`;
+                    return `${star} ${d.depth} ${value} <<d${d.depth}>>`;
                 })
                 .join('\n');
         };
