@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <title>Excel to MindMap</title>
+    <title>To UML</title>
     <meta charset="UTF-8">
     <meta name="Author" content="정재욱">
 </head>
@@ -45,6 +45,7 @@
             <option value="45">10</option>
         </select>
         <label for="nodeDepth">노드 레벨: </label>
+        <input type="checkbox" id="countDepth" checked />
         <select id="nodeDepth" class="select">
             <option value=""> - </option>
         </select>
@@ -64,7 +65,7 @@
 <script src="https://cdn.rawgit.com/jmnote/plantuml-encoder/d133f316/dist/plantuml-encoder.min.js"></script>
 <script>
     $(function() {
-        $('#viewType, #umlType, #umlScale, #nodeDepth, #showDepth').change(function(){
+        $('#viewType, #umlType, #umlScale, #countDepth, #nodeDepth, #showDepth').change(function(){
             $('#dataInput').val() && $('#execBtn').trigger('click');
         });
 
@@ -83,6 +84,7 @@
                     type: $('#viewType').val(),
                     umlType: $('#umlType').val(),
                     umlScale: $('#umlScale').val(),
+                    countDepth: $('#countDepth').is(':checked'),
                     nodeDepth,
                     showDepth
                 }
@@ -120,6 +122,7 @@
             $('#viewType').val("plantUML");
             $('#umlType option:eq(0)').prop('selected', true);
             $('#umlScale option:eq(2)').prop('selected', true);
+            $('#countDepth').prop('checked', true);
             $('#nodeDepth, #showDepth').html($('<option value=""> - </option>'));
             $('#view').html(`
             <pre>
@@ -210,21 +213,20 @@
     }
 
     function formatPlantUML(opts) {
-        const { type, umlType, umlScale, nodeDepth} = opts.view;
-        const umlStyle = getPlantUmlStyle(opts);
-        const colorset = (depth) => ({
-            1: '[#ABBFFF]',
-            2: '[#E8BEFA]',
-            3: '[#FBCDF2]',
-            4: '[#FEE3E2]',
-            5: '[#FCF4C9]',
-            6: '[#FFFAE5]',
-            7: '[#FFFBEF]',
-        })[depth] || '';
+        const formatData = ({ data, view: { countDepth, nodeDepth }}) => {
+            const colorset = (depth) => ({
+                1: '[#ABBFFF]',
+                2: '[#E8BEFA]',
+                3: '[#FBCDF2]',
+                4: '[#FEE3E2]',
+                5: '[#FCF4C9]',
+                6: '[#FFFAE5]',
+                7: '[#FFFBEF]',
+            })[depth] || '';
 
-        const formatData = (_data) => {
-            const addStar = _data[0].depth == 0? 1 : 0;
-            return _data.filter(d => d.show)
+            const addStar = data[0].depth == 0? 1 : 0;
+
+            return data.filter(d => d.show)
                 .map(d => {
                     let star = new Array(d.depth + addStar).fill('*').join('').trim();
                     star += (nodeDepth < d.depth)? '_' : `${colorset(d.depth)}`;
@@ -233,21 +235,25 @@
                         d.value = '\\n' + d.value.replace(/^"([^"]+)"$/, '$1');
                     }
 
+                    const depth = (countDepth) ? ` [${d.depth}]` : '';
+
                     let value = (d.value.indexOf('\\n') > -1)
                         ? '\\n' + d.value.replace(/^"([^"]+)"$/, '$1')
                         : d.value;
 
-                    const depth = d.depth > 0? `<color:#9d9d9d>${d.depth}</color>` : '';
-                    return `${star} ${depth} ${value}`;
+                    return `${star}${depth} ${value}`;
                 })
                 .join('\n');
         };
+
+        const { type, umlType, umlScale, nodeDepth} = opts.view;
+        const umlStyle = getPlantUmlStyle(opts);
 
         const uml =
             `@start${umlType}
             skinparam defaultFontSize ${umlScale}
             ${umlStyle}
-            ${formatData(opts.data)}
+            ${formatData(opts)}
             @end${umlType}`;
 
         return uml;
