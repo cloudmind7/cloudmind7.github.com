@@ -52,7 +52,7 @@
 
         <button id="execBtn" class="btn"> 실행 </button>
         <button id="resetBtn" class="btn"> 초기화 </button>
-        <button id="sampleBtn" class="btn"> 샘플데이터 실행 </button>
+        <button id="sampleBtn" class="btn"> 샘플데이터 </button>
     </div>
     <hr>
 </header>
@@ -74,7 +74,7 @@
             let showDepth = $('#showDepth').val() || Infinity;
 
             const opts = {
-                orgnData: '',
+                inputText: '',
                 display: '#view',
                 view: {
                     type: $('#viewType').val(),
@@ -85,7 +85,7 @@
                 }
             };
 
-            opts.orgnData = $('#dataInput').val();
+            opts.inputText = $('#dataInput').val();
             const data = opts.data = parseData(opts);
 
             if (data && 1 < data[0].depth) {
@@ -94,16 +94,16 @@
                 return;
             }
 
-            const max = data.reduce((a, b) => Math.max(a, b.depth), -Infinity);
+            const maxDepth = data.reduce((a, b) => Math.max(a, b.depth), -Infinity);
 
-            if (showDepth === Infinity || showDepth > max) {
-                showDepth = opts.showDepth = max;
+            if (showDepth === Infinity || showDepth > maxDepth) {
+                showDepth = opts.showDepth = maxDepth;
             }
 
             const $nodeDepth = $('#nodeDepth').html('');
             const $showDepth = $('#showDepth').html('');
 
-            for (let i = 1; i <= max; i++) {
+            for (let i = 1; i <= maxDepth; i++) {
                 if (i == 1) $nodeDepth.append($(`<option ${0 == nodeDepth? 'selected' : ''}>${0}</option>`));
                 $nodeDepth.append($(`<option ${i == nodeDepth? 'selected' : ''}>${i}</option>`));
                 $showDepth.append($(`<option ${i == showDepth? 'selected' : ''}>${i}</option>`));
@@ -120,7 +120,8 @@
             $('#nodeDepth, #showDepth').html($('<option value=""> - </option>'));
             $('#view').html(`
             <pre>
-            * IA 정의서 엑셀시트의 내용을 복사 후 상단 입력란에 넣고 실행 버튼을 클릭하여 UML로 변환합니다.
+            * IA 정의서의 내용을 쉽게 확인하기 위해 제작했습니다. 엑셀 시트의 내용을 복사 후 상단 입력란에 넣고 '실행' 버튼을 클릭해주세요.
+            * 입력한 텍스트의 Tab이 변환된 UML의 Depth 입니다.
             * 개선 및 문의: 정재욱
             </pre>
         `.replace(/^[ ]+([^ ].+)/gm, '$1'));
@@ -138,7 +139,6 @@
             samples['plantUML']();
         });
 
-        /* init & reset page */
         $('#resetBtn').trigger('click');
     });
 
@@ -154,11 +154,10 @@
         return isValid;
     }
 
-    function parseData({ orgnData, view: { showDepth } }) {
-        const replaceMultiBlockLFToSingleLF = (txt) =>
-            txt ? txt.replace(/(?<=")([\w\W\n]+)(?=")/g, (v) => v.replace(/\n/g, '\\n'))
+    function parseData({ inputText, view: { showDepth } }) {
+        const replaceMultiNL = (txt) => txt 
+                ? txt.replace(/(?<=")([\w\W\n]+)(?=")/g, (v) => v.replace(/\n/g, '\\n'))
                 : '';
-
         const notEmpty = (s) => s && !/^[ \t\n]+$/.test(s);
         const removeTabTails = (s) => s.replace(/(.+[^\t])\t*$/, '$1');
 
@@ -182,7 +181,7 @@
 
         let topCnt = 0;
         let data =
-            replaceMultiBlockLFToSingleLF(orgnData)
+            replaceMultiNL(inputText)
                 .split(/\n/)
                 .filter(notEmpty)
                 .reduce(reducer, []);
@@ -242,7 +241,7 @@
         return uml;
     };
 
-    function getPlantUmlStyle (opts) {
+    function getPlantUmlStyle(opts) {
         const { umlScale } = opts.view;
         const rootFontColor = opts.data[0].depth == 0 ? 'white' : 'black';
         const thickness = umlScale <= 12 ? 0.3 : umlScale * 0.012 + 0.3;
