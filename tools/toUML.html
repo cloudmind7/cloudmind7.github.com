@@ -19,10 +19,13 @@
 <header>
     <div>
         <textarea id="dataInput" placeholder="엑셀 시트의 내용을 복사 후 입력해주세요." cols="80" class="input"></textarea>
+        <input type="hidden" id="viewType" value="plantUML" />
+        <!--
         <label for="viewType">뷰어: </label>
         <select id="viewType" class="select">
             <option>plantUML</option>
         </select>
+        -->
         <label for="umlType">타입: </label>
         <select id="umlType" class="select">
             <option selected>mindmap</option>
@@ -114,7 +117,7 @@
 
         $('#resetBtn').click(function() {
             $('#dataInput').val("").css({height:"30px", width:"300px"});
-            $('#viewType option:eq(0)').prop('selected', true);
+            $('#viewType').val("plantUML");
             $('#umlType option:eq(0)').prop('selected', true);
             $('#umlScale option:eq(2)').prop('selected', true);
             $('#nodeDepth, #showDepth').html($('<option value=""> - </option>'));
