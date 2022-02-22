@@ -8,16 +8,24 @@
 <style>
     header { position:fixed;padding:5px;top:0;left:0;right:0;display:flex;background: white; }
     body { padding-top:35px;font-size:.9em;font-family:Arial,Dotum,"돋움",sans-serif; }
-    hr { height:1px;background-color: #bebebe;border:none; }
+    hr { height:1px;background-color:#bebebe;border:none; }
+    .checkDepth { position:relative;padding-top:9px;padding-left:35px;margin-bottom:12px;cursor:pointer;font-size:12px; }
+    .checkDepth input { position:absolute;opacity:0;cursor:pointer;height:0;width:0; }
+    .checkmark { position:absolute;top:0;left:0;font-size:.6em;line-height:27px;height:28px;width:28px;background-color:white;border:1px solid rgb(118, 118, 118); }
+    .checkDepth input:checked ~ .checkmark { background-color:rgb(116, 216, 255); }
+    .srch_dev { display:block; position:relative; }
     .select { height:30px;padding-left:5px;padding-right:5px; }
     .input { height:30px;width:300px;padding:0;margin:0;vertical-align: middle; }
-    .btn { height:30px;cursor:pointer }
+    .btn { height:30px;cursor:pointer; position:absolute }
+    .execBtn { margin-left: 5px }
+    .resetBtn { margin-left: 53px }
+    .sampleBtn { margin-left: 115px }
     .view { padding:10px }
     .view pre { line-height:20px; }
 </style>
 <body>
 <header>
-    <div>
+    <div class="srch_div">
         <textarea id="dataInput" placeholder="엑셀 시트의 내용을 복사 후 입력해주세요." cols="80" class="input"></textarea>
         <input type="hidden" id="viewType" value="plantUML" />
         <!--
@@ -45,7 +53,10 @@
             <option value="45">10</option>
         </select>
         <label for="nodeDepth">노드 레벨: </label>
-        <input type="checkbox" id="countDepth" checked />
+        <label class="checkDepth">
+            <input type="checkbox" id="countDepth" checked />
+            <span class="checkmark">Depth</span>
+        </label>
         <select id="nodeDepth" class="select">
             <option value=""> - </option>
         </select>
@@ -54,9 +65,9 @@
             <option value=""> - </option>
         </select>
 
-        <button id="execBtn" class="btn"> 실행 </button>
-        <button id="resetBtn" class="btn"> 초기화 </button>
-        <button id="sampleBtn" class="btn"> 샘플데이터 </button>
+        <button id="execBtn" class="btn execBtn"> 실행 </button>
+        <button id="resetBtn" class="btn resetBtn"> 초기화 </button>
+        <button id="sampleBtn" class="btn sampleBtn"> 샘플데이터 </button>
     </div>
     <hr>
 </header>
