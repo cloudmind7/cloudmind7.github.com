@@ -38,9 +38,10 @@
         <select id="umlType" class="select">
             <option selected>mindmap</option>
             <option>wbs</option>
+            <option>json</option>
         </select>
-        <label for="umlScale">크기: </label>
-        <select id="umlScale" class="select">
+        <label for="umlScale" class="mindmap wbs">크기: </label>
+        <select id="umlScale" class="select mindmap wbs">
             <option value="8">1</option>
             <option value="10">2</option>
             <option value="12" selected>3</option>
@@ -52,16 +53,16 @@
             <option value="30">9</option>
             <option value="45">10</option>
         </select>
-        <label for="nodeDepth">노드 레벨: </label>
-        <label class="checkDepth">
+        <label for="nodeDepth" class="mindmap wbs">노드 레벨: </label>
+        <label class="checkDepth mindmap wbs">
             <input type="checkbox" id="countDepth" checked />
             <span class="checkmark">Depth</span>
         </label>
-        <select id="nodeDepth" class="select">
+        <select id="nodeDepth" class="select mindmap wbs">
             <option value=""> - </option>
         </select>
-        <label for="showDepth">출력 레벨: </label>
-        <select id="showDepth" class="select">
+        <label for="showDepth" class="mindmap wbs">출력 레벨: </label>
+        <select id="showDepth" class="select mindmap wbs">
             <option value=""> - </option>
         </select>
 
@@ -77,6 +78,13 @@
 <script>
     $(function() {
         $('#viewType, #umlType, #umlScale, #countDepth, #nodeDepth, #showDepth').change(function(){
+            const umlType = $('#umlType').val();
+            if (umlType === 'json') {
+                $('.mindmap').hide();
+            } else {
+                $('.mindmap').show();
+            }
+
             $('#dataInput').val() && $('#execBtn').trigger('click');
         });
 
@@ -84,51 +92,72 @@
             if (!validate()) {
                 return;
             }
+            
+            const umlType = $('#umlType').val();
 
-            let nodeDepth = $('#nodeDepth').val() || 1;
-            let showDepth = $('#showDepth').val() || Infinity;
+            const options = {
+                mindmap: () => {
+                    let nodeDepth = $('#nodeDepth').val() || 1;
+                    let showDepth = $('#showDepth').val() || Infinity;
 
-            const opts = {
-                inputText: '',
-                display: '#view',
-                view: {
-                    type: $('#viewType').val(),
-                    umlType: $('#umlType').val(),
-                    umlScale: $('#umlScale').val(),
-                    countDepth: $('#countDepth').is(':checked'),
-                    nodeDepth,
-                    showDepth
-                }
-            };
+                    const opts = {
+                        inputText: '',
+                        display: '#view',
+                        view: {
+                            type: $('#viewType').val(),
+                            umlType: $('#umlType').val(),
+                            umlScale: $('#umlScale').val(),
+                            countDepth: $('#countDepth').is(':checked'),
+                            nodeDepth,
+                            showDepth
+                        }
+                    };
 
-            opts.inputText = $('#dataInput').val();
-            const data = opts.data = parseData(opts);
+                    opts.inputText = $('#dataInput').val();
+                    const data = opts.data = parseData(opts);
 
-            if (data && 1 < data[0].depth) {
-                alert("잘못된 데이터입니다. 문자열이 Tab으로 시작할 수 없습니다.");
-                $('#dataInput').focus();
-                return;
-            }
+                    if (data && 1 < data[0].depth) {
+                        alert("잘못된 데이터입니다. 문자열이 Tab으로 시작할 수 없습니다.");
+                        $('#dataInput').focus();
+                        return;
+                    }
 
-            const maxDepth = data.reduce((a, b) => Math.max(a, b.depth), -Infinity);
+                    const maxDepth = data.reduce((a, b) => Math.max(a, b.depth), -Infinity);
 
-            if (showDepth === Infinity || showDepth > maxDepth) {
-                showDepth = opts.showDepth = maxDepth;
-            }
+                    if (showDepth === Infinity || showDepth > maxDepth) {
+                        showDepth = opts.showDepth = maxDepth;
+                    }
 
-            const $nodeDepth = $('#nodeDepth').html('');
-            const $showDepth = $('#showDepth').html('');
+                    const $nodeDepth = $('#nodeDepth').html('');
+                    const $showDepth = $('#showDepth').html('');
 
-            for (let i = 1; i <= maxDepth; i++) {
-                if (i == 1) $nodeDepth.append($(`<option ${0 == nodeDepth? 'selected' : ''}>${0}</option>`));
-                $nodeDepth.append($(`<option ${i == nodeDepth? 'selected' : ''}>${i}</option>`));
-                $showDepth.append($(`<option ${i == showDepth? 'selected' : ''}>${i}</option>`));
-            }
+                    for (let i = 1; i <= maxDepth; i++) {
+                        if (i == 1) $nodeDepth.append($(`<option ${0 == nodeDepth? 'selected' : ''}>${0}</option>`));
+                        $nodeDepth.append($(`<option ${i == nodeDepth? 'selected' : ''}>${i}</option>`));
+                        $showDepth.append($(`<option ${i == showDepth? 'selected' : ''}>${i}</option>`));
+                    }
 
-            viewer.show(opts);
+                    return opts;
+                },
+                uml: this.mindmap,
+                json: () => {
+                    return {
+                    inputText: $('#dataInput').val(),
+                    data: $('#dataInput').val(),
+                    display: '#view',
+                    view: {
+                        type: $('#viewType').val(),
+                        umlType: $('#umlType').val(),
+                        umlScale: $('#umlScale').val()
+                    }
+                }}
+            }[umlType]();
+
+            viewer.show(options);
         });
 
         $('#resetBtn').click(function() {
+            $('.mindmap').show();
             $('#dataInput').val("").css({height:"30px", width:"300px"});
             $('#viewType').val("plantUML");
             $('#umlType option:eq(0)').prop('selected', true);
@@ -145,9 +174,15 @@
         });
 
         $('#sampleBtn').click(function() {
+            const umlType = $('#umlType').val();
+            const data = {
+                mindmap: "%EA%B3%BC%EB%AA%A9%20%EA%B4%80%EB%A6%AC%09%EB%AA%A9%EB%A1%9D%09%09%09%0A%09%09%EA%B2%80%EC%83%89%09%ED%85%8D%EC%8A%A4%ED%8A%B8%09%EA%B3%BC%EB%AA%A9%EB%AA%85%2F%EB%8B%B4%EB%8B%B9%EC%9E%90%0A%09%09%09%EA%B5%AC%EB%B6%84%09%EB%82%B4%EC%9D%BC%EB%B0%B0%EC%9B%80%EC%B9%B4%EB%93%9C%EA%B3%BC%EC%A0%95%2F%EC%9D%BC%EB%B0%98%EA%B3%BC%EC%A0%95%0A%09%09%09%EC%83%81%ED%83%9C%09%EC%A4%80%EB%B9%84%EC%A4%91%2F%EA%B5%90%EC%9C%A1%EC%A4%91%0A%09%09%09%EC%9C%A0%ED%98%95%09%EA%B0%95%EC%9D%98%ED%98%95%2C%20%EC%8B%A4%EC%8A%B5%ED%98%95%2C%20%EC%9C%B5%ED%95%A9%ED%98%95%0A%09%09%09%EB%8C%80%EB%B6%84%EB%A5%98%09%EC%8B%9C%EC%84%A4%EC%9B%90%EC%98%88%2F%EB%85%B8%EC%A7%80%2F%EC%B6%95%EC%82%B0%2F%EC%9E%84%EC%97%85%2F%EC%88%98%EC%82%B0%E2%80%A6%0A%09%09%09%EC%86%8C%EB%B6%84%EB%A5%98%09%EC%9E%AC%EB%B0%B0%2F%EC%A0%9C%EC%96%B4%2F%EB%8D%B0%EC%9D%B4%ED%84%B0%2F%EA%B2%BD%EC%98%81%E2%80%A6%0A%09%09%09%EB%82%9C%EC%9D%B4%EB%8F%84%09%EC%9E%85%EB%AC%B8%2F%EA%B8%B0%EC%B4%88%2F%EC%8B%AC%ED%99%94%20%0A%09%09%EC%8D%B8%EB%84%A4%EC%9D%BC%ED%98%95%20%EB%A6%AC%EC%8A%A4%ED%8A%B8%09%EC%8D%B8%EB%84%A4%EC%9D%BC%20%EC%9D%B4%EB%AF%B8%EC%A7%80%09%0A%09%09%09%EA%B3%BC%EB%AA%A9%EB%AA%85%09%0A%09%09%09%EA%B3%BC%EB%AA%A9%20%EA%B0%9C%EC%9A%94%09%0A%09%09%09%EB%8B%B4%EB%8B%B9%EC%9E%90%09%0A%09%09%09%EA%B5%AC%EB%B6%84%09%0A%09%09%09%EC%83%81%ED%83%9C%09%0A%09%09%09%EC%9C%A0%ED%98%95%09%0A%09%09%09%EB%8C%80%EB%B6%84%EB%A5%98%09%0A%09%09%09%EC%86%8C%EB%B6%84%EB%A5%98%09%0A%09%09%09%EB%82%9C%EC%9D%B4%EB%8F%84",
+                wbs: this.mindmap,
+                json: "%7B%0A%20%20%22firstName%22%3A%20%22John%22%2C%0A%20%20%22lastName%22%3A%20%22Smith%22%2C%0A%20%20%22isAlive%22%3A%20true%2C%0A%20%20%22age%22%3A%2028%2C%0A%20%20%22address%22%3A%20%7B%0A%20%20%20%20%22streetAddress%22%3A%20%2221%202nd%20Street%22%2C%0A%20%20%20%20%22city%22%3A%20%22New%20York%22%2C%0A%20%20%20%20%22state%22%3A%20%22NY%22%2C%0A%20%20%20%20%22postalCode%22%3A%20%2210021-3100%22%0A%20%20%7D%2C%0A%20%20%22phoneNumbers%22%3A%20%5B%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22type%22%3A%20%22home%22%2C%0A%20%20%20%20%20%20%22number%22%3A%20%22212%20555-1234%22%0A%20%20%20%20%7D%2C%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22type%22%3A%20%22office%22%2C%0A%20%20%20%20%20%20%22number%22%3A%20%22646%20555-4567%22%0A%20%20%20%20%7D%0A%20%20%5D%2C%0A%20%20%22children%22%3A%20%5B%5D%2C%0A%20%20%22spouse%22%3A%20null%0A%7D"
+            }[umlType];
             const samples = {
                 plantUML: () => {
-                    const sampleData = "%EA%B3%BC%EB%AA%A9%20%EA%B4%80%EB%A6%AC%09%EB%AA%A9%EB%A1%9D%09%09%09%0A%09%09%EA%B2%80%EC%83%89%09%ED%85%8D%EC%8A%A4%ED%8A%B8%09%EA%B3%BC%EB%AA%A9%EB%AA%85%2F%EB%8B%B4%EB%8B%B9%EC%9E%90%0A%09%09%09%EA%B5%AC%EB%B6%84%09%EB%82%B4%EC%9D%BC%EB%B0%B0%EC%9B%80%EC%B9%B4%EB%93%9C%EA%B3%BC%EC%A0%95%2F%EC%9D%BC%EB%B0%98%EA%B3%BC%EC%A0%95%0A%09%09%09%EC%83%81%ED%83%9C%09%EC%A4%80%EB%B9%84%EC%A4%91%2F%EA%B5%90%EC%9C%A1%EC%A4%91%0A%09%09%09%EC%9C%A0%ED%98%95%09%EA%B0%95%EC%9D%98%ED%98%95%2C%20%EC%8B%A4%EC%8A%B5%ED%98%95%2C%20%EC%9C%B5%ED%95%A9%ED%98%95%0A%09%09%09%EB%8C%80%EB%B6%84%EB%A5%98%09%EC%8B%9C%EC%84%A4%EC%9B%90%EC%98%88%2F%EB%85%B8%EC%A7%80%2F%EC%B6%95%EC%82%B0%2F%EC%9E%84%EC%97%85%2F%EC%88%98%EC%82%B0%E2%80%A6%0A%09%09%09%EC%86%8C%EB%B6%84%EB%A5%98%09%EC%9E%AC%EB%B0%B0%2F%EC%A0%9C%EC%96%B4%2F%EB%8D%B0%EC%9D%B4%ED%84%B0%2F%EA%B2%BD%EC%98%81%E2%80%A6%0A%09%09%09%EB%82%9C%EC%9D%B4%EB%8F%84%09%EC%9E%85%EB%AC%B8%2F%EA%B8%B0%EC%B4%88%2F%EC%8B%AC%ED%99%94%20%0A%09%09%EC%8D%B8%EB%84%A4%EC%9D%BC%ED%98%95%20%EB%A6%AC%EC%8A%A4%ED%8A%B8%09%EC%8D%B8%EB%84%A4%EC%9D%BC%20%EC%9D%B4%EB%AF%B8%EC%A7%80%09%0A%09%09%09%EA%B3%BC%EB%AA%A9%EB%AA%85%09%0A%09%09%09%EA%B3%BC%EB%AA%A9%20%EA%B0%9C%EC%9A%94%09%0A%09%09%09%EB%8B%B4%EB%8B%B9%EC%9E%90%09%0A%09%09%09%EA%B5%AC%EB%B6%84%09%0A%09%09%09%EC%83%81%ED%83%9C%09%0A%09%09%09%EC%9C%A0%ED%98%95%09%0A%09%09%09%EB%8C%80%EB%B6%84%EB%A5%98%09%0A%09%09%09%EC%86%8C%EB%B6%84%EB%A5%98%09%0A%09%09%09%EB%82%9C%EC%9D%B4%EB%8F%84";
+                    const sampleData = data;
                     $('#dataInput').val(decodeURIComponent(sampleData));
                     $('#execBtn').trigger('click');
                 }
@@ -224,80 +259,94 @@
     }
 
     function formatPlantUML(opts) {
-        const formatData = ({ data, view: { countDepth, nodeDepth }}) => {
-            const colorset = (depth) => ({
-                1: '[#ABBFFF]',
-                2: '[#E8BEFA]',
-                3: '[#FBCDF2]',
-                4: '[#FEE3E2]',
-                5: '[#FCF4C9]',
-                6: '[#FFFAE5]',
-                7: '[#FFFBEF]',
-            })[depth] || '';
-
-            const addStar = data[0].depth == 0? 1 : 0;
-
-            return data.filter(d => d.show)
-                .map(d => {
-                    let star = new Array(d.depth + addStar).fill('*').join('').trim();
-                    star += (nodeDepth < d.depth)? '_' : `${colorset(d.depth)}`;
-
-                    if (d.value.indexOf('\\n') > -1) {
-                        d.value = '\\n' + d.value.replace(/^"([^"]+)"$/, '$1');
-                    }
-
-                    const depth = (countDepth) ? ` [${d.depth}]` : '';
-
-                    let value = (d.value.indexOf('\\n') > -1)
-                        ? '\\n' + d.value.replace(/^"([^"]+)"$/, '$1')
-                        : d.value;
-
-                    return `${star}${depth} ${value}`;
-                })
-                .join('\n');
-        };
-
-        const { type, umlType, umlScale, nodeDepth} = opts.view;
+        const formatData = getPlantUmlFormat(opts);
         const umlStyle = getPlantUmlStyle(opts);
+
+        const { type, umlType, umlScale, nodeDepth } = opts.view;
 
         const uml =
             `@start${umlType}
             skinparam defaultFontSize ${umlScale}
             ${umlStyle}
-            ${formatData(opts)}
+            ${formatData}
             @end${umlType}`;
 
         return uml;
     };
 
+    function getPlantUmlFormat(opts) {
+        return {
+            mindmap: ({ data, view: { umlType, countDepth, nodeDepth }}) => {
+                const colorset = (depth) => ({
+                    1: '[#ABBFFF]',
+                    2: '[#E8BEFA]',
+                    3: '[#FBCDF2]',
+                    4: '[#FEE3E2]',
+                    5: '[#FCF4C9]',
+                    6: '[#FFFAE5]',
+                    7: '[#FFFBEF]',
+                })[depth] || '';
+
+                const addStar = data[0].depth == 0? 1 : 0;
+
+                return data.filter(d => d.show)
+                    .map(d => {
+                        let star = new Array(d.depth + addStar).fill('*').join('').trim();
+                        star += (nodeDepth < d.depth)? '_' : `${colorset(d.depth)}`;
+
+                        if (d.value.indexOf('\\n') > -1) {
+                            d.value = '\\n' + d.value.replace(/^"([^"]+)"$/, '$1');
+                        }
+
+                        const depth = (countDepth) ? ` [${d.depth}]` : '';
+
+                        let value = (d.value.indexOf('\\n') > -1)
+                            ? '\\n' + d.value.replace(/^"([^"]+)"$/, '$1')
+                            : d.value;
+
+                        return `${star}${depth} ${value}`;
+                    })
+                    .join('\n');
+            },
+            wbs: this.mindmap,
+            json: ({ data }) => data
+
+        }[opts.view.umlType](opts);
+    }
+
     function getPlantUmlStyle(opts) {
-        const { umlScale } = opts.view;
-        const rootFontColor = opts.data[0].depth == 0 ? 'white' : 'black';
-        const thickness = umlScale <= 12 ? 0.3 : umlScale * 0.012 + 0.3;
+        return {
+            mindmap: (opts) => {
+                const { umlScale } = opts.view;
+                const rootFontColor = opts.data[0].depth == 0 ? 'white' : 'black';
+                const thickness = umlScale <= 12 ? 0.3 : umlScale * 0.012 + 0.3;
 
-        return `
-            <style>
-            node {
-                Padding 6
-                LineColor #919191
-                LineThickness 0.5
-                BackgroundColor #FFFFFF
-                RoundCorner 15
-                Shadowing 1
-            }
+                return `
+                    <style>
+                    node {
+                        Padding 6
+                        LineColor #919191
+                        LineThickness 0.5
+                        BackgroundColor #FFFFFF
+                        RoundCorner 15
+                        Shadowing 1
+                    }
 
-            rootNode {
-                BackgroundColor #3D3D3D
-                FontColor ${rootFontColor}
-            }
+                    rootNode {
+                        BackgroundColor #3D3D3D
+                        FontColor ${rootFontColor}
+                    }
 
-            arrow {
-                LineThickness ${thickness}
-                LineColor gray
-            }
-            </style>
-        `;
-
+                    arrow {
+                        LineThickness ${thickness}
+                        LineColor gray
+                    }
+                    </style>
+                `;
+            },
+            wbs: this.mindmap,
+            json: (opts) => ''
+        }[opts.view.umlType](opts);
         /* 적용시 mindmap 에서 Depth가 낮을때 오류가 발생하는 버그
         leafNode {
             BackgroundColor #FBF1D6
