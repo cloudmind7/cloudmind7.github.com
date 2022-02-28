@@ -40,8 +40,8 @@
             <option>wbs</option>
             <option>json</option>
         </select>
-        <label for="umlScale" class="mindmap wbs">크기: </label>
-        <select id="umlScale" class="select mindmap wbs">
+        <label for="umlScale">크기: </label>
+        <select id="umlScale" class="select">
             <option value="8">1</option>
             <option value="10">2</option>
             <option value="12" selected>3</option>
@@ -77,6 +77,22 @@
 <script src="https://cdn.rawgit.com/jmnote/plantuml-encoder/d133f316/dist/plantuml-encoder.min.js"></script>
 <script>
     $(function() {
+        $('#dataInput').change(function(){
+            console.log('check');
+            let isJson = false;
+            try {
+                JSON.parse(this.value);
+                isJson = true;
+            } catch(e) {}
+
+            if (isJson) {
+                $('#umlType').val('json').prop('selected', true);
+                $('.mindmap').hide();
+                $('#execBtn').trigger('click');
+            }
+
+        });
+
         $('#viewType, #umlType, #umlScale, #countDepth, #nodeDepth, #showDepth').change(function(){
             const umlType = $('#umlType').val();
             if (umlType === 'json') {
