@@ -309,6 +309,7 @@
 
     function plantUML(opts) {
         let uml = formatPlantUML(opts);
+        window.uml = uml;
         const src = "https://www.plantuml.com/plantuml/svg/" + window.plantumlEncoder.encode(uml);
         $(opts.display).html($('<img>').attr('src', src));
     }
@@ -317,11 +318,10 @@
         const formatData = getPlantUmlFormat(opts);
         const umlStyle = getPlantUmlStyle(opts);
 
-        const { type, umlType, umlScale, nodeDepth } = opts.view;
+        const { umlType } = opts.view;
 
         const uml =
             `@start${umlType}
-            skinparam defaultFontSize ${umlScale}
             ${umlStyle}
             ${formatData}
             @end${umlType}`;
@@ -380,6 +380,7 @@
 
                 return `
                     <style>
+                    skinparam defaultFontSize ${umlScale}
                     node {
                         Padding 6
                         LineColor #919191
