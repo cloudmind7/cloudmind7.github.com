@@ -23,6 +23,10 @@
     .view { padding:10px }
     .view pre { line-height:20px; }
     .ttl { font-size:1em; font-weight: bold; }
+    .json { display: none; }
+    .zoom { width: 102px; }
+    .zoom button { top: 5px; width: 30px; }
+    .zoomOut { margin-left: 32px }
 </style>
 <body>
 <header>
@@ -41,6 +45,11 @@
             <option>wbs</option>
             <option>json</option>
         </select>
+        <div class="zoom json">
+            <label for="umlScale" class="json">zoom: </label>
+            <button id="zoomIn" class="btn json" onclick="javascript:zoomIn()"> + </button>
+            <button id="zoomOut" class="btn zoomOut json" onclick="javascript:zoomOut()"> - </button>
+        </div>
         <label for="umlScale" class="mindmap wbs">크기: </label>
         <select id="umlScale" class="select mindmap wbs">
             <option value="8">1</option>
@@ -97,8 +106,11 @@
             const umlType = $('#umlType').val();
             if (umlType === 'json') {
                 $('.mindmap').hide();
+                $('.json').css('display', 'inline-block');
+                $('.zoom').css('display', 'inline-block');
             } else {
                 $('.mindmap').show();
+                $('.json').hide();
             }
 
             $('#dataInput').val() && execBtn();
@@ -391,6 +403,20 @@
         }
         */
     };
+
+    function zoomIn() {
+    zoom(100);
+    }
+
+    function zoomOut() { 
+        zoom(-100);
+    }
+
+    function zoom(val) {
+        const $img = $('#view img');
+        const width = parseInt($img.css('width'));
+        $img.css('width', (width + val) + 'px');
+    }
 
     /* Polyfill */
     Array.prototype.fill||Object.defineProperty(Array.prototype,"fill",{value:function(t){if(null==this)throw new TypeError("this is null or not defined");for(var r=Object(this),e=r.length>>>0,i=arguments[1]>>0,n=i<0?Math.max(e+i,0):Math.min(i,e),i=arguments[2],i=void 0===i?e:i>>0,o=i<0?Math.max(e+i,0):Math.min(i,e);n<o;)r[n]=t,n++;return r}});
