@@ -87,21 +87,6 @@
 <script src="https://cdn.rawgit.com/jmnote/plantuml-encoder/d133f316/dist/plantuml-encoder.min.js"></script>
 <script>
     $(function() {
-        $('#dataInput').change(function(){
-            let isJson = false;
-            try {
-                JSON.parse(this.value);
-                isJson = true;
-            } catch(e) {}
-
-            if (isJson) {
-                $('#umlType').val('json').prop('selected', true);
-                $('.mindmap').hide();
-                execBtn();
-            }
-
-        });
-
         $('#viewType, #umlType, #umlScale, #countDepth, #nodeDepth, #showDepth').change(function(){
             const umlType = $('#umlType').val();
             if (umlType === 'json') {
