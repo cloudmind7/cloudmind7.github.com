@@ -286,7 +286,6 @@
 
     function plantUML(opts) {
         let uml = formatPlantUML(opts);
-        window.uml = uml;
         const src = "https://www.plantuml.com/plantuml/svg/" + window.plantumlEncoder.encode(uml);
         $(opts.display).html($('<img>').attr('src', src));
     }
@@ -304,7 +303,7 @@
             ${formatData}
             @end${umlType}`;
 
-        return uml;
+        return uml.replace(/^[\t\s]+([^\t\s].*)$/gm, '$1');;
     };
 
     function getPlantUmlFormat(opts) {
