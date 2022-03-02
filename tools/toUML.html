@@ -17,9 +17,9 @@
     .select { height:30px;padding-left:5px;padding-right:5px; }
     .input { height:30px;width:300px;padding:0;margin:0;vertical-align: middle; }
     .btn { height:30px;cursor:pointer; position:absolute }
-    .execBtn { margin-left: 5px }
-    .resetBtn { margin-left: 53px }
-    .sampleBtn { margin-left: 115px }
+    .execBtn { margin-left: 5px; width: 45px; }
+    .resetBtn { margin-left: 52px; width: 60px; }
+    .sampleBtn { margin-left: 114px; width: 90px; }
     .view { padding:10px }
     .view pre { line-height:20px; }
     .ttl { font-size:1em; font-weight: bold; }
@@ -30,7 +30,7 @@
 </style>
 <body>
 <header>
-    <div class="srch_div">
+    <div class="srch_div" style="min-width: 1100px;">
         <textarea id="dataInput" placeholder="내용을 입력해주세요." cols="80" class="input"></textarea>
         <input type="hidden" id="viewType" value="plantUML" />
         <!--
@@ -93,11 +93,12 @@
             tmpVal = $(this).val();
         })
         .change(function() {
-            if (! isValidInput()) {
+            if (!isEmptyInput() && !isValidInput()) {
                 $(this).val(tmpVal);
                 return;
             }
 
+            const umlType = $('#umlType').val();
             if (umlType === 'json') {
                 $('.mindmap').hide();
                 $('.json').css('display', 'inline-block');
@@ -108,7 +109,7 @@
                 $('.json').hide();
             }
 
-            execBtn();
+            !isEmptyInput() && execBtn();
         });
 
         $('#execBtn').click(function(e, opts) {
@@ -228,6 +229,10 @@
         $('#resetBtn').trigger('click');
     });
 
+    function isEmptyInput() {
+        return !$('#dataInput').val().replace(/[\t\s\n]/g, '');
+    }
+
     function execBtn(opts) {
         opts = opts || {};
         $('#execBtn').trigger('click', opts);
@@ -235,13 +240,12 @@
 
     function isValidInput() {
         const $input = $('#dataInput');
-        
-        if (!$input.val().replace(/[\t\s\n]/g, '')) {
-            alert('내용을 입력해주세요.');
-            $input.val('').focus();
+        if (isEmptyInput()) {
+            alert("입력값이 없습니다.");
+            $input.focus();
             return false;
         }
-
+        
         const umlType = $('#umlType').val();
         let isJson = false;
         try {
@@ -250,7 +254,7 @@
         } catch(e) {}
 
         if ((umlType === 'json' && !isJson) || (umlType !== 'json' && isJson)) {
-            alert('데이터 형식이 올바르지 않습니다.');
+            alert("데이터 형식이 올바르지 않습니다.");
             $input.focus();
             return false;
         }
@@ -362,7 +366,7 @@
             wbs: function(opts) {
                 return this.mindmap(opts);
             },
-            json: ({ data }) => data
+            json: ({ data }) => JSON.stringify(JSON.parse(data),  null, '\t')
         };
         return func[opts.view.umlType](opts);
     }
