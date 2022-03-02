@@ -23,8 +23,7 @@
     .view { padding:10px }
     .view pre { line-height:20px; }
     .ttl { font-size:1em; font-weight: bold; }
-    .json { display: none; }
-    .zoom { width: 102px; }
+    .zoom { display: none; width: 102px; }
     .zoom button { top: 5px; width: 30px; }
     .zoomOut { margin-left: 32px }
 </style>
@@ -45,10 +44,10 @@
             <option>wbs</option>
             <option>json</option>
         </select>
-        <div class="zoom json">
-            <label for="umlScale" class="json">zoom: </label>
-            <button id="zoomIn" class="btn json" onclick="javascript:zoomIn()"> + </button>
-            <button id="zoomOut" class="btn zoomOut json" onclick="javascript:zoomOut()"> - </button>
+        <div class="zoom">
+            <label for="umlScale">zoom: </label>
+            <button id="zoomIn" class="btn" onclick="javascript:zoomIn()"> + </button>
+            <button id="zoomOut" class="btn zoomOut" onclick="javascript:zoomOut()"> - </button>
         </div>
         <label for="umlScale" class="mindmap wbs">크기: </label>
         <select id="umlScale" class="select mindmap wbs">
@@ -101,12 +100,11 @@
             const umlType = $('#umlType').val();
             if (umlType === 'json') {
                 $('.mindmap').hide();
-                $('.json').css('display', 'inline-block');
                 $('.zoom').css('display', 'inline-block');
 
             } else {
                 $('.mindmap').show();
-                $('.json').hide();
+                $('.zoom').hide();
             }
 
             !isEmptyInput() && execBtn();
@@ -190,6 +188,7 @@
 
         $('#resetBtn').click(function() {
             $('.mindmap').show();
+            $('.zoom').hide();
             $('#dataInput').val("").css({height:"30px", width:"300px"});
             $('#viewType').val("plantUML");
             $('#umlType option:eq(0)').prop('selected', true);
