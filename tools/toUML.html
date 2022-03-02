@@ -23,6 +23,7 @@
     .view { padding:10px }
     .view pre { line-height:20px; }
     .ttl { font-size:1em; font-weight: bold; }
+    .json { display: none; }
     .zoom { display: none; width: 102px; }
     .zoom button { top: 5px; width: 30px; }
     .zoomOut { margin-left: 32px }
@@ -44,6 +45,7 @@
             <option>wbs</option>
             <option>json</option>
         </select>
+        <textarea id="jsonStyleInput" placeholder="JSON 키 / 키 형식 입력 후 Ctrl + Enter" cols="80" class="input json"></textarea>
         <div class="zoom">
             <label for="umlScale">zoom: </label>
             <button id="zoomIn" class="btn" onclick="javascript:zoomIn()"> + </button>
@@ -100,14 +102,21 @@
             const umlType = $('#umlType').val();
             if (umlType === 'json') {
                 $('.mindmap').hide();
-                $('.zoom').css('display', 'inline-block');
+                $('.json, .zoom').css('display', 'inline-block');
 
             } else {
                 $('.mindmap').show();
-                $('.zoom').hide();
+                $('.json, .zoom').hide();
+                $('#jsonStyleInput').val("").css({height:"30px", width:"300px"});
             }
 
             !isEmptyInput() && execBtn();
+        });
+
+        $('#jsonStyleInput').keydown(function(e) {
+            if (e.ctrlKey && e.keyCode == 13) {
+                execBtn();
+            }
         });
 
         $('#execBtn').click(function(e, opts) {
@@ -188,8 +197,8 @@
 
         $('#resetBtn').click(function() {
             $('.mindmap').show();
-            $('.zoom').hide();
-            $('#dataInput').val("").css({height:"30px", width:"300px"});
+            $('.json, .zoom').hide();
+            $('#dataInput, #jsonStyleInput').val("").css({height:"30px", width:"300px"});
             $('#viewType').val("plantUML");
             $('#umlType option:eq(0)').prop('selected', true);
             $('#umlScale option:eq(2)').prop('selected', true);
@@ -218,6 +227,11 @@
                 plantUML: () => {
                     const sampleData = data;
                     $('#dataInput').val(decodeURIComponent(sampleData));
+
+                    if (umlType === 'json') {
+                        $('#jsonStyleInput').val("firstName\naddress / city\nphoneNumbers / 0 / type\nphoneNumbers / 1 / number");
+                    }
+
                     execBtn();
                 }
             };
@@ -404,7 +418,22 @@
             wbs: function(opts) {
                 return this.mindmap(opts);
             },
-            json: (opts) => ''
+            json: (opts) => {   
+                const input = $('#jsonStyleInput').val();
+                if (! input) {
+                    return '';
+                }
+
+                return input.split('\n')
+                            .filter(s => s.trim())
+                            .map(s => {
+                                s = s.trim()
+                                    .replace(/([\s])+/g, '$1')
+                                    .replace(/(?<=(^|\/[\s]+))([^\s][\w\W]*?)(?=($|[\s]+\/))/g, (s) => `"${s}"`);
+                                return '#highlight ' + s;
+                            })
+                            .join('\n');
+            }
         };
         
         return func[opts.view.umlType](opts);
