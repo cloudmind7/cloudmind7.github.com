@@ -87,22 +87,32 @@
 <script src="https://cdn.rawgit.com/jmnote/plantuml-encoder/d133f316/dist/plantuml-encoder.min.js"></script>
 <script>
     $(function() {
-        $('#viewType, #umlType, #umlScale, #countDepth, #nodeDepth, #showDepth').change(function(){
-            const umlType = $('#umlType').val();
+        let tmpVal;
+        $('#viewType, #umlType, #umlScale, #countDepth, #nodeDepth, #showDepth')
+        .focus(function() {
+            tmpVal = $(this).val();
+        })
+        .change(function() {
+            if (! isValidInput()) {
+                $(this).val(tmpVal);
+                return;
+            }
+
             if (umlType === 'json') {
                 $('.mindmap').hide();
                 $('.json').css('display', 'inline-block');
                 $('.zoom').css('display', 'inline-block');
+
             } else {
                 $('.mindmap').show();
                 $('.json').hide();
             }
 
-            $('#dataInput').val() && execBtn();
+            execBtn();
         });
 
         $('#execBtn').click(function(e, opts) {
-            if (!validate()) {
+            if (!isValidInput()) {
                 return;
             }
 
@@ -223,16 +233,29 @@
         $('#execBtn').trigger('click', opts);
     }
 
-    function validate() {
-        let isValid = true;
+    function isValidInput() {
         const $input = $('#dataInput');
-
+        
         if (!$input.val().replace(/[\t\s\n]/g, '')) {
             alert('내용을 입력해주세요.');
             $input.val('').focus();
-            isValid = false;
+            return false;
         }
-        return isValid;
+
+        const umlType = $('#umlType').val();
+        let isJson = false;
+        try {
+            JSON.parse($input.val());
+            isJson = true;
+        } catch(e) {}
+
+        if ((umlType === 'json' && !isJson) || (umlType !== 'json' && isJson)) {
+            alert('데이터 형식이 올바르지 않습니다.');
+            $input.focus();
+            return false;
+        }
+        
+        return true;
     }
 
     function parseData({ inputText, view: { showDepth } }) {
