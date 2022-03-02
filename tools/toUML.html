@@ -115,7 +115,7 @@
 
             const func = {
                 mindmap: () => {
-                    let nodeDepth = $('#nodeDepth').val() || 1;
+                    let nodeDepth = !btnClicked && $('#nodeDepth').val() || 1;
                     let showDepth = !btnClicked && $('#showDepth').val() || Infinity;
 
                     const opts = {
