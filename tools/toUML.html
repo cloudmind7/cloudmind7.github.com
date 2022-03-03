@@ -31,7 +31,7 @@
 </style>
 <body>
 <header>
-    <div class="srch_div" style="min-width: 1100px;">
+    <div class="srch_div" style="min-width: 1200px;">
         <textarea id="dataInput" placeholder="내용을 입력해주세요." cols="80" class="input"></textarea>
         <input type="hidden" id="viewType" value="plantUML" />
         <!--
@@ -146,9 +146,6 @@
                         inputText: '',
                         display: '#view',
                         view: {
-                            type: $('#viewType').val(),
-                            umlType: $('#umlType').val(),
-                            umlScale: $('#umlScale').val(),
                             countDepth: $('#countDepth').is(':checked'),
                             nodeDepth,
                             showDepth
@@ -194,7 +191,6 @@
                     data: $('#dataInput').val(),
                     display: '#view',
                     view: {
-                        type: $('#viewType').val(),
                         umlType: $('#umlType').val()
                     }
                 }}
@@ -305,7 +301,7 @@
     const viewer = {
         default: plantUML,
         show: function (opts) {
-            this[opts.view.type || this.default](opts);
+            this[$('#viewType').val() || this.default](opts);
         },
         plantUML
     };
@@ -335,7 +331,7 @@
         const formatData = getPlantUmlFormat(opts);
         const umlStyle = getPlantUmlStyle(opts);
 
-        const { umlType } = opts.view;
+        const umlType = $('#umlType').val();
 
         const uml =
             `@start${umlType}
@@ -348,7 +344,7 @@
 
     function getPlantUmlFormat(opts) {
         const func = {
-            mindmap: ({ data, view: { umlType, countDepth, nodeDepth }}) => {
+            mindmap: ({ data, view: { countDepth, nodeDepth }}) => {
                 const colorset = (depth) => ({
                     1: '[#ABBFFF]',
                     2: '[#E8BEFA]',
@@ -379,13 +375,14 @@
             },
             json: ({ data }) => JSON.stringify(JSON.parse(data),  null, '\t')
         };
-        return func[opts.view.umlType](opts);
+        const umlType = $('#umlType').val();
+        return func[umlType](opts);
     }
 
     function getPlantUmlStyle(opts) {
         const func = {
             mindmap: (opts) => {
-                const { umlScale } = opts.view;
+                const umlScale = $('#umlScale').val();
                 const rootFontColor = opts.data[0].depth == 0 ? 'white' : 'black';
                 const thickness = umlScale <= 12 ? 0.3 : umlScale * 0.012 + 0.3;
 
@@ -433,8 +430,9 @@
                             .join('\n');
             }
         };
-        
-        return func[opts.view.umlType](opts);
+
+        const umlType = $('#umlType').val();
+        return func[umlType](opts);
     };
 
     function zoomIn() {
