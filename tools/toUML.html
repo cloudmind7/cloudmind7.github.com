@@ -85,7 +85,16 @@
     </div>
     <hr>
 </header>
-<main id="view" class="view"></main>
+<main id="view" class="view">
+<pre>
+  <span class="ttl">mindmap, wbs</span>
+    + IA 정의서의 내용을 쉽게 확인하기 위해 제작했습니다. 엑셀 시트의 내용을 복사 후 상단 입력란에 넣고 '실행' 버튼을 클릭해주세요.
+    + 입력한 텍스트의 Tab이 변환된 UML의 Depth 입니다.
+
+  <span class="ttl">json</span>
+    + Json 데이터를 시각적으로 보여줍니다.
+</pre>
+</main>
 <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
 <script>
     $(function() {
@@ -196,24 +205,7 @@
         });
 
         $('#resetBtn').click(function() {
-            $('.mindmap').show();
-            $('.json, .zoom').hide();
-            $('#dataInput, #jsonStyleInput').val("").css({height:"30px", width:"300px"});
-            $('#viewType').val("plantUML");
-            $('#umlType option:eq(0)').prop('selected', true);
-            $('#umlScale option:eq(2)').prop('selected', true);
-            $('#countDepth').prop('checked', true);
-            $('#nodeDepth, #showDepth').html($('<option value=""> - </option>'));
-            $('#view').html(`
-            <pre>
-            <span class="ttl">mindmap, wbs</span>
-                + IA 정의서의 내용을 쉽게 확인하기 위해 제작했습니다. 엑셀 시트의 내용을 복사 후 상단 입력란에 넣고 '실행' 버튼을 클릭해주세요.
-                + 입력한 텍스트의 Tab이 변환된 UML의 Depth 입니다.
-
-            <span class="ttl">json</span>
-                + Json 데이터를 시각적으로 보여줍니다.
-            </pre>
-        `.replace(/^[ ]+([^ ].+)/gm, '$1'));
+            location.href = location.href;
         });
 
         $('#sampleBtn').click(function() {
@@ -238,8 +230,6 @@
 
             samples['plantUML']();
         });
-
-        $('#resetBtn').trigger('click');
     });
 
     function isEmptyInput() {
