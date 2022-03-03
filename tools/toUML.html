@@ -19,7 +19,8 @@
     .btn { height:30px;cursor:pointer; position:absolute }
     .execBtn { margin-left: 5px; width: 45px; }
     .resetBtn { margin-left: 52px; width: 60px; }
-    .sampleBtn { margin-left: 114px; width: 90px; }
+    .downloadBtn { margin-left: 114px; width: 90px; }
+    .sampleBtn { margin-left: 206px; width: 90px; }
     .view { padding:10px }
     .view pre { line-height:20px; }
     .ttl { font-size:1em; font-weight: bold; }
@@ -79,6 +80,7 @@
 
         <button id="execBtn" class="btn execBtn"> 실행 </button>
         <button id="resetBtn" class="btn resetBtn"> 초기화 </button>
+        <button id="downloadBtn" class="btn downloadBtn" onclick="download()"> 이미지저장 </button>
         <button id="sampleBtn" class="btn sampleBtn"> 샘플데이터 </button>
     </div>
     <hr>
@@ -330,10 +332,13 @@
             return encode64_(compressed);
         }
 
-        let uml = formatPlantUML(opts);
-        window.uml = uml;
-        let src = "https://www.plantuml.com/plantuml/svg/" + encode(uml);
-        $(opts.display).html($('<img>').attr('src', src));
+        $(opts.display).text("처리중입니다.");
+        setTimeout(()=>{
+            let uml = formatPlantUML(opts);
+            uml = window.uml = encode(uml);
+            let src = "https://www.plantuml.com/plantuml/svg/" + uml;
+            $(opts.display).html($('<img>').attr('src', src));
+        }, 10);
     }
 
     function formatPlantUML(opts) {
@@ -454,6 +459,47 @@
         const $img = $('#view img');
         const width = parseInt($img.css('width'));
         $img.css('width', (width + val) + 'px');
+    }
+
+    function download() {
+        if (!window.uml) {
+            alert("저장할 이미지가 없습니다.");
+            return;
+        }
+
+        let fileName = 'uml.png';
+        let imgSrc = 'https://www.plantuml.com/plantuml/png/' + window.uml;
+        let image = new Image();
+        image.crossOrigin = "anonymous";
+        image.src = imgSrc;
+        image.onload = function() {
+            let canvas = document.createElement('canvas');
+            canvas.width = this.width;
+            canvas.height = this.height;
+            canvas.getContext('2d').drawImage(this, 0, 0);
+            if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                window.navigator.msSaveBlob(dataURLtoBlob(canvas.toDataURL()), fileName);
+            } else {
+                let link = document.createElement('a');
+                link.href = canvas.toDataURL();
+                link.download = fileName;
+                link.click();
+            }
+        };
+    }
+
+    function dataURLtoBlob(dataurl) {
+        var arr = dataurl.split(','),
+          mime = arr[0].match(/:(.*?);/)[1],
+          bstr = atob(arr[1]),
+          n = bstr.length,
+          u8arr = new Uint8Array(n);
+        while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new Blob([u8arr], {
+            type: mime
+        });
     }
 
     /* Polyfill */
