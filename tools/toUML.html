@@ -41,7 +41,7 @@
         </select>
         -->
         <label for="umlType">타입: </label>
-        <select id="umlType" class="select">
+        <select id="umlType" class="select" title="이미지 타입">
             <option selected>mindmap</option>
             <option>wbs</option>
             <option>json</option>
@@ -49,11 +49,11 @@
         <textarea id="jsonStyleInput" placeholder="JSON 키 / 키 형식 입력 후 Ctrl + Enter" cols="80" class="input json"></textarea>
         <div class="zoom">
             <label for="umlScale">zoom: </label>
-            <button id="zoomIn" class="btn" onclick="javascript:zoomIn()"> + </button>
-            <button id="zoomOut" class="btn zoomOut" onclick="javascript:zoomOut()"> - </button>
+            <button id="zoomIn" class="btn" onclick="javascript:zoomIn()" title="이미지 확대"> + </button>
+            <button id="zoomOut" class="btn zoomOut" onclick="javascript:zoomOut()" title="이미지 축소"> - </button>
         </div>
         <label for="umlScale" class="mindmap wbs">크기: </label>
-        <select id="umlScale" class="select mindmap wbs">
+        <select id="umlScale" class="select mindmap wbs" title="이미지 크기">
             <option value="8">1</option>
             <option value="10">2</option>
             <option value="12" selected>3</option>
@@ -73,12 +73,12 @@
             <input type="checkbox" id="chkDepth" checked />
             <span class="checkmark" title="[ Depth ] 표현">D</span>
         </label>
-        <label for="nodeDepth" class="mindmap wbs">노드 레벨: </label>
-        <select id="nodeDepth" class="select mindmap wbs">
+        <label for="nodeDepth" class="mindmap wbs">강조 단계: </label>
+        <select id="nodeDepth" class="select mindmap wbs" title="강조 표시 단계">
             <option value=""> - </option>
         </select>
-        <label for="showDepth" class="mindmap wbs">출력 레벨: </label>
-        <select id="showDepth" class="select mindmap wbs">
+        <label for="showDepth" class="mindmap wbs">출력 단계: </label>
+        <select id="showDepth" class="select mindmap wbs" title="화면에 표시할 단계">
             <option value=""> - </option>
         </select>
 
