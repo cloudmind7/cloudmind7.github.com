@@ -6,18 +6,18 @@
     <meta name="Author" content="cloudmind7">
 </head>
 <style>
-    header { position:fixed;padding:5px;top:0;left:0;right:0;display:flex;background: white; }
-    body { padding-top:35px;font-size:.9em;font-family:Arial,Dotum,"돋움",sans-serif; }
-    hr { height:1px;background-color:#bebebe;border:none; }
-    .check { position:relative;padding-top:9px;padding-left:34px;margin-bottom:12px;cursor:pointer;font-size:12px; }
-    .check input { position:absolute;opacity:0;cursor:pointer;height:0;width:0; }
+    header { position:fixed; padding:5px; top:0; left:0; right:0; display:flex; background: white; }
+    body { padding-top:35px; font-size:.9em; font-family:Arial,Dotum,"돋움",sans-serif; }
+    hr { height:1px; background-color:#bebebe; border:none; }
+    .check { position:relative; padding-top:9px; padding-left:34px; margin-bottom:12px; cursor:pointer; font-size:12px; }
+    .check input { position:absolute; opacity:0; cursor:pointer;height:0; width:0; }
     .check input:checked ~ .checkmark { background-color:rgb(116, 216, 255); }
-    .checkmark { text-align:center;position:absolute;top:0;left:0;font-size:1.2em;line-height:27px;height:28px;width:28px;background-color:white;border:1px solid rgb(118, 118, 118); }
+    .checkmark { text-align:center; position:absolute; top:0;left:0; font-size:1.2em; line-height:27px; height:28px; width:28px; background-color:white; border:1px solid rgb(118, 118, 118); }
     .srch_dev { display:block; position:relative; }
-    .select { height:30px;padding-left:5px;padding-right:5px; }
-    .input { height:30px;width:300px;padding:0;margin:0;vertical-align: middle; }
-    .btn { height:30px;cursor:pointer; position:absolute }
-    .execBtn { margin-left: 5px; width: 45px; }
+    .select { height:30px; padding-left:5px; padding-right:5px; }
+    .input { height:30px; width:300px; padding:0; margin:0; vertical-align: middle; }
+    .btn { height:30px; cursor:pointer; position:absolute }
+    .execBtn { margin-left: 5px; width: 45px; font-weight: bold; }
     .resetBtn { margin-left: 52px; width: 60px; }
     .downloadBtn { margin-left: 114px; width: 90px; }
     .sampleBtn { margin-left: 206px; width: 90px; }
@@ -67,11 +67,11 @@
         </select>
         <label class="check checkShadow mindmap wbs">
             <input type="checkbox" id="chkShadow" />
-            <span class="checkmark" title="그림자 표현">S</span>
+            <span class="checkmark" title="그림자 표시">S</span>
         </label>
         <label class="check checkDepth mindmap wbs">
             <input type="checkbox" id="chkDepth" checked />
-            <span class="checkmark" title="[ Depth ] 표현">D</span>
+            <span class="checkmark" title="[ Depth ] 표시">D</span>
         </label>
         <label for="nodeDepth" class="mindmap wbs">강조 단계: </label>
         <select id="nodeDepth" class="select mindmap wbs" title="강조 표시 단계">
