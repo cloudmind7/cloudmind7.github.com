@@ -9,10 +9,10 @@
     header { position:fixed;padding:5px;top:0;left:0;right:0;display:flex;background: white; }
     body { padding-top:35px;font-size:.9em;font-family:Arial,Dotum,"돋움",sans-serif; }
     hr { height:1px;background-color:#bebebe;border:none; }
-    .checkDepth { position:relative;padding-top:9px;padding-left:35px;margin-bottom:12px;cursor:pointer;font-size:12px; }
-    .checkDepth input { position:absolute;opacity:0;cursor:pointer;height:0;width:0; }
-    .checkmark { position:absolute;top:0;left:0;font-size:.6em;line-height:27px;height:28px;width:28px;background-color:white;border:1px solid rgb(118, 118, 118); }
-    .checkDepth input:checked ~ .checkmark { background-color:rgb(116, 216, 255); }
+    .check { position:relative;padding-top:9px;padding-left:34px;margin-bottom:12px;cursor:pointer;font-size:12px; }
+    .check input { position:absolute;opacity:0;cursor:pointer;height:0;width:0; }
+    .check input:checked ~ .checkmark { background-color:rgb(116, 216, 255); }
+    .checkmark { text-align:center;position:absolute;top:0;left:0;font-size:1.2em;line-height:27px;height:28px;width:28px;background-color:white;border:1px solid rgb(118, 118, 118); }
     .srch_dev { display:block; position:relative; }
     .select { height:30px;padding-left:5px;padding-right:5px; }
     .input { height:30px;width:300px;padding:0;margin:0;vertical-align: middle; }
@@ -65,11 +65,15 @@
             <option value="30">9</option>
             <option value="45">10</option>
         </select>
-        <label for="nodeDepth" class="mindmap wbs">노드 레벨: </label>
-        <label class="checkDepth mindmap wbs">
-            <input type="checkbox" id="countDepth" checked />
-            <span class="checkmark">Depth</span>
+        <label class="check checkShadow mindmap wbs">
+            <input type="checkbox" id="chkShadow" />
+            <span class="checkmark">S</span>
         </label>
+        <label class="check checkDepth mindmap wbs">
+            <input type="checkbox" id="chkDepth" checked />
+            <span class="checkmark">D</span>
+        </label>
+        <label for="nodeDepth" class="mindmap wbs">노드 레벨: </label>
         <select id="nodeDepth" class="select mindmap wbs">
             <option value=""> - </option>
         </select>
@@ -99,7 +103,7 @@
 <script>
     $(function() {
         let tmpVal;
-        $('#viewType, #umlType, #umlScale, #countDepth, #nodeDepth, #showDepth')
+        $('#viewType, #umlType, #umlScale, #chkShadow, #chkDepth, #nodeDepth, #showDepth')
             .focus(function() {
                 tmpVal = $(this).val();
             })
@@ -146,7 +150,6 @@
                         inputText: '',
                         display: '#view',
                         view: {
-                            countDepth: $('#countDepth').is(':checked'),
                             nodeDepth,
                             showDepth
                         }
@@ -344,7 +347,7 @@
 
     function getPlantUmlFormat(opts) {
         const func = {
-            mindmap: ({ data, view: { countDepth, nodeDepth }}) => {
+            mindmap: ({ data, view: { nodeDepth }}) => {
                 const colorset = (depth) => ({
                     1: '[#ABBFFF]',
                     2: '[#E8BEFA]',
@@ -361,7 +364,8 @@
                     .map(d => {
                         let star = new Array(d.depth + addStar).fill('*').join('').trim();
                         star += (nodeDepth < d.depth)? '_' : `${colorset(d.depth)}`;
-                        const depth = (countDepth) ? ` [${d.depth}]` : '';
+                        const showDepth = $('#chkDepth').is(':checked');
+                        const depth = (showDepth) ? ` [${d.depth}]` : '';
                         let value = (d.value.indexOf('\\n') > -1)
                             ? d.value.replace(/^"([^"]+)"$/, '$1')
                             : d.value;
@@ -383,6 +387,7 @@
         const func = {
             mindmap: (opts) => {
                 const umlScale = $('#umlScale').val();
+                const shadow = $('#chkShadow').is(':checked')? 1 : 0;
                 const rootFontColor = opts.data[0].depth == 0 ? 'white' : 'black';
                 const thickness = umlScale <= 12 ? 0.3 : umlScale * 0.012 + 0.3;
 
@@ -395,7 +400,7 @@
                         LineThickness 0.5
                         BackgroundColor #FFFFFF
                         RoundCorner 15
-                        Shadowing 1
+                        Shadowing ${shadow}
                     }
 
                     rootNode {
