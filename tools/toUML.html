@@ -400,8 +400,8 @@ if (!allowedBrowser) {
 
         $(opts.display).text("처리중입니다.");
         setTimeout(() => {
-            let uml = window.uml = formatPlantUML(opts);
-            uml = encode(uml);
+            let uml = formatPlantUML(opts);
+            uml = window.uml = encode(uml);
             let src = "https://www.plantuml.com/plantuml/svg/" + uml;
             $(opts.display).html($('<img>').attr('src', src));
         }, 10);
