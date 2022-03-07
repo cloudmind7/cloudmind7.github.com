@@ -205,7 +205,7 @@ if (!allowedBrowser) {
                     }
                 }}
             };
-            
+
             const options = func[umlType]();
             viewer.show(options);
         });
@@ -271,9 +271,12 @@ if (!allowedBrowser) {
                 return;
             }
 
+            let encData = encodeURIComponent($("#dataInput").val());
+            let encStyle = encodeURIComponent($('#jsonStyleInput').val());
             let params = ['?'];
-            params.push('d=' + encodeURIComponent($("#dataInput").val()));
-            $('#jsonStyleInput').val() && params.push('&sty=' + encodeURIComponent($('#jsonStyleInput').val()));
+
+            params.push('d=' + encData);
+            $('#jsonStyleInput').val() && params.push('&sty=' + encStyle);
             $('#umlType').val() && params.push('&t=' + $('#umlType').val());
             $('#umlScale').val() && params.push('&s=' + $('#umlScale').val());
             $('#chkShadow').is(':checked') && params.push('&cs=y');
@@ -282,6 +285,7 @@ if (!allowedBrowser) {
             $('#showDepth').val() && params.push('&sd=' + $('#showDepth').val());
 
             const url = location.href.replace(/^([^?]+)\?.+/, '$1') + params.join('');
+
             navigator.clipboard.writeText(url);
             alert("URL이 클립보드에 저장되었습니다.\n붙여넣기(Ctrl+V)로 화면을 공유할 수 있습니다.");
         });
