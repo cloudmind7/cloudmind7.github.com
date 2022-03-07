@@ -209,7 +209,7 @@ if (!allowedBrowser) {
                 }}
             };
 
-            const options = func[umlType]();
+            const options = window.opts = func[umlType]();
             viewer.show(options);
         });
 
