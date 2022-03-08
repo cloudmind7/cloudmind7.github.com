@@ -16,7 +16,8 @@
     .srch_dev { display:block; position:relative; }
     .select { height:30px; padding-left:5px; padding-right:5px; }
     .input { height:30px; width:300px; padding:0; margin:0; vertical-align: middle; }
-    #compactLimit { height:26px; width: 26px; display: none; }
+    .jsonInput { height:26px; width: 26px; }
+    #compactLimit { display: none; }
     .btn { height:30px; cursor:pointer; position:absolute }
     .execBtn { margin-left: 5px; width: 45px; font-weight: bold; }
     .resetBtn { margin-left: 52px; width: 60px; }
@@ -54,13 +55,14 @@
             <input type="checkbox" id="checkCompact" />
             <span class="checkmark" title="배열 생략">C</span>
         </label>
-        <input type="number" class="json" id="compactLimit" value="5" title="배열 길이제한" />
+        <input type="number" id="compactLimit" class="json jsonInput" value="5" title="배열 길이제한" />
 
         <div class="zoom json">
             <label for="umlScale">zoom: </label>
             <button id="zoomIn" class="btn" onclick="javascript:zoomIn()" title="이미지 확대"> + </button>
             <button id="zoomOut" class="btn zoomOut" onclick="javascript:zoomOut()" title="이미지 축소"> - </button>
         </div>
+        <input type="number" id="zoomInput" class="json jsonInput" value="0" title="줌 수치" />
         <label for="umlScale" class="mindmap wbs">크기: </label>
         <select id="umlScale" class="select mindmap wbs" title="이미지 크기">
             <option value="8">1</option>
@@ -141,6 +143,7 @@ if (!allowedBrowser) {
         const pCompLimit = params.get('cl');
         const pNode = params.get('nd');
         const pShow = params.get('sd');
+        const pZoom = params.get('z');
 
         pData = pData && LZString.decompressFromEncodedURIComponent(pData) || pData;
         pStyle = pStyle && LZString.decompressFromEncodedURIComponent(pStyle) || pStyle;
@@ -297,6 +300,7 @@ if (!allowedBrowser) {
             style && params.push('&sty=' + style);
             $('#umlType').val() && params.push('&t=' + $('#umlType').val());
             $('#umlScale').val() && params.push('&s=' + $('#umlScale').val());
+            $('#zoomInput').val() && params.push('&z=' + $('#zoomInput').val());
             $('#chkShadow').is(':checked') && params.push('&cs=y');
             $('#chkDepth').is(':checked') && params.push('&cd=y');
             $('#checkCompact').is(':checked') && params.push('&cc=y');
@@ -316,6 +320,7 @@ if (!allowedBrowser) {
             $('#jsonStyleInput').val(pStyle);
             pCompLimit && $('#compactLimit').val(pCompLimit);
             pScale && $('#umlScale').val(pScale).prop('selected', true);
+            pZoom && $('#zoomInput').val(pZoom);
             pShadow && $('#chkShadow').prop('checked', true);
             pDepth && $('#chkDepth').prop('checked', true);
             pCompact && $('#checkCompact').prop('checked', true);
@@ -430,8 +435,13 @@ if (!allowedBrowser) {
     function showUMLImage(uml) {
         const src = "https://www.plantuml.com/plantuml/svg/" + uml;
         const img = new Image();
-        img.onload = () => $(opts.display).html(img);
-        img.onerror = () => $(opts.display).text("오류가 발생했습니다.");
+        img.onload = () => {
+            $(opts.display).html(img);
+            $('#umlType').val() === 'json' && zoom();
+        }
+        img.onerror = () => {
+            $(opts.display).text("오류가 발생했습니다.");
+        }
         img.src = src;
     }
 
@@ -568,17 +578,21 @@ if (!allowedBrowser) {
     };
 
     function zoomIn() {
-        zoom(100);
+        zoom(1);
     }
 
     function zoomOut() { 
-        zoom(-100);
+        zoom(-1);
     }
 
     function zoom(val) {
+        $input = $('#zoomInput');
+        let add = parseInt($input.val() || 0) + parseInt(val || 0);
+        $input.val(add);
         const $img = $('#view img');
         const width = parseInt($img.css('width'));
-        $img.css('width', (width + val) + 'px');
+        console.log(width, ((val || add) * 100));
+        $img.css('width', (width + ((val || add) * 100)) + 'px');
     }
 
     function download() {
