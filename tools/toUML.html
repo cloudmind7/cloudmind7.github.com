@@ -22,8 +22,9 @@
     .downloadBtn { margin-left: 114px; width: 90px; }
     .sampleBtn { margin-left: 206px; width: 90px; }
     .shareBtn { margin-left: 298px; width: 60px; }
-    .view { padding:10px }
+    .view { padding:10px; }
     .view pre { line-height:20px; }
+    .loading { display:flex; justify-content: center; padding-top:100px }
     .ttl { font-size:1em; font-weight: bold; }
     .json { display: none; }
     .zoom { display: none; width: 102px; }
@@ -398,13 +399,16 @@ if (!allowedBrowser) {
             return encode64_(compressed);
         }
 
-        $(opts.display).text("처리중입니다.");
-        setTimeout(() => {
-            let uml = formatPlantUML(opts);
-            uml = window.uml = encode(uml);
-            let src = "https://www.plantuml.com/plantuml/svg/" + uml;
-            $(opts.display).html($('<img>').attr('src', src));
-        }, 10);
+        $(opts.display).html('<div class="loading"><img src="https://loading.io/mod/spinner/spinner/sample.gif"></div>');
+
+        let uml = formatPlantUML(opts);
+        uml = window.uml = encode(uml);
+
+        let src = "https://www.plantuml.com/plantuml/svg/" + uml;
+        const img = new Image();
+        img.onload = () => $(opts.display).html(img);
+        img.onerror = () => $(opts.display).text("오류가 발생했습니다.");
+        img.src = src;
     }
 
     function formatPlantUML(opts) {
