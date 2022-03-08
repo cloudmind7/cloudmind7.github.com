@@ -44,7 +44,7 @@
             <option>plantUML</option>
         </select>
         -->
-        <label for="umlType">타입: </label>
+        <label for="umlType">Type: </label>
         <select id="umlType" class="select" title="이미지 타입">
             <option selected>mindmap</option>
             <option>wbs</option>
@@ -64,16 +64,16 @@
             <input type="checkbox" id="chkDepth" />
             <span class="checkmark" title="[ Depth ] 표시">D</span>
         </label>
-        <label for="nodeDepth" class="mindmap wbs">강조단계: </label>
-        <select id="nodeDepth" class="select mindmap wbs" title="강조 표시 단계">
+        <label for="nodeDepth" class="mindmap wbs">Focus: </label>
+        <select id="nodeDepth" class="select mindmap wbs" title="강조 표시 레벨 선택">
             <option value=""> - </option>
         </select>
-        <label for="showDepth" class="mindmap wbs">출력단계: </label>
+        <label for="showDepth" class="mindmap wbs">Show: </label>
         <select id="showDepth" class="select mindmap wbs" title="화면에 표시할 단계">
             <option value=""> - </option>
         </select>
         <div class="zoom">
-            <label for="zoomIn">zoom: </label>
+            <label for="zoomIn">Zoom: </label>
             <button id="zoomIn" class="btn" onclick="javascript:zoomIn()" title="이미지 확대"> + </button>
             <button id="zoomOut" class="btn zoomOut" onclick="javascript:zoomOut()" title="이미지 축소"> - </button>
         </div>
