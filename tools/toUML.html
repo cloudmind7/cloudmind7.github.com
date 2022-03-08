@@ -6,7 +6,7 @@
     <meta name="Author" content="cloudmind7">
 </head>
 <style>
-    header { position:fixed; padding:5px; top:0; left:0; right:0; display:flex; background: white; }
+    header { position:fixed; padding:5px; top:0; left:0; right:0; display:flex; background: white; z-index: 100; }
     body { padding-top:35px; font-size:.9em; font-family:Arial,Dotum,"돋움",sans-serif; }
     hr { height:1px; background-color:#bebebe; border:none; }
     .check { position:relative; padding-top:9px; padding-left:34px; margin-bottom:12px; cursor:pointer; font-size:12px; }
@@ -32,6 +32,8 @@
     .zoom { display: inline-block; width: 102px; }
     .zoom button { top: 5px; width: 30px; }
     .zoomOut { margin-left: 32px }
+    .loading-div { position: fixed; top: 0; left: 0; z-index: 10; width: 100%; height: 100%; background: #fff; opacity: .85; filter: alpha(opacity=85); }
+    .loading-img { position: relative; top: 40%; left: 50% }
 </style>
 <body>
 <header>
@@ -407,27 +409,37 @@ if (!allowedBrowser) {
             return encode64_(compressed);
         }
 
-        showLoading();
-
+        loading();
         let uml = formatPlantUML(opts);
         uml = window.uml = encode(uml);
         showUMLImage(uml);
     }
 
-    function showLoading(target) {
-        target = target || 'main';
-        $(target).html(`<div class="loading"><img src="${loadingImg}"></div>`);
+    function loading() {
+        if ($('.loading-div').length) {
+            return;
+        }
+        const $loadingDiv = $('<div class="loading-div">');
+        const $loadingImg = $(`<img src="${loadingImg}" class="loading-img">`);
+        $loadingDiv.append($loadingImg);
+        $('#view').prepend($loadingDiv);
+    }
+
+    function doneLoading() {
+        $('.loading-div').remove();
     }
 
     function showUMLImage(uml) {
         const src = "https://www.plantuml.com/plantuml/svg/" + uml;
         const img = new Image();
         img.onload = () => {
+            doneLoading();
             $(opts.display).html(img);
             window.vw = img.width;
             zoom();
         }
         img.onerror = () => {
+            doneLoading();
             $(opts.display).text("오류가 발생했습니다.");
         }
         img.src = src;
@@ -483,7 +495,11 @@ if (!allowedBrowser) {
             json: ({ data }) => {
                 const parsed = JSON.parse(data);
                 const str = JSON.stringify(parsed,  null, '\t');
-                const compLimit = $('#compactLimit').val();
+                let compLimit = $('#compactLimit').val();
+                if (compLimit < 0) {
+                    compLimit = 0;
+                    $('#compactLimit').val(0);
+                }
 
                 function compactJson(obj) {
                     if (Array.isArray(obj)) {
@@ -597,12 +613,14 @@ if (!allowedBrowser) {
             return;
         }
 
+        loading();
         let fileName = 'uml.png';
         let imgSrc = 'https://www.plantuml.com/plantuml/png/' + window.uml;
         let image = new Image();
         image.crossOrigin = "anonymous";
         image.src = imgSrc;
         image.onload = function() {
+            doneLoading();
             let canvas = document.createElement('canvas');
             canvas.width = this.width;
             canvas.height = this.height;
@@ -616,6 +634,9 @@ if (!allowedBrowser) {
                 link.click();
             }
         };
+        image.onerror = function() {
+            doneLoading();
+        }
     }
 
     function dataURLtoBlob(dataurl) {
