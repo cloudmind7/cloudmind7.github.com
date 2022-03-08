@@ -597,7 +597,7 @@ if (!allowedBrowser) {
             $zoom.val(z);
         }
 
-        let width = window.vw + (z * 100);
+        let width = window.vw + (parseInt(window.vw / 20) * z);
         if (width < 100) {
             width = 100;
         } else if (width > 10000) {
