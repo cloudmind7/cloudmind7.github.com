@@ -9,15 +9,16 @@
     header { position:fixed; padding:5px; top:0; left:0; right:0; display:flex; background: white; z-index: 100; }
     body { padding-top:35px; font-size:.9em; font-family:Arial,Dotum,"돋움",sans-serif; }
     hr { height:1px; background-color:#bebebe; border:none; }
+    input[type=number] { padding: 0; text-align: center; }
     .check { position:relative; padding-top:9px; padding-left:34px; margin-bottom:12px; cursor:pointer; font-size:12px; }
     .check input { position:absolute; opacity:0; cursor:pointer;height:0; width:0; }
     .check input:checked ~ .checkmark { background-color:rgb(116, 216, 255); }
-    .checkmark { text-align:center; position:absolute; top:0;left:0; font-size:1.2em; line-height:27px; height:28px; width:28px; background-color:white; border:1px solid rgb(118, 118, 118); }
+    .checkmark { text-align:center; position:absolute; top:0;left:0; font-size:1.2em; line-height:27px; height:30px; width:30px; background-color:white; border:1px solid rgb(118, 118, 118); }
     .srch_dev { display:block; position:relative; }
     .select { height:30px; padding-left:5px; padding-right:5px; }
     .input { height:30px; width:300px; padding:0; margin:0; vertical-align: middle; }
-    .squareInput { height:26px; width: 26px; }
-    #compactLimit { display: none; }
+    .square { height:27px; width: 27px; }
+    .comp { display: none; }
     .btn { height:30px; cursor:pointer; position:absolute }
     .execBtn { margin-left: 5px; width: 45px; font-weight: bold; }
     .resetBtn { margin-left: 52px; width: 60px; }
@@ -53,11 +54,16 @@
             <option>json</option>
         </select>
         <textarea id="jsonStyleInput" placeholder="JSON 키 / 키 형식 입력 후 Ctrl + Enter" cols="80" class="input json"></textarea>
-        <label class="check checkCompact json">
-            <input type="checkbox" id="checkCompact" />
-            <span class="checkmark" title="배열 생략">C</span>
+        <label class="check json">
+            <input type="checkbox" id="chkCompArr" />
+            <span class="checkmark" title="배열 생략">CA</span>
         </label>
-        <input type="number" id="compactLimit" class="json squareInput" value="5" title="배열 길이제한" maxlength="3" />
+        <input type="number" id="compArr" class="json square comp" value="5" title="배열 길이제한" maxlength="3" />
+        <label class="check json">
+            <input type="checkbox" id="chkCompObj" />
+            <span class="checkmark" title="객체 생략">CO</span>
+        </label>
+        <input type="number" id="compObj" class="json square comp" value="5" title="객체 길이제한" maxlength="3" />
         <label class="check checkShadow mindmap wbs">
             <input type="checkbox" id="chkShadow" />
             <span class="checkmark" title="그림자 표시">S</span>
@@ -79,7 +85,7 @@
             <button id="zoomIn" class="btn" onclick="javascript:zoomIn()" title="이미지 확대"> + </button>
             <button id="zoomOut" class="btn zoomOut" onclick="javascript:zoomOut()" title="이미지 축소"> - </button>
         </div>
-        <input type="number" id="zoom" class="squareInput" value="0" title="줌 수치" maxlength="3" />
+        <input type="number" id="zoom" class="square" value="0" title="줌 수치" maxlength="3" />
 
         <button id="execBtn" class="btn execBtn"> 실행 </button>
         <button id="resetBtn" class="btn resetBtn"> 초기화 </button>
@@ -126,11 +132,13 @@ if (!allowedBrowser) {
         const pType = params.get('t');
         const pShadow = params.get('cs');
         const pDepth = params.get('cd');
-        const pCompact = params.get('cc');
-        const pCompLimit = params.get('cl');
         const pNode = params.get('nd');
         const pShow = params.get('sd');
         const pZoom = params.get('z');
+        const pCompArr = params.get('ca');
+        const pCompArrLen = params.get('cal');
+        const pCompObj = params.get('co');
+        const pCompObjLen = params.get('col');
 
         pData = pData && LZString.decompressFromEncodedURIComponent(pData) || pData;
         pStyle = pStyle && LZString.decompressFromEncodedURIComponent(pStyle) || pStyle;
@@ -223,7 +231,7 @@ if (!allowedBrowser) {
         });
 
         let tmpVal;
-        $('#viewType, #umlType, #chkShadow, #chkDepth, #nodeDepth, #showDepth, #checkCompact, #compactLimit')
+        $('#viewType, #umlType, #chkShadow, #chkDepth, #nodeDepth, #showDepth, #chkCompArr, #chkCompObj, #compArr, #compObj')
             .focus(function() {
                 tmpVal = $(this).val();
             })
@@ -237,8 +245,11 @@ if (!allowedBrowser) {
                 if (umlType === 'json') {
                   $('.mindmap').hide();
                   $('.json').css('display', 'inline-block');
-                  $('#compactLimit').css('display',
-                    $('#checkCompact').is(':checked')? 'inline-block' : 'none'
+                  $('#compArr').css('display',
+                    $('#chkCompArr').is(':checked')? 'inline-block' : 'none'
+                  );
+                  $('#compObj').css('display',
+                    $('#chkCompObj').is(':checked')? 'inline-block' : 'none'
                   );
 
                 } else {
@@ -293,10 +304,12 @@ if (!allowedBrowser) {
             $('#zoom').val() && params.push('&z=' + $('#zoom').val());
             $('#chkShadow').is(':checked') && params.push('&cs=y');
             $('#chkDepth').is(':checked') && params.push('&cd=y');
-            $('#checkCompact').is(':checked') && params.push('&cc=y');
-            $('#compactLimit').val() && params.push('&cl=' + $('#compactLimit').val());
             $('#nodeDepth').val() && params.push('&nd=' + $('#nodeDepth').val());
             $('#showDepth').val() && params.push('&sd=' + $('#showDepth').val());
+            $('#chkCompArr').is(':checked') && params.push('&ca=y');
+            $('#compArr').val() && params.push('&cal=' + $('#compArr').val());
+            $('#chkCompObj').is(':checked') && params.push('&co=y');
+            $('#compObj').val() && params.push('&col=' + $('#compObj').val());
 
             const url = location.href.replace(/^([^?]+)\?.+/, '$1') + params.join('');
 
@@ -308,11 +321,14 @@ if (!allowedBrowser) {
             window.pData = pData;
             $('#dataInput').val(pData);
             $('#jsonStyleInput').val(pStyle);
-            pCompLimit && $('#compactLimit').val(pCompLimit);
             pZoom && $('#zoom').val(pZoom);
             pShadow && $('#chkShadow').prop('checked', true);
             pDepth && $('#chkDepth').prop('checked', true);
-            pCompact && $('#checkCompact').prop('checked', true);
+            pCompArr && $('#chkCompArr').prop('checked', true) && $('#compArr').show();
+            pCompArrLen && $('#compArr').val(pCompArrLen);
+            pCompObj && $('#chkCompObj').prop('checked', true) && $('#compObj').show();
+            pCompObjLen && $('#compObj').val(pCompObjLen);
+
             pType && $('#umlType').val(pType).prop('selected', true).trigger('change');
         }
     });
@@ -495,29 +511,47 @@ if (!allowedBrowser) {
             json: ({ data }) => {
                 const parsed = JSON.parse(data);
                 const str = JSON.stringify(parsed,  null, '\t');
-                let compLimit = $('#compactLimit').val();
-                if (compLimit < 0) {
-                    compLimit = 0;
-                    $('#compactLimit').val(0);
+                let compArrLen = $('#compArr').val();
+                let compObjLen = $('#compObj').val();
+
+                if (compArrLen < 0) {
+                    compArrLen = 0;
+                    $('#compArr').val(0);
+                }
+                if (compObjLen < 0) {
+                    compObjLen = 0;
+                    $('#compObj').val(0);
                 }
 
                 function compactJson(obj) {
                     if (Array.isArray(obj)) {
-                        for (let d of obj) {
-                            (typeof obj[d] === 'object') && compactJson(obj[d]);
+                        for (let k of obj) {
+                            (typeof obj[k] === 'object') && compactJson(obj[k]);
                         }
-                        if (obj.length > compLimit) {
-                            obj.splice(compLimit);
+
+                        if ($('#chkCompArr').is(':checked') && obj.length > compArrLen) {
+                            obj.splice(compArrLen);
                             obj.push('📂...');
                         }
                     } else if (typeof obj === 'object') {
-                        for (let d in obj) compactJson(obj[d]);
+                        const keys = Object.keys(obj);
+                        keys.forEach(k => compactJson(obj[k]));
+
+                        if ($('#chkCompObj').is(':checked') && keys.length > compObjLen) {
+                            keys.forEach((k, i) => {
+                                i >= compObjLen && delete obj[k];
+                            });
+                            obj['📂'] = '...';
+                        }
+
                     }
                     return JSON.stringify(obj,  null, '\t');
                 }
 
                 $('#dataInput').val(str);
-                return $('#checkCompact').is(':checked')? compactJson(parsed) : str;
+                return $('#chkCompArr').is(':checked') || $('#chkCompObj').is(':checked')
+                        ? compactJson(parsed)
+                        : str;
             }
         };
         const umlType = $('#umlType').val();
