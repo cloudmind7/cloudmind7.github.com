@@ -572,24 +572,24 @@ if (!allowedBrowser) {
                         }
                     }
 
-                    if (compArr && Array.isArray(obj)) {
+                    if (Array.isArray(obj)) {
                         obj.forEach((d, i) => {
                             if (typeof d === 'object') {
                               obj[i] = compactJson(d, depth + 1);
                             }
                         });
 
-                        if ($('#chkCompArr').is(':checked') && obj.length > compArrLen) {
+                        if (compArr && obj.length > compArrLen) {
                             obj.splice(compArrLen);
                             obj.push('📂...');
                         }
-                    } else if (compObj && typeof obj === 'object') {
+                    } else if (typeof obj === 'object') {
                         const keys = Object.keys(obj);
                         keys.forEach(k => {
                           obj[k] = compactJson(obj[k], depth + 1);
                         });
 
-                        if ($('#chkCompObj').is(':checked') && keys.length > compObjLen) {
+                        if (compObj && keys.length > compObjLen) {
                             keys.forEach((k, i) => {
                                 i >= compObjLen && delete obj[k];
                             });
