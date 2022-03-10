@@ -565,10 +565,10 @@ if (!allowedBrowser) {
 
                     if (showDepth < depth) {
                         if (Array.isArray(obj)) {
-                            return ["📂..."];
+                            return ["📂", "Array"];
 
                         } else if (typeof obj === 'object') {
-                            return {"📂": "..."};
+                            return {"📂": "Object"};
                         }
                     }
 
