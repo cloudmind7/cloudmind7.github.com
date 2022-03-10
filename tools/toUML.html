@@ -76,8 +76,8 @@
         <select id="nodeDepth" class="select mindmap wbs" title="강조 표시 레벨 선택">
             <option value=""> - </option>
         </select>
-        <label for="showDepth" class="mindmap wbs">Show: </label>
-        <select id="showDepth" class="select mindmap wbs" title="화면에 표시할 단계">
+        <label for="showDepth">Show: </label>
+        <select id="showDepth" class="select" title="화면에 표시할 단계">
             <option value=""> - </option>
         </select>
         <div class="zoom">
@@ -165,16 +165,13 @@ if (!allowedBrowser) {
                     let showDepth = !btnClicked && $('#showDepth').val() || pShow || Infinity;
 
                     const opts = {
-                        inputText: '',
+                        inputText: $('#dataInput').val(),
                         display: '#view',
-                        view: {
-                            nodeDepth,
-                            showDepth
-                        }
+                        nodeDepth,
+                        showDepth
                     };
 
-                    opts.inputText = $('#dataInput').val();
-                    const data = opts.data = parseData(opts);
+                    const data = opts.data = parseMindmap(opts);
 
                     if (data && 1 < data[0].depth) {
                         alert("잘못된 데이터입니다. 문자열이 Tab으로 시작할 수 없습니다.");
@@ -207,14 +204,62 @@ if (!allowedBrowser) {
                     return this.mindmap(opts);
                 },
                 json: () => {
-                    return {
-                    inputText: $('#dataInput').val(),
-                    data: $('#dataInput').val(),
-                    display: '#view',
-                    view: {
-                        umlType: $('#umlType').val()
+                    const getMaxDepth = (obj, depth) => {
+                        depth = depth || 0;
+                        let maxDepth = 0;
+
+                        if (Array.isArray(obj)) {
+                            obj.forEach(o => {
+                                const tmpDepth = getMaxDepth(o, depth + 1);
+                                if (tmpDepth > maxDepth) maxDepth = tmpDepth;
+                            });
+                        } else if (typeof obj === 'object') {
+                            const keys = Object.keys(obj);
+                            keys.forEach(k => {
+                                const tmpDepth = getMaxDepth(obj[k], depth + 1);
+                                if (tmpDepth > maxDepth) maxDepth = tmpDepth;
+                            });
+                        }
+
+                        maxDepth = (maxDepth > depth)? maxDepth : depth;
+                        return maxDepth;
                     }
-                }}
+
+                    let showDepth = !btnClicked && $('#showDepth').val() || pShow || Infinity;
+
+                    const opts = {
+                        inputText: $('#dataInput').val(),
+                        display: '#view',
+                        showDepth,
+                        compArrLen: $('#compArr').val(),
+                        compObjLen: $('#compObj').val()
+                    };
+
+                    if (!opts.compArrLen || opts.compArrLen < 1) {
+                        opts.compArrLen = 1;
+                        $('#compArr').val(1);
+                    }
+                    if (!opts.compObjLen || opts.compObjLen < 1) {
+                        opts.compObjLen = 1;
+                        $('#compObj').val(1);
+                    }
+
+                    const data = opts.data = parseJson(opts);
+                    $('#dataInput').val(JSON.stringify(data,  null, '\t'));
+                    const maxDepth = getMaxDepth(data);
+
+                    if (showDepth === Infinity || showDepth > maxDepth) {
+                        showDepth = opts.showDepth = maxDepth;
+                    }
+
+                    const $showDepth = $('#showDepth').html('');
+
+                    for (let i = 1; i <= maxDepth; i++) {
+                        $showDepth.append($(`<option ${i == showDepth? 'selected' : ''}>${i}</option>`));
+                    }
+
+                    return opts;
+                }
             };
 
             const options = window.opts = func[umlType]();
@@ -318,7 +363,6 @@ if (!allowedBrowser) {
         });
 
         if (pData) {
-            window.pData = pData;
             $('#dataInput').val(pData);
             $('#jsonStyleInput').val(pStyle);
             pZoom && $('#zoom').val(pZoom);
@@ -368,7 +412,7 @@ if (!allowedBrowser) {
         return true;
     }
 
-    function parseData({ inputText, view: { showDepth } }) {
+    function parseMindmap({ inputText, showDepth }) {
         const replaceMultiNL = (txt) => txt 
                 ? txt.replace(/(?<=")([^\t\s][^"]+)(?=")/gm, (v) => v.replace(/\n/g, '\\n'))
                 : '';
@@ -403,6 +447,10 @@ if (!allowedBrowser) {
         return (topCnt > 1)
             ? [{ show: true, depth: 0, value: 'Root' }, ...data]
             : data;
+    }
+
+    function parseJson({ inputText }) {
+        return JSON.parse(inputText);
     }
 
     const viewer = {
@@ -478,7 +526,7 @@ if (!allowedBrowser) {
 
     function getPlantUmlFormat(opts) {
         const func = {
-            mindmap: ({ data, view: { nodeDepth }}) => {
+            mindmap: ({ data, nodeDepth }) => {
                 const colorset = (depth) => ({
                     1: '[#ABBFFF]',
                     2: '[#E8BEFA]',
@@ -508,34 +556,38 @@ if (!allowedBrowser) {
             wbs: function(opts) {
                 return this.mindmap(opts);
             },
-            json: ({ data }) => {
-                const parsed = JSON.parse(data);
-                const str = JSON.stringify(parsed,  null, '\t');
-                let compArrLen = $('#compArr').val();
-                let compObjLen = $('#compObj').val();
+            json: ({ data, showDepth, compArrLen, compObjLen }) => {
+                const compArr = $('#chkCompArr').is(':checked');
+                const compObj = $('#chkCompObj').is(':checked');
 
-                if (compArrLen < 0) {
-                    compArrLen = 0;
-                    $('#compArr').val(0);
-                }
-                if (compObjLen < 0) {
-                    compObjLen = 0;
-                    $('#compObj').val(0);
-                }
+                function compactJson(obj, depth) {
+                    depth  = depth || 1;
 
-                function compactJson(obj) {
-                    if (Array.isArray(obj)) {
-                        for (let k of obj) {
-                            (typeof obj[k] === 'object') && compactJson(obj[k]);
+                    if (showDepth < depth) {
+                        if (Array.isArray(obj)) {
+                            return ["📂..."];
+
+                        } else if (typeof obj === 'object') {
+                            return {"📂": "..."};
                         }
+                    }
+
+                    if (compArr && Array.isArray(obj)) {
+                        obj.forEach((d, i) => {
+                            if (typeof d === 'object') {
+                              obj[i] = compactJson(d, depth + 1);
+                            }
+                        });
 
                         if ($('#chkCompArr').is(':checked') && obj.length > compArrLen) {
                             obj.splice(compArrLen);
                             obj.push('📂...');
                         }
-                    } else if (typeof obj === 'object') {
+                    } else if (compObj && typeof obj === 'object') {
                         const keys = Object.keys(obj);
-                        keys.forEach(k => compactJson(obj[k]));
+                        keys.forEach(k => {
+                          obj[k] = compactJson(obj[k], depth + 1);
+                        });
 
                         if ($('#chkCompObj').is(':checked') && keys.length > compObjLen) {
                             keys.forEach((k, i) => {
@@ -543,15 +595,12 @@ if (!allowedBrowser) {
                             });
                             obj['📂'] = '...';
                         }
-
                     }
-                    return JSON.stringify(obj,  null, '\t');
+
+                    return obj;
                 }
 
-                $('#dataInput').val(str);
-                return $('#chkCompArr').is(':checked') || $('#chkCompObj').is(':checked')
-                        ? compactJson(parsed)
-                        : str;
+                return JSON.stringify(compactJson(data), null, '\t');
             }
         };
         const umlType = $('#umlType').val();
