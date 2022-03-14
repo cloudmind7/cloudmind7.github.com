@@ -648,15 +648,74 @@ if (!allowedBrowser) {
                     return '';
                 }
 
-                return input.split('\n')
-                            .filter(s => s.trim())
-                            .map(s => {
-                                s = s.trim()
-                                    .replace(/([\s])+/g, '$1')
-                                    .replace(/(?<=(^|\/[\s]+))([^\s][\w\W]*?)(?=($|[\s]+\/))/g, (s) => `"${s}"`);
-                                return '#highlight ' + s;
-                            })
-                            .join('\n');
+                const getList = (str, compare) => {
+                    const getTargetObj = (keys) => keys.reduce((obj, k) => obj?.[k], compare);
+
+                    const getChildKeys = ((keys) => {
+                        const obj = getTargetObj(keys);
+
+                        if (Array.isArray(obj)) {
+                            return new Array(obj.length).fill(0).map((v, i) => i);
+
+                        } else if (typeof obj === 'object') {
+                            return Object.keys(obj);
+
+                        } else {
+                            return;
+                        }
+                    });
+
+                    const parse = (keys) => {
+                        return keys.reduce((arr, k) => {
+                            let tmp = [];
+
+                            if (k === '*') {
+                                arr.forEach(a => {
+                                    const childKeys = getChildKeys(a);
+                                    if (childKeys && childKeys.length) {
+                                        childKeys.forEach(c => tmp.push([...a, c]));
+                                    }
+                                });
+
+                            } else {
+                                arr.forEach(a => {
+                                    const next = [...a, k];
+                                    const obj = getTargetObj(next);
+                                    obj && tmp.push(next);
+                                });
+                            }
+
+                            return tmp;
+                        }, [[]]);
+                    };
+
+                    const findAll = /(?<=\/\s+|^\s*)\*(?=\s+\/|\s*$)/;
+                    return str.split('\n').map(s => s.trim()).filter(s => s).reduce((arr, s) => {
+                        const splits = s.split(/\s+\/\s+/).filter(s => s);
+
+                        if (findAll.test(s)) {
+                            const parsed = parse(splits);
+                            parsed.forEach(p => {
+                                arr.push(p);
+                            });
+
+                        } else {
+                            arr.push(splits);
+                        }
+
+                        return arr;
+                    }, []);
+                }
+
+                const list = getList(input, opts.data);
+
+                if (list && list.length) {
+                    return list.map(a => a.map(b => `"${b}"`))
+                               .map(a => '#highlight ' + a.join(' / ')).join('\n');
+
+                } else {
+                    return '';
+                }
             }
         };
 
