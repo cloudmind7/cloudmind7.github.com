@@ -579,9 +579,10 @@ if (!allowedBrowser) {
                             }
                         });
 
-                        if (compArr && obj.length > compArrLen) {
+                        const len = obj.length;
+                        if (compArr && len > compArrLen) {
                             obj.splice(compArrLen);
-                            obj.push('📂...');
+                            obj.push(`📂...(${len - obj.length})`);
                         }
                     } else if (typeof obj === 'object') {
                         const keys = Object.keys(obj);
@@ -593,7 +594,7 @@ if (!allowedBrowser) {
                             keys.forEach((k, i) => {
                                 i >= compObjLen && delete obj[k];
                             });
-                            obj['📂'] = '...';
+                            obj['📂'] = `...(${keys.length - Object.keys(obj).length})`;
                         }
                     }
 
