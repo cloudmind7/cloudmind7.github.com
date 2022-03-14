@@ -107,6 +107,7 @@
 </main>
 <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
 <script src="https://plantuml.com/synchro2.min.js"></script>
+<script src="https://unpkg.com/json5@^2.0.0/dist/index.min.js"></script>
 <script>
 var agent = navigator.userAgent.toLowerCase();
 var allowedBrowser = false;
@@ -399,7 +400,7 @@ if (!allowedBrowser) {
         const umlType = $('#umlType').val();
         let isJson = false;
         try {
-            JSON.parse($input.val());
+            JSON5.parse($input.val());
             isJson = true;
         } catch(e) {}
 
@@ -450,7 +451,7 @@ if (!allowedBrowser) {
     }
 
     function parseJson({ inputText }) {
-        return JSON.parse(inputText);
+        return JSON5.parse(inputText);
     }
 
     const viewer = {
