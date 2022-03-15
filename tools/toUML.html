@@ -19,12 +19,12 @@
     .input { height:30px; width:300px; padding:0; margin:0; vertical-align: middle; }
     .square { height:27px; width: 27px; }
     .comp { display: none; }
-    .btn { height:30px; cursor:pointer; position:absolute }
-    .execBtn { margin-left: 5px; width: 45px; font-weight: bold; }
+    .btn { height:30px; cursor:pointer; position:absolute; border: 1px solid #000; }
+    .execBtn { margin-left: 5px; width: 45px; font-weight: bold; background-color: rgb(116, 216, 255); }
     .resetBtn { margin-left: 52px; width: 60px; }
     .downloadBtn { margin-left: 114px; width: 90px; }
-    .sampleBtn { margin-left: 206px; width: 90px; }
-    .shareBtn { margin-left: 298px; width: 60px; }
+    .shareBtn { margin-left: 206px; width: 60px; }
+    .sampleBtn { margin-left: 268px; width: 90px; }
     .view { padding:10px; }
     .view pre { line-height:20px; }
     .loading { display:flex; justify-content: center; padding-top:100px }
@@ -35,6 +35,7 @@
     .zoomOut { margin-left: 32px }
     .loading-div { position: fixed; top: 0; left: 0; z-index: 10; width: 100%; height: 100%; background: #fff; opacity: .85; filter: alpha(opacity=85); }
     .loading-img { position: relative; top: 40%; left: 50%; margin-left: -64px; }
+    #umlType { background-color: rgb(116, 216, 255); }
 </style>
 <body>
 <header>
@@ -90,8 +91,8 @@
         <button id="execBtn" class="btn execBtn"> 실행 </button>
         <button id="resetBtn" class="btn resetBtn"> 초기화 </button>
         <button id="downloadBtn" class="btn downloadBtn" onclick="download()"> 이미지저장 </button>
-        <button id="sampleBtn" class="btn sampleBtn"> 샘플데이터 </button>
         <button id="shareBtn" class="btn shareBtn"> 공유 </button>
+        <button id="sampleBtn" class="btn sampleBtn"> 샘플데이터 </button>
     </div>
     <hr>
 </header>
@@ -310,22 +311,14 @@ if (!allowedBrowser) {
         // "샘플데이터" 버튼 이벤트 처리
         $('#sampleBtn').click(function() {
             const umlType = $('#umlType').val();
-            const smpl = "%EA%B3%BC%EB%AA%A9%20%EA%B4%80%EB%A6%AC%09%EB%AA%A9%EB%A1%9D%09%09%09%0A%09%09%EA%B2%80%EC%83%89%09%ED%85%8D%EC%8A%A4%ED%8A%B8%09%EA%B3%BC%EB%AA%A9%EB%AA%85%2F%EB%8B%B4%EB%8B%B9%EC%9E%90%0A%09%09%09%EA%B5%AC%EB%B6%84%09%EB%82%B4%EC%9D%BC%EB%B0%B0%EC%9B%80%EC%B9%B4%EB%93%9C%EA%B3%BC%EC%A0%95%2F%EC%9D%BC%EB%B0%98%EA%B3%BC%EC%A0%95%0A%09%09%09%EC%83%81%ED%83%9C%09%EC%A4%80%EB%B9%84%EC%A4%91%2F%EA%B5%90%EC%9C%A1%EC%A4%91%0A%09%09%09%EC%9C%A0%ED%98%95%09%EA%B0%95%EC%9D%98%ED%98%95%2C%20%EC%8B%A4%EC%8A%B5%ED%98%95%2C%20%EC%9C%B5%ED%95%A9%ED%98%95%0A%09%09%09%EB%8C%80%EB%B6%84%EB%A5%98%09%EC%8B%9C%EC%84%A4%EC%9B%90%EC%98%88%2F%EB%85%B8%EC%A7%80%2F%EC%B6%95%EC%82%B0%2F%EC%9E%84%EC%97%85%2F%EC%88%98%EC%82%B0%E2%80%A6%0A%09%09%09%EC%86%8C%EB%B6%84%EB%A5%98%09%EC%9E%AC%EB%B0%B0%2F%EC%A0%9C%EC%96%B4%2F%EB%8D%B0%EC%9D%B4%ED%84%B0%2F%EA%B2%BD%EC%98%81%E2%80%A6%0A%09%09%09%EB%82%9C%EC%9D%B4%EB%8F%84%09%EC%9E%85%EB%AC%B8%2F%EA%B8%B0%EC%B4%88%2F%EC%8B%AC%ED%99%94%20%0A%09%09%EC%8D%B8%EB%84%A4%EC%9D%BC%ED%98%95%20%EB%A6%AC%EC%8A%A4%ED%8A%B8%09%EC%8D%B8%EB%84%A4%EC%9D%BC%20%EC%9D%B4%EB%AF%B8%EC%A7%80%09%0A%09%09%09%EA%B3%BC%EB%AA%A9%EB%AA%85%09%0A%09%09%09%EA%B3%BC%EB%AA%A9%20%EA%B0%9C%EC%9A%94%09%0A%09%09%09%EB%8B%B4%EB%8B%B9%EC%9E%90%09%0A%09%09%09%EA%B5%AC%EB%B6%84%09%0A%09%09%09%EC%83%81%ED%83%9C%09%0A%09%09%09%EC%9C%A0%ED%98%95%09%0A%09%09%09%EB%8C%80%EB%B6%84%EB%A5%98%09%0A%09%09%09%EC%86%8C%EB%B6%84%EB%A5%98%09%0A%09%09%09%EB%82%9C%EC%9D%B4%EB%8F%84";
-            const data = {
-                mindmap: smpl,
-                wbs: smpl,
-                json: "%7B%0A%20%20%22packet%22%3A%20%7B%0A%20%20%20%20%22cmd%22%3A%20%22publish%22%2C%0A%20%20%20%20%22retain%22%3A%20false%2C%0A%20%20%20%20%22qos%22%3A%200%2C%0A%20%20%20%20%22dup%22%3A%20false%2C%0A%20%20%20%20%22length%22%3A%20833%2C%0A%20%20%20%20%22topic%22%3A%20%22data%2Fsensor%2Ftopic1%22%2C%0A%20%20%20%20%22payload%22%3A%20%7B%0A%20%20%20%20%20%20%22type%22%3A%20%22Buffer%22%2C%0A%20%20%20%20%20%20%22data%22%3A%20%5B%5D%0A%20%20%20%20%7D%2C%0A%20%20%20%20%22properties%22%3A%20%7B%0A%20%20%20%20%20%20%22contentType%22%3A%20%22json%22%2C%0A%20%20%20%20%20%20%22userProperties%22%3A%20%7B%0A%20%20%20%20%20%20%20%20%22timestamp%22%3A%20%222022-03-02T07%3A09%3A58Z%22%2C%0A%20%20%20%20%20%20%20%20%22sender%22%3A%20%22namespace%2Ftopic1%22%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%20%20%7D%2C%0A%20%20%22data%22%3A%20%7B%0A%20%20%20%20%22namespace%2Ftopic1%22%3A%20%7B%0A%20%20%20%20%20%20%22name%22%3A%20%22%EC%98%A8%EC%8B%A41%22%2C%0A%20%20%20%20%20%20%22sensor%22%3A%20%7B%0A%20%20%20%20%20%20%20%20%22station%22%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%22timestamp%22%3A%20%222022-03-02T07%3A09%3A58.000Z%22%2C%0A%20%20%20%20%20%20%20%20%20%20%22name%22%3A%20%22%EA%B8%B0%EC%83%81%EB%8C%80%22%2C%0A%20%20%20%20%20%20%20%20%20%20%22measure%22%3A%20%5B%0A%20%20%20%20%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22id%22%3A%20%22temperature%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22name%22%3A%20%22%EC%98%A8%EB%8F%84%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22value%22%3A%2025.89%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22id%22%3A%20%22humidity%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22name%22%3A%20%22%EC%8A%B5%EB%8F%84%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22value%22%3A%2023%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22id%22%3A%20%22airpressure%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22name%22%3A%20%22%EA%B8%B0%EC%95%95%EA%B3%84%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22value%22%3A%20996.52%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22id%22%3A%20%22airpressure_abs%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22name%22%3A%20%22%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22value%22%3A%201011.42%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20%20%20%5D%0A%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%22outside%22%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%22timestamp%22%3A%20%222022-03-02T07%3A09%3A58.000Z%22%2C%0A%20%20%20%20%20%20%20%20%20%20%22name%22%3A%20%22%EC%99%B8%EB%B6%80%22%2C%0A%20%20%20%20%20%20%20%20%20%20%22measure%22%3A%20%5B%0A%20%20%20%20%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22id%22%3A%20%22temperature%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22name%22%3A%20%22%EC%98%A8%EB%8F%84%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22value%22%3A%207.5%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22id%22%3A%20%22humidity%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22name%22%3A%20%22%EC%8A%B5%EB%8F%84%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22value%22%3A%2040%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22id%22%3A%20%22winddir%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22name%22%3A%20%22%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22value%22%3A%2020%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22id%22%3A%20%22windspeed%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22name%22%3A%20%22%ED%92%8D%EC%86%8D%EA%B3%84%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22value%22%3A%200.8%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22id%22%3A%20%22windgust%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22name%22%3A%20%22%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22value%22%3A%200.98%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22id%22%3A%20%22windgust_dailymax%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22name%22%3A%20%22%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22value%22%3A%205.1%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22id%22%3A%20%22rain_hourly%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22name%22%3A%20%22%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22value%22%3A%200%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20%20%20%5D%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D"
+            const params = {
+                mindmap: "?d=j81kqugEgAtYNZ0JAouh0yQKCYAJrCTAzQsouBKhwHUsyiChXQPSAvTYJ9NgCeOpKA2tYCG9MgLQ2A+44Aw9gA2OAuc4DstwQKgTpNoAweoXRiBBgcA7CzEAAk4BE+wIiTpQAq1gQnHlkwATjgVDWYgVBrAGuN6ANGEAnQ4Fah82ECs44EtVvZMAAzY0AanTEA7Q4BJBwAtjgBBjpIAejYADk6SAqbOADQOkgCHjgKOjpIAYQ9GAZASSgDGDnjCANeMcpIA4E4Ato6SADs2ALuOADIukgL01gIBjGUgwgDkNFYAjzTCAoeOAHN2kgAx1gBCzpIA3Q4Aqa2B0gB7DgCSNbHpgUAQws2xgFYAf3WEwkiQ7zaBggDg1gClj+0hU1OcwTNey1-rX7l5ZOZJt7UA&t=mindmap&z=0&nd=3&sd=5&cal=5&col=5",
+                wbs: "?d=pVdl0OiQEFBoATWJMDZCyi4EqHAdS2QPzXEKFdB6QL02CfTYAnj0YgNrWAhvWIC0NgPuOAMPYANjgLnOA7LRoKgTudgGD1dlAgwOAdhbCAAScAifYERJ3IAVawITjUsoAJxwKhrYQKg1gDXHVAGgAEgE6HArUN79gVnHAlquqygAGbKgDU6wgHaHAJIOAFscAQY7kAejYAHJ3EBU2cAGgdxAEPHAUdHcQAwh4MAyAjJAGMHHMEAa8YZcQBwJwBbR3EAHZsAXccAGRdxAXprAQDGEiEAchoLAEeawQFDxwA5u3EAGOsAIWdxAG6HAFTX9aEAPYcASRrpVfUAazrQwEbp9AsAP7r8wMixsFYgsfUAcGsAUsY2wImIDqgORA7UD+ycklLJauqA&t=wbs&z=0&nd=2&sd=4&cal=5&col=5",
+                json: "?d=N4KAkARADghgxgawKYBcIC4AEoyTgWwBMNNoBXAIwBsBLAZwAsIAacSAJ1RhoDsSAzGFTpJWuCAEcA9nRIAGMZEJkoAoSMUQqSHgHMUTLAA4AzCc0opUGnBIRCMFDAD0InnSntnl63ACMLGzQMACeVFIwxFg44ighUEh2AEJk-PxI7IG4So4wdgB0hRBsAL6aUOxWGSg0SLLRbHhSPCg6KAAq8YlYEABWHnyKkGQi7AAKlQnsNXUkMbE0+HVO+Ko9AExy6+sAtHIme+vtcgDs6HIAnOgArEYAWlnZEG6EGXY8MEt0sHBI3lY2AKNEqlcBlcD2XJzIIfL4-P4+QHQp6w7qkQAUY4AToYCQ2eOg8mQa2UgdCcNWayOJEBqXxWa1Im22ewOW2OZ0uNyM+TkPIeQ3EqLsgAY6wCDA4AAZseTyWMDoZE4JAA2o1svMqTQoqRWqsMo45Yl+SjPmiIOjACPNkqpADchGQ0etrvkjBdlbhwcTcKqnuq7AwyPh1TQ4hbDUs7IBWofNBvE1qotpI6xMLrAbvdnvE3p63HYFTqsvlUcggp6QsAqqOAEZrg9GbWiLhcAGz5a7rJMp4lpyAZ0hZnN0PNIAD6MAosgLECLpErkBjcawfjkfj8+QALM33cmXQBdZWtyBSMgoOjqtGe6mLZafekQRm7faHNnnK63bm84Njo12QAeY4AA3tf0r7iqTdsIE7akkG1dhdXzJNC3fHozUnCBpzRE5GxbKMgJA31-UIQMQgQ8cIAjBCkJIJc5DQwDoOAjUIAAd14QgcMyUcCOI6t43Itcdw9KiQPonhCG+JAkGIFjYNIQBYlcAWMGK1HEisDkR0KLXDCaP4whdBGNAxNDHo2NjNFFIuIxlNTXi1IYzTSX7BwaCoEJ8BgAAPfDxIgfSZ0wB0-FMttzLsCDeH7Bg93YezXN0ic5PYhSW03bdgVBdcSiAA&sty=A4Qwxg1gpgLgBAejgKmQKACYhiT2SIp46HKEDOUAduQPYBOxBSZSlNDhtArjOQJYYoTUhWp16XXgKGEAtlBDlu9YVhIsxHSUh59BUeYuWrCABhGa24zrukGjSlYaRnSQA&t=json&z=-4&sd=6&cal=5&col=5"
             }[umlType];
             const samples = {
                 plantUML: () => {
-                    const sampleData = data;
-                    $('#dataInput').val(decodeURIComponent(sampleData));
-
-                    if (umlType === 'json') {
-                        $('#jsonStyleInput').val("data\ndata / namespace/topic1 / name\ndata / namespace/topic1 / sensor / outside / timestamp");
-                    }
-
-                    execBtn();
+                    location.href = location.href.replace(/^([^?]+).*/, '$1') + params;
                 }
             };
 
@@ -668,30 +661,56 @@ if (!allowedBrowser) {
                     });
 
                     const parse = (keys) => {
-                        return keys.reduce((arr, k) => {
-                            let tmp = [];
+                        let allDepth = false;
 
-                            if (k === '*') {
-                                arr.forEach(a => {
-                                    const childKeys = getChildKeys(a);
-                                    if (childKeys && childKeys.length) {
-                                        childKeys.forEach(c => tmp.push([...a, c]));
-                                    }
-                                });
+                        const getAllChild = (target) => {
+                            return target.reduce((tmpArr, t) => {
+                                const childKeys = getChildKeys(t);
+                                if (childKeys && childKeys.length) {
+                                    childKeys.forEach(c => tmpArr.push([...t, c]));
+                                }
+                                return tmpArr;
+                            }, []);
+                        }
 
-                            } else {
-                                arr.forEach(a => {
-                                    const next = [...a, k];
-                                    const obj = getTargetObj(next);
-                                    obj && tmp.push(next);
-                                });
+                        let results = keys.reduce((arr, k) => {
+                            if (allDepth) {
+                                return;
                             }
 
-                            return tmp;
+                            let children;
+                            if (/^\*{2,}$/.test(k)) {
+                                allDepth = true;
+                                children = getAllChild(arr);
+
+                            } else if (k === '*') {
+                                children = getAllChild(arr);
+
+                            } else {
+                                children = arr.reduce((tmpArr, a) => {
+                                    const next = [...a, k];
+                                    const obj = getTargetObj(next);
+                                    obj && tmpArr.push(next);
+                                    return tmpArr;
+                                }, []);
+                            }
+
+                            return children;
                         }, [[]]);
+
+                        if (allDepth) {
+                            let childArr;
+                            let tmpArr = [...results];
+                            while((childArr = getAllChild(tmpArr)).length) {
+                                childArr.forEach(c => results.push(c));
+                                tmpArr = childArr;
+                            }
+                        }
+
+                        return results;
                     };
 
-                    const findAll = /(?<=\/\s+|^\s*)\*(?=\s+\/|\s*$)/;
+                    const findAll = /(?<=\/\s+|^\s*)\*+(?=\s+\/|\s*$)/;
                     return str.split('\n').map(s => s.trim()).filter(s => s).reduce((arr, s) => {
                         const splits = s.split(/\s+\/\s+/).filter(s => s);
 
@@ -710,6 +729,7 @@ if (!allowedBrowser) {
                 }
 
                 const list = getList(input, opts.data);
+                window.list = list;
 
                 if (list && list.length) {
                     return list.map(a => a.map(b => `"${b}"`))
