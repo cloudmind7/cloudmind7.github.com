@@ -16,7 +16,7 @@
     .checkmark { text-align:center; position:absolute; top:0;left:0; font-size:1.2em; line-height:27px; height:30px; width:30px; background-color:white; border:1px solid rgb(118, 118, 118); }
     .srch_dev { display:block; position:relative; }
     .select { height:30px; padding-left:5px; padding-right:5px; }
-    .input { width:150px; height:30px; line-height: 30px; padding:0; margin:0; vertical-align: middle; }
+    .input { width:150px; height:30px; padding:0; margin:0; vertical-align: middle; }
     .square { height:27px; width: 27px; }
     .comp { display: none; }
     .btn { height:30px; cursor:pointer; position:absolute; border: 1px solid #000; }
@@ -42,8 +42,8 @@
     <div class="srch_div" style="min-width: 1200px;">
         <input type="hidden" id="viewType" value="plantUML" />
         <textarea id="dataInput" placeholder="데이터 입력" class="input"></textarea>
-        <textarea id="highlights" placeholder="스타일 입력" class="input json"></textarea>
-        <textarea id="visibles" placeholder="스타일 입력" class="input json"></textarea>
+        <textarea id="highlights" placeholder="강조대상 입력" class="input json"></textarea>
+        <textarea id="visibles" placeholder="출력대상 입력" class="input json"></textarea>
         <label for="umlType">Type: </label>
         <select id="umlType" class="select" title="이미지 타입">
             <option selected>mindmap</option>
@@ -131,7 +131,8 @@ if (!allowedBrowser) {
         const url = new URL(location.href);
         const params = new URLSearchParams(url.search);
         let pData = params.get('d');
-        let pStyle = params.get('sty');
+        let pHlights = params.get('sty');
+        let pVisible = params.get('vi');
         const pType = params.get('t');
         const pShadow = params.get('cs');
         const pDepth = params.get('cd');
@@ -144,7 +145,8 @@ if (!allowedBrowser) {
         const pCompObjLen = params.get('col');
 
         pData = pData && LZString.decompressFromEncodedURIComponent(pData) || pData;
-        pStyle = pStyle && LZString.decompressFromEncodedURIComponent(pStyle) || pStyle;
+        pHlights = pHlights && LZString.decompressFromEncodedURIComponent(pHlights) || pHlights;
+        pVisible = pVisible && LZString.decompressFromEncodedURIComponent(pVisible) || pVisible;
 
         // Input Ctrl + Enter 이벤트 처리
         $('.input').each(function() {
@@ -274,9 +276,22 @@ if (!allowedBrowser) {
                         $('#compObj').val(1);
                     }
 
-                    const data = opts.data = parseJson(opts);
+                    let data = opts.data = parseJson(opts);
                     $('#dataInput').val(JSON.stringify(data,  null, '\t'));
-                    const maxDepth = getMaxDepth(data);
+                    const maxDepth = getMaxDepth(opts.data);
+
+                    const visibles = $('#visibles').val();
+                    if (visibles.trim()) {
+                        const list = parseJsonInput(visibles, data);
+                        const result = list.reduce((arr, t) => {
+                            const key = (t.length == 1)? t[0] : t[t.length - 1];
+                            const obj = getExistChild(t, data);
+                            arr.push({ [key]: obj });
+                            return arr;
+                        }, []);
+
+                        opts.data = (result.length == 1)? result[0] : result;
+                    }
 
                     if (showDepth === Infinity || showDepth > maxDepth) {
                         showDepth = opts.showDepth = maxDepth;
@@ -369,12 +384,15 @@ if (!allowedBrowser) {
 
             let data = $("#dataInput").val();
             let style = $('#highlights').val();
+            let visibles = $('#visibles').val();
             data = data && LZString.compressToEncodedURIComponent(data) || '';
             style = style && LZString.compressToEncodedURIComponent(style) || '';
+            visibles = visibles && LZString.compressToEncodedURIComponent(visibles) || '';
 
             let params = ['?'];
             params.push('d=' + data);
             style && params.push('&sty=' + style);
+            visibles && params.push('&vi=' + visibles);
             $('#umlType').val() && params.push('&t=' + $('#umlType').val());
             $('#zoom').val() && params.push('&z=' + $('#zoom').val());
             $('#chkShadow').is(':checked') && params.push('&cs=y');
@@ -394,7 +412,8 @@ if (!allowedBrowser) {
 
         if (pData) {
             $('#dataInput').val(pData);
-            $('#highlights').val(pStyle);
+            $('#highlights').val(pHlights);
+            $('#visibles').val(pVisible);
             pZoom && $('#zoom').val(pZoom);
             pShadow && $('#chkShadow').prop('checked', true);
             pDepth && $('#chkDepth').prop('checked', true);
@@ -477,6 +496,93 @@ if (!allowedBrowser) {
         return (topCnt > 1)
             ? [{ show: true, depth: 0, value: 'Root' }, ...data]
             : data;
+    }
+
+    function getExistChild(keys, compare) {
+        return keys.reduce((obj, k) => obj?.[k], compare);
+    }
+
+    function getChildKeys(keys, compare) {
+        const obj = getExistChild(keys, compare);
+
+        if (Array.isArray(obj)) {
+            return new Array(obj.length).fill(0).map((v, i) => i);
+
+        } else if (typeof obj === 'object') {
+            return Object.keys(obj);
+
+        } else {
+            return;
+        }
+    }
+
+    function parseJsonInput(str, compare) {
+        const parse = (keys) => {
+            let allDepth = false;
+
+            const getAllChild = (target) => {
+                return target.reduce((tmpArr, t) => {
+                    const childKeys = getChildKeys(t, compare);
+                    if (childKeys && childKeys.length) {
+                        childKeys.forEach(c => tmpArr.push([...t, c]));
+                    }
+                    return tmpArr;
+                }, []);
+            }
+
+            let results = keys.reduce((arr, k) => {
+                if (allDepth) {
+                    return;
+                }
+
+                let children;
+                if (/^\*{2,}$/.test(k)) {
+                    allDepth = true;
+                    children = getAllChild(arr);
+
+                } else if (k === '*') {
+                    children = getAllChild(arr);
+
+                } else {
+                    children = arr.reduce((tmpArr, a) => {
+                        const next = [...a, k];
+                        const obj = getExistChild(next, compare);
+                        obj && tmpArr.push(next);
+                        return tmpArr;
+                    }, []);
+                }
+
+                return children;
+            }, [[]]);
+
+            if (allDepth) {
+                let childArr;
+                let tmpArr = [...results];
+                while((childArr = getAllChild(tmpArr)).length) {
+                    childArr.forEach(c => results.push(c));
+                    tmpArr = childArr;
+                }
+            }
+
+            return results;
+        };
+
+        const findAll = /(?<=\/\s+|^\s*)\*+(?=\s+\/|\s*$)/;
+        return str.split('\n').map(s => s.trim()).filter(s => s).reduce((arr, s) => {
+            const splits = s.split(/\s+\/\s+/).filter(s => s);
+
+            if (findAll.test(s)) {
+                const parsed = parse(splits);
+                parsed.forEach(p => {
+                    arr.push(p);
+                });
+
+            } else {
+                arr.push(splits);
+            }
+
+            return arr;
+        }, []);
     }
 
     function parseJson({ inputText }) {
@@ -679,93 +785,7 @@ if (!allowedBrowser) {
                     return '';
                 }
 
-                const getList = (str, compare) => {
-                    const getTargetObj = (keys) => keys.reduce((obj, k) => obj?.[k], compare);
-
-                    const getChildKeys = ((keys) => {
-                        const obj = getTargetObj(keys);
-
-                        if (Array.isArray(obj)) {
-                            return new Array(obj.length).fill(0).map((v, i) => i);
-
-                        } else if (typeof obj === 'object') {
-                            return Object.keys(obj);
-
-                        } else {
-                            return;
-                        }
-                    });
-
-                    const parse = (keys) => {
-                        let allDepth = false;
-
-                        const getAllChild = (target) => {
-                            return target.reduce((tmpArr, t) => {
-                                const childKeys = getChildKeys(t);
-                                if (childKeys && childKeys.length) {
-                                    childKeys.forEach(c => tmpArr.push([...t, c]));
-                                }
-                                return tmpArr;
-                            }, []);
-                        }
-
-                        let results = keys.reduce((arr, k) => {
-                            if (allDepth) {
-                                return;
-                            }
-
-                            let children;
-                            if (/^\*{2,}$/.test(k)) {
-                                allDepth = true;
-                                children = getAllChild(arr);
-
-                            } else if (k === '*') {
-                                children = getAllChild(arr);
-
-                            } else {
-                                children = arr.reduce((tmpArr, a) => {
-                                    const next = [...a, k];
-                                    const obj = getTargetObj(next);
-                                    obj && tmpArr.push(next);
-                                    return tmpArr;
-                                }, []);
-                            }
-
-                            return children;
-                        }, [[]]);
-
-                        if (allDepth) {
-                            let childArr;
-                            let tmpArr = [...results];
-                            while((childArr = getAllChild(tmpArr)).length) {
-                                childArr.forEach(c => results.push(c));
-                                tmpArr = childArr;
-                            }
-                        }
-
-                        return results;
-                    };
-
-                    const findAll = /(?<=\/\s+|^\s*)\*+(?=\s+\/|\s*$)/;
-                    return str.split('\n').map(s => s.trim()).filter(s => s).reduce((arr, s) => {
-                        const splits = s.split(/\s+\/\s+/).filter(s => s);
-
-                        if (findAll.test(s)) {
-                            const parsed = parse(splits);
-                            parsed.forEach(p => {
-                                arr.push(p);
-                            });
-
-                        } else {
-                            arr.push(splits);
-                        }
-
-                        return arr;
-                    }, []);
-                }
-
-                const list = getList(input, opts.data);
-                window.list = list;
+                const list = parseJsonInput(input, opts.data);
 
                 if (list && list.length) {
                     return list.map(a => a.map(b => `"${b}"`))
