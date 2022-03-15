@@ -16,7 +16,7 @@
     .checkmark { text-align:center; position:absolute; top:0;left:0; font-size:1.2em; line-height:27px; height:30px; width:30px; background-color:white; border:1px solid rgb(118, 118, 118); }
     .srch_dev { display:block; position:relative; }
     .select { height:30px; padding-left:5px; padding-right:5px; }
-    .input { height:30px; width:300px; padding:0; margin:0; vertical-align: middle; }
+    .input { width:150px; height:30px; line-height: 30px; padding:0; margin:0; vertical-align: middle; }
     .square { height:27px; width: 27px; }
     .comp { display: none; }
     .btn { height:30px; cursor:pointer; position:absolute; border: 1px solid #000; }
@@ -40,21 +40,16 @@
 <body>
 <header>
     <div class="srch_div" style="min-width: 1200px;">
-        <textarea id="dataInput" placeholder="내용을 입력해주세요." cols="80" class="input"></textarea>
         <input type="hidden" id="viewType" value="plantUML" />
-        <!--
-        <label for="viewType">뷰어: </label>
-        <select id="viewType" class="select">
-            <option>plantUML</option>
-        </select>
-        -->
+        <textarea id="dataInput" placeholder="데이터 입력" class="input"></textarea>
+        <textarea id="highlights" placeholder="스타일 입력" class="input json"></textarea>
+        <textarea id="visibles" placeholder="스타일 입력" class="input json"></textarea>
         <label for="umlType">Type: </label>
         <select id="umlType" class="select" title="이미지 타입">
             <option selected>mindmap</option>
             <option>wbs</option>
             <option>json</option>
         </select>
-        <textarea id="jsonStyleInput" placeholder="JSON 키 / 키 형식 입력 후 Ctrl + Enter" cols="80" class="input json"></textarea>
         <label class="check json">
             <input type="checkbox" id="chkCompArr" />
             <span class="checkmark" title="배열 생략">CA</span>
@@ -99,11 +94,17 @@
 <main id="view" class="view">
 <pre>
   <span class="ttl">mindmap, wbs</span>
-    + 엑셀 시트의 내용을 복사 후 상단 입력란에 넣고 '실행' 버튼을 클릭해주세요.
-    + 입력한 텍스트의 Tab이 변환된 UML의 Depth 입니다.
+    = 엑셀 시트의 내용을 시각적으로 출력
+    ! 엑셀 내용 드래그 & 복사 후 입력란에 붙여넣은 후 "실행" 클릭 혹은 "Ctrl + Enter"
+      + [S]: 그림자 표시
+      + [D]: [Depth] 표시
+      + Focus: 강조 표시할 노드의 Depth
 
   <span class="ttl">json</span>
-    + Json 데이터를 시각적으로 보여줍니다.
+    = Json 데이터를 시각적으로 출력
+    ! JSON 데이터 입력란에 입력 후 "실행" 클릭 혹은 "Ctrl + Enter"
+      + [CA]: 배열 생략 - 활성화 후 입력란의 숫자만큼만 배열 내용 표시
+      + [CO]: 객체 생략 - 활성화 후 입력란의 숫자만큼만 객체 내용 표시
 </pre>
 </main>
 <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
@@ -146,10 +147,37 @@ if (!allowedBrowser) {
         pStyle = pStyle && LZString.decompressFromEncodedURIComponent(pStyle) || pStyle;
 
         // Input Ctrl + Enter 이벤트 처리
-        $('#dataInput, #jsonStyleInput').keydown(function(e) {
+        $('.input').each(function() {
+            const $this = $(this);
+            $this.data('ow', $this.css('width'));
+            $this.data('oh', $this.css('height'));
+
+        }).keydown(function(e) {
             if (e.ctrlKey && e.keyCode == 13) {
                 execBtn();
             }
+
+        }).focus(function() {
+            $('.input').each(function(){
+                const $this = $(this);
+                const sw = $this.data('sw');
+                const sh = $this.data('sh');
+                sw && (sw != $this.data('ow')) && $this.css('width', sw);
+                sh && (sh != $this.data('oh')) && $this.css('height', sh);
+            });
+
+        }).blur(function() {
+            $('.input').each(function() {
+                const $this = $(this);
+                const sw = $this.css('width');
+                const sh = $this.css('height');
+                const ow = $this.data('ow');
+                const oh = $this.data('oh');
+                sw != ow && $this.data('sw', sw);
+                sh != oh && $this.data('sh', sh);
+                $this.css('width', ow);
+                $this.css('height', oh);
+            });
         });
 
         // "실행" 버튼 이벤트 처리
@@ -266,6 +294,14 @@ if (!allowedBrowser) {
 
             const options = window.opts = func[umlType]();
             viewer.show(options);
+
+            $('.input').blur().each(function() {
+                const $this = $(this);
+                const ow = $this.data('ow');
+                const oh = $this.data('oh');
+                ow && $this.css('width', ow);
+                oh && $this.css('height', oh);
+            });
         });
 
         // "초기화" 버튼 이벤트 처리
@@ -302,7 +338,7 @@ if (!allowedBrowser) {
                 } else {
                   $('.mindmap').show();
                   $('.json').hide();
-                  $('#jsonStyleInput').val("").css({height:"30px", width:"300px"});
+                  $('#highlights').val("").css({height:"30px", width:"300px"});
                 }
 
                 !isEmptyInput() && execBtn();
@@ -332,7 +368,7 @@ if (!allowedBrowser) {
             }
 
             let data = $("#dataInput").val();
-            let style = $('#jsonStyleInput').val();
+            let style = $('#highlights').val();
             data = data && LZString.compressToEncodedURIComponent(data) || '';
             style = style && LZString.compressToEncodedURIComponent(style) || '';
 
@@ -358,7 +394,7 @@ if (!allowedBrowser) {
 
         if (pData) {
             $('#dataInput').val(pData);
-            $('#jsonStyleInput').val(pStyle);
+            $('#highlights').val(pStyle);
             pZoom && $('#zoom').val(pZoom);
             pShadow && $('#chkShadow').prop('checked', true);
             pDepth && $('#chkDepth').prop('checked', true);
@@ -638,7 +674,7 @@ if (!allowedBrowser) {
                 return this.mindmap(opts);
             },
             json: (opts) => {   
-                const input = $('#jsonStyleInput').val();
+                const input = $('#highlights').val();
                 if (! input) {
                     return '';
                 }
