@@ -20,7 +20,7 @@
     .square { height:27px; width: 27px; }
     .comp { display: none; }
     .btn { height:30px; cursor:pointer; position:absolute; border: 1px solid #000; }
-    .execBtn { margin-left: 5px; width: 45px; font-weight: bold; background-color: rgb(116, 216, 255); }
+    .execBtn { margin-left: 5px; width: 45px; font-weight: bold; background-color: #74D8FF; }
     .resetBtn { margin-left: 52px; width: 60px; }
     .downloadBtn { margin-left: 114px; width: 90px; }
     .shareBtn { margin-left: 206px; width: 60px; }
@@ -35,7 +35,8 @@
     .zoomOut { margin-left: 32px }
     .loading-div { position: fixed; top: 0; left: 0; z-index: 10; width: 100%; height: 100%; background: #fff; opacity: .85; filter: alpha(opacity=85); }
     .loading-img { position: relative; top: 40%; left: 50%; margin-left: -64px; }
-    #umlType { background-color: rgb(116, 216, 255); }
+    .yellow-bg { background-color: #ffea75 }
+    #umlType { background-color: #74D8FF; }
 </style>
 <body>
 <header>
@@ -184,7 +185,7 @@ if (!allowedBrowser) {
 
         // "실행" 버튼 이벤트 처리
         $('#execBtn').click(function(e, opts) {
-            if (!isValidInput()) {
+            if (!isValidInput('dataInput')) {
                 return;
             }
 
@@ -228,6 +229,10 @@ if (!allowedBrowser) {
                         if (i == 1 && opts.data[0].depth == 0) $nodeDepth.append($(`<option ${0 == nodeDepth? 'selected' : ''}>${0}</option>`));
                         $nodeDepth.append($(`<option ${i == nodeDepth? 'selected' : ''}>${i}</option>`));
                         $showDepth.append($(`<option ${i == showDepth? 'selected' : ''}>${i}</option>`));
+                    }
+
+                    if (showDepth != maxDepth) {
+                        $showDepth.addClass('yellow-bg');
                     }
 
                     return opts;
@@ -303,6 +308,10 @@ if (!allowedBrowser) {
                         $showDepth.append($(`<option ${i == showDepth? 'selected' : ''}>${i}</option>`));
                     }
 
+                    if (showDepth != maxDepth) {
+                        $showDepth.addClass('yellow-bg');
+                    }
+
                     return opts;
                 }
             };
@@ -334,9 +343,21 @@ if (!allowedBrowser) {
                 tmpVal = $(this).val();
             })
             .change(function() {
-                if (!isEmptyInput() && !isValidInput()) {
+                if (!isEmptyInput('dataInput') && !isValidInput('dataInput')) {
                   $(this).val(tmpVal);
                   return;
+                }
+
+                const id = this.id;
+                if (id === 'showDepth') {
+                    const $sd = $('#showDepth');
+                    const isLast = $sd.children('option:selected').val() == $sd.children('option:last').val();
+
+                    if (isLast) {
+                        $sd.removeClass('yellow-bg');
+                    } else {
+                        $sd.addClass('yellow-bg');
+                    }
                 }
 
                 const umlType = $('#umlType').val();
@@ -356,7 +377,7 @@ if (!allowedBrowser) {
                   $('#highlights').val("").css({height:"30px", width:"300px"});
                 }
 
-                !isEmptyInput() && execBtn();
+                !isEmptyInput('dataInput') && execBtn();
             });
 
         // "샘플데이터" 버튼 이벤트 처리
@@ -378,7 +399,7 @@ if (!allowedBrowser) {
 
         // "URL생성" 버튼 이벤트 처리
         $('#shareBtn').click(function() {
-            if (!isValidInput()) {
+            if (!isValidInput('dataInput')) {
                 return;
             }
 
@@ -428,18 +449,13 @@ if (!allowedBrowser) {
 </script>
 <!-- functions -->
 <script>
-    function isEmptyInput() {
-        return !$('#dataInput').val().replace(/[\t\s\n]/g, '');
+    function isEmptyInput(id) {
+        return !$('#' + id).val().replace(/[\t\s\n]/g, '');
     }
 
-    function execBtn(opts) {
-        opts = opts || {};
-        $('#execBtn').trigger('click', opts);
-    }
-
-    function isValidInput() {
-        const $input = $('#dataInput');
-        if (isEmptyInput()) {
+    function isValidInput(id) {
+        const $input = $('#' + id);
+        if (isEmptyInput(id)) {
             alert("입력값이 없습니다.");
             $input.focus();
             return false;
@@ -459,6 +475,11 @@ if (!allowedBrowser) {
         }
         
         return true;
+    }
+
+    function execBtn(opts) {
+        opts = opts || {};
+        $('#execBtn').trigger('click', opts);
     }
 
     function parseMindmap({ inputText, showDepth }) {
