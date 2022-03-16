@@ -28,18 +28,18 @@
     .json { display: none; }
     .loading-div { position: fixed; top: 0; left: 0; z-index: 10; width: 100%; height: 100%; background: #fff; opacity: .85; filter: alpha(opacity=85); }
     .loading-img { position: relative; top: 40%; left: 50%; margin-left: -64px; }
-    .yellow-bg { background-color: #FFEB8C; }
-    .blue-bg { background-color: #93e2ff; }
-    .green-bg { background-color: #a5ff75; }
+    .bg-yellow { background-color: #FFEB8C; }
+    .bg-blue { background-color: #93e2ff; }
+    .bg-green { background-color: #a5ff75; }
     .entry { padding: 2px; }
     .zoom { width: 30px; }
     .zoom-out { margin-left: 32px }
     .zoom-input { margin-left: 64px; }
-    .execBtn { margin-left: 10px; width: 45px; background-color: #93e2ff; }
-    .resetBtn { margin-left: 57px; width: 60px; }
-    .downloadBtn { margin-left: 120px; width: 90px; }
-    .shareBtn { margin-left: 213px; width: 60px; }
-    .sampleBtn { margin-left: 276px; width: 90px; }
+    .btn-exec { margin-left: 10px; width: 45px; background-color: #93e2ff; }
+    .btn-reset { margin-left: 57px; width: 60px; }
+    .btn-download { margin-left: 120px; width: 90px; }
+    .btn-share { margin-left: 213px; width: 60px; }
+    .btn-sample { margin-left: 276px; width: 90px; }
 </style>
 <body>
 <header>
@@ -49,7 +49,7 @@
         <textarea id="highlights" placeholder="강조대상" title="강조 표시할 대상 입력란" class="input json"></textarea>
         <textarea id="visibles" placeholder="출력대상" title="화면에 제한적으로 출력할 대상 입력란" class="input json"></textarea>
         <label for="umlType">Type: </label>
-        <select id="umlType" title="이미지 타입" class="blue-bg">
+        <select id="umlType" title="데이터 표현방식 선택" class="bg-yellow">
             <option selected>mindmap</option>
             <option>wbs</option>
             <option>json</option>
@@ -85,11 +85,11 @@
         <button id="zoomOut" class="btn zoom zoom-out" onclick="javascript:zoomOut()" title="이미지 축소"> - </button>
         <input type="number" id="zoom" class="square zoom-input" value="0" title="줌 수치" maxlength="3" />
 
-        <button id="execBtn" class="btn execBtn"> 실행 </button>
-        <button id="resetBtn" class="btn resetBtn"> 초기화 </button>
-        <button id="downloadBtn" class="btn downloadBtn" onclick="download()"> 이미지저장 </button>
-        <button id="shareBtn" class="btn shareBtn"> 공유 </button>
-        <button id="sampleBtn" class="btn sampleBtn"> 샘플데이터 </button>
+        <button id="execBtn" class="btn btn-exec"> 실행 </button>
+        <button id="resetBtn" class="btn btn-reset"> 초기화 </button>
+        <button id="downloadBtn" class="btn btn-download" onclick="download()"> 이미지저장 </button>
+        <button id="shareBtn" class="btn btn-share"> 공유 </button>
+        <button id="sampleBtn" class="btn btn-sample"> 샘플데이터 </button>
     </div>
     <hr>
 </header>
@@ -98,27 +98,27 @@
   <span class="ttl">mindmap, wbs</span>
     = 엑셀 시트의 내용을 시각적으로 출력
     ! 엑셀 내용을 드래그 & 복사 후 데이터 입력란에 붙여넣은 후 "실행" 클릭 혹은 "Ctrl + Enter"
-      + <span class="blue-bg">[S]</span>: 노드에 그림자 표시
-      + <span class="blue-bg">[D]</span>: 노드의 깊이를 [Depth]로 표시
-      + <span class="blue-bg">Focus</span>: 강조 표시할 노드의 깊이
+      + <span class="bg-blue">[S]</span>: 노드에 그림자 표시
+      + <span class="bg-blue">[D]</span>: 노드의 깊이를 [Depth]로 표시
+      + <span class="bg-blue">Focus</span>: 강조 표시할 노드의 깊이
 
   <span class="ttl">json</span>
     = Json 데이터를 시각적으로 출력
     ! JSON 데이터 입력란에 입력 후 "실행" 클릭 혹은 "Ctrl + Enter"
-      + <span class="blue-bg entry">[CA]</span>: 배열 생략 - 활성화 후 입력란의 숫자만큼만 배열 내용 표시
-      + <span class="blue-bg entry">[CO]</span>: 객체 생략 - 활성화 후 입력란의 숫자만큼만 객체 내용 표시
-      + <span class="blue-bg entry">강조대상</span>: 강조 표시할 대상 입력 (Enter로 구분하여 복수선택 가능)
-        . <span class="yellow-bg entry">A / B</span> : A 하위에 있는 B 선택
-        . <span class="yellow-bg entry">A / B / *</span> : A.B 바로 아래에 자식요소 모두 선택
-        . <span class="yellow-bg entry">A / B / **</span> : A.B 이하 모든 자식요소 선택
-      + <span class="blue-bg entry">출력대상</span>: 화면에 제한적으로 출력할 대상 입력 (Enter로 구분하여 복수선택 가능)
-        . <span class="yellow-bg entry">"강조대상" 문법과 동일</span>
-        . <span class="yellow-bg entry">복수로 선택할 경우 해체된 구조로 다중 표시</span>
+      + <span class="bg-blue entry">[CA]</span>: 배열 생략 - 활성화 후 입력란의 숫자만큼만 배열 내용 표시
+      + <span class="bg-blue entry">[CO]</span>: 객체 생략 - 활성화 후 입력란의 숫자만큼만 객체 내용 표시
+      + <span class="bg-blue entry">강조대상</span>: 강조 표시할 대상 입력 (Enter로 구분하여 복수선택 가능)
+        . <span class="bg-yellow entry">A / B</span> : A 하위에 있는 B 선택
+        . <span class="bg-yellow entry">A / B / *</span> : A.B 바로 아래에 자식요소 모두 선택
+        . <span class="bg-yellow entry">A / B / **</span> : A.B 이하 모든 자식요소 선택
+      + <span class="bg-blue entry">출력대상</span>: 화면에 제한적으로 출력할 대상 입력 (Enter로 구분하여 복수선택 가능)
+        . <span class="bg-yellow entry">"강조대상" 문법과 동일</span>
+        . <span class="bg-yellow entry">복수로 선택할 경우 해체된 구조로 다중 표시</span>
 
   <span class="ttl">공통</span>
-      + <span class="blue-bg">Show</span>: 화면에 표시할 단계 선택
-        . 마지막 Depth(전체표시)가 아닐 경우 배경이 <span class="yellow-bg entry">노란색</span>
-      + <span class="blue-bg">Zoom</span>: 화면에 출력된 이미지 크기 조절
+      + <span class="bg-blue">Show</span>: 화면에 표시할 단계 선택
+        . 마지막 Depth(전체표시)가 아닐 경우 배경이 <span class="bg-yellow entry">노란색</span>
+      + <span class="bg-blue">Zoom</span>: 화면에 출력된 이미지 크기 조절
 </pre>
 </main>
 <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
@@ -245,7 +245,7 @@ if (!allowedBrowser) {
                     }
 
                     if (showDepth != maxDepth) {
-                        $showDepth.addClass('yellow-bg');
+                        $showDepth.addClass('bg-yellow');
                     }
 
                     return opts;
@@ -322,7 +322,7 @@ if (!allowedBrowser) {
                     }
 
                     if (showDepth != maxDepth) {
-                        $showDepth.addClass('yellow-bg');
+                        $showDepth.addClass('bg-yellow');
                     }
 
                     return opts;
@@ -367,9 +367,9 @@ if (!allowedBrowser) {
                     const isLast = $sd.children('option:selected').val() == $sd.children('option:last').val();
 
                     if (isLast) {
-                        $sd.removeClass('yellow-bg');
+                        $sd.removeClass('bg-yellow');
                     } else {
-                        $sd.addClass('yellow-bg');
+                        $sd.addClass('bg-yellow');
                     }
                 }
 
