@@ -24,7 +24,7 @@
     .view { padding:10px; }
     .view pre { line-height:20px; }
     .loading { display:flex; justify-content: center; padding-top:100px }
-    .ttl { font-size:1em; font-weight: bold; }
+    .ttl { font-size:1em; font-weight: bold; padding:2px; }
     .json { display: none; }
     .loading-div { position: fixed; top: 0; left: 0; z-index: 10; width: 100%; height: 100%; background: #fff; opacity: .85; filter: alpha(opacity=85); }
     .loading-img { position: relative; top: 40%; left: 50%; margin-left: -64px; }
@@ -95,14 +95,14 @@
 </header>
 <main id="view" class="view">
 <pre>
-  <span class="ttl">mindmap, wbs</span>
+  <span class="ttl bg-green">mindmap, wbs</span>
     = 엑셀 시트의 내용을 시각적으로 출력
     ! 엑셀 내용을 드래그 & 복사 후 데이터 입력란에 붙여넣은 후 "실행" 클릭 혹은 "Ctrl + Enter"
       + <span class="bg-blue">[S]</span>: 노드에 그림자 표시
       + <span class="bg-blue">[D]</span>: 노드의 깊이를 [Depth]로 표시
       + <span class="bg-blue">Focus</span>: 강조 표시할 노드의 깊이
 
-  <span class="ttl">json</span>
+  <span class="ttl bg-green">json</span>
     = Json 데이터를 시각적으로 출력
     ! JSON 데이터 입력란에 입력 후 "실행" 클릭 혹은 "Ctrl + Enter"
       + <span class="bg-blue entry">[CA]</span>: 배열 생략 - 활성화 후 입력란의 숫자만큼만 배열 내용 표시
@@ -115,7 +115,7 @@
       + <span class="bg-blue entry">강조대상</span>: 강조 표시할 대상 입력 (Enter로 구분하여 복수선택 가능)
         . <span class="bg-yellow entry">"출력대상"과 동일한 표현식 사용</span>
 
-  <span class="ttl">공통</span>
+  <span class="ttl bg-green">공통</span>
       + <span class="bg-blue">Show</span>: 화면에 표시할 단계 선택
         . 마지막 Depth(전체표시)가 아닐 경우 배경이 <span class="bg-yellow entry">노란색</span>
       + <span class="bg-blue">Zoom</span>: 화면에 출력된 이미지 크기 조절
