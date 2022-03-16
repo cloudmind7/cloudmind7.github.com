@@ -31,6 +31,7 @@
     .bg-yellow { background-color: #FFEB8C; }
     .bg-blue { background-color: #93e2ff; }
     .bg-green { background-color: #a5ff75; }
+    .bg-gray { background-color: #eaeaea; }
     .entry { padding: 2px; }
     .zoom { width: 30px; }
     .zoom-out { margin-left: 32px }
@@ -95,16 +96,24 @@
 </header>
 <main id="view" class="view">
 <pre>
+  <span class="ttl">테스트: </span>
+    = <span class="bg-gray entry">샘플데이터</span> 버튼 클릭
+
+  <span class="ttl">공통</span>
+      + <span class="bg-blue">Show</span>: 화면에 표시할 단계 선택
+        . 마지막 Depth(전체표시)가 아닐 경우 배경이 <span class="bg-yellow entry">노란색</span>
+      + <span class="bg-blue">Zoom</span>: 화면에 출력된 이미지 크기 조절
+
   <span class="ttl bg-green">mindmap, wbs</span>
     = 엑셀 시트의 내용을 시각적으로 출력
-    ! 엑셀 내용을 드래그 & 복사 후 데이터 입력란에 붙여넣은 후 "실행" 클릭 혹은 "Ctrl + Enter"
+    ! 엑셀 내용을 드래그 & 복사 후 데이터 입력란에 붙여넣은 후 <span class="bg-gray entry">실행</span> 클릭 혹은 <span class="bg-gray entry">Ctrl + Enter</span>
       + <span class="bg-blue">[S]</span>: 노드에 그림자 표시
       + <span class="bg-blue">[D]</span>: 노드의 깊이를 [Depth]로 표시
       + <span class="bg-blue">Focus</span>: 강조 표시할 노드의 깊이
 
   <span class="ttl bg-green">json</span>
     = Json 데이터를 시각적으로 출력
-    ! JSON 데이터 입력란에 입력 후 "실행" 클릭 혹은 "Ctrl + Enter"
+    ! JSON 데이터 입력란에 입력 후 <span class="bg-gray entry">실행</span> 클릭 혹은 <span class="bg-gray entry">Ctrl + Enter</span>
       + <span class="bg-blue entry">[CA]</span>: 배열 생략 - 활성화 후 입력란의 숫자만큼만 배열 내용 표시
       + <span class="bg-blue entry">[CO]</span>: 객체 생략 - 활성화 후 입력란의 숫자만큼만 객체 내용 표시
       + <span class="bg-blue entry">출력대상</span>: 화면에 제한적으로 출력할 대상 입력 (Enter로 구분하여 복수선택 가능)
@@ -114,11 +123,6 @@
         . <span class="bg-yellow entry">A / B / **</span> : A.B 이하 모든 자식요소 선택
       + <span class="bg-blue entry">강조대상</span>: 강조 표시할 대상 입력 (Enter로 구분하여 복수선택 가능)
         . <span class="bg-yellow entry">"출력대상"과 동일한 표현식 사용</span>
-
-  <span class="ttl">공통</span>
-      + <span class="bg-blue">Show</span>: 화면에 표시할 단계 선택
-        . 마지막 Depth(전체표시)가 아닐 경우 배경이 <span class="bg-yellow entry">노란색</span>
-      + <span class="bg-blue">Zoom</span>: 화면에 출력된 이미지 크기 조절
 </pre>
 </main>
 <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
@@ -473,7 +477,7 @@ if (!allowedBrowser) {
             $input.focus();
             return false;
         }
-        
+
         const umlType = $('#umlType').val();
         let isJson = false;
         try {
@@ -486,7 +490,7 @@ if (!allowedBrowser) {
             $input.focus();
             return false;
         }
-        
+
         return true;
     }
 
@@ -496,7 +500,7 @@ if (!allowedBrowser) {
     }
 
     function parseMindmap({ inputText, showDepth }) {
-        const replaceMultiNL = (txt) => txt 
+        const replaceMultiNL = (txt) => txt
                 ? txt.replace(/(?<=")([^\t\s][^"]+)(?=")/gm, (v) => v.replace(/\n/g, '\\n'))
                 : '';
         const notEmpty = (s) => s && !/^[ \t\n]+$/.test(s);
@@ -813,7 +817,7 @@ if (!allowedBrowser) {
             wbs: function(opts) {
                 return this.mindmap(opts);
             },
-            json: (opts) => {   
+            json: (opts) => {
                 const input = $('#highlights').val();
                 if (! input) {
                     return '';
