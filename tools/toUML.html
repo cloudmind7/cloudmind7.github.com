@@ -46,8 +46,8 @@
     <div class="srch_div">
         <input type="hidden" id="viewType" value="plantUML" />
         <textarea id="dataInput" placeholder="데이터" title="화면에 표시할 데이터 입력란" class="input"></textarea>
-        <textarea id="highlights" placeholder="강조대상" title="강조 표시할 대상 입력란" class="input json"></textarea>
         <textarea id="visibles" placeholder="출력대상" title="화면에 제한적으로 출력할 대상 입력란" class="input json"></textarea>
+        <textarea id="highlights" placeholder="강조대상" title="강조 표시할 대상 입력란" class="input json"></textarea>
         <label for="umlType">Type: </label>
         <select id="umlType" title="데이터 표현방식 선택" class="bg-yellow">
             <option selected>mindmap</option>
@@ -107,13 +107,13 @@
     ! JSON 데이터 입력란에 입력 후 "실행" 클릭 혹은 "Ctrl + Enter"
       + <span class="bg-blue entry">[CA]</span>: 배열 생략 - 활성화 후 입력란의 숫자만큼만 배열 내용 표시
       + <span class="bg-blue entry">[CO]</span>: 객체 생략 - 활성화 후 입력란의 숫자만큼만 객체 내용 표시
-      + <span class="bg-blue entry">강조대상</span>: 강조 표시할 대상 입력 (Enter로 구분하여 복수선택 가능)
+      + <span class="bg-blue entry">출력대상</span>: 화면에 제한적으로 출력할 대상 입력 (Enter로 구분하여 복수선택 가능)
+        . <span class="bg-yellow entry">복수로 선택할 경우 해체된 구조로 다중 표시</span>
         . <span class="bg-yellow entry">A / B</span> : A 하위에 있는 B 선택
         . <span class="bg-yellow entry">A / B / *</span> : A.B 바로 아래에 자식요소 모두 선택
         . <span class="bg-yellow entry">A / B / **</span> : A.B 이하 모든 자식요소 선택
-      + <span class="bg-blue entry">출력대상</span>: 화면에 제한적으로 출력할 대상 입력 (Enter로 구분하여 복수선택 가능)
-        . <span class="bg-yellow entry">"강조대상" 문법과 동일</span>
-        . <span class="bg-yellow entry">복수로 선택할 경우 해체된 구조로 다중 표시</span>
+      + <span class="bg-blue entry">강조대상</span>: 강조 표시할 대상 입력 (Enter로 구분하여 복수선택 가능)
+        . <span class="bg-yellow entry">"출력대상"과 동일한 표현식 사용</span>
 
   <span class="ttl">공통</span>
       + <span class="bg-blue">Show</span>: 화면에 표시할 단계 선택
