@@ -21,16 +21,17 @@
     .square {height: 27px;width: 27px;}
     .comp {display: none;}
     .btn {height: 30px;cursor: pointer;position: absolute;top: 50%;transform: translateY(-50%);border: 1px solid #000;}
-    .view {padding: 10px;}
-    .view pre {line-height: 22px;}
+    .view {padding: 20px;text-align: center;}
+    .view pre {line-height: 22px;text-align: left;}
     .loading {display: flex;justify-content: center;padding-top: 100px}
     .ttl {font-size: 1em;font-weight: bold;padding: 2px;}
     .json {display: none;}
     .loading-div {position: fixed;top: 0;left: 0;z-index: 10;width: 100%;height: 100%;background: #fff;opacity: .85;filter: alpha(opacity=85);}
-    .loading-img {position: relative;top: 40%;left: 50%;margin-left: -64px;}
+    .loading-img {position: relative;top: 40%;}
+    /*.loading-img {position: relative;top: 40%;left: 50%;margin-left: -64px;}*/
     .bg-yellow {background-color: #FFEB8C;}
     .bg-blue {background-color: #93e2ff;}
-    .bg-green {background-color: #a5ff75;}
+    .bg-green {background-color: #CCFF02;}
     .bg-gray {background-color: #eaeaea;}
     .entry {padding: 2px;}
     .zoom {width: 30px;}
@@ -699,7 +700,7 @@ $(function() {
         };
         img.onerror = () => {
             removeLoading();
-            $('#view').text("오류가 발생했습니다.");
+            $('#view').html("<br/><br/>화면을 표시할 수 없습니다. 데이터 및 조회 조건을 다시한번 확인해주세요.");
         };
         img.src = src;
     }
@@ -761,8 +762,8 @@ $(function() {
     }
 
     function jsonFormat({ data, showDepth, compArrLen, compObjLen }) {
-        const compArr = $("#chkCompArr").is(":checked");
-        const compObj = $("#chkCompObj").is(":checked");
+        const chkCompArr = $("#chkCompArr").is(":checked");
+        const chkCompObj = $("#chkCompObj").is(":checked");
 
         function compactJson(obj, depth) {
             depth = depth || 1;
@@ -784,7 +785,7 @@ $(function() {
                 });
 
                 const len = obj.length;
-                if (compArr && len > compArrLen) {
+                if (chkCompArr && len > compArrLen) {
                     obj.splice(compArrLen);
                     obj.push(`📂...(${len - obj.length})`);
                 }
@@ -794,14 +795,13 @@ $(function() {
                     obj[k] = compactJson(obj[k], depth + 1);
                 });
 
-                if (compObj && keys.length > compObjLen) {
+                if (chkCompObj && keys.length > compObjLen) {
                     keys.forEach((k, i) => {
                         i >= compObjLen && delete obj[k];
                     });
                     obj["📂"] = `...(${keys.length - Object.keys(obj).length})`;
                 }
             }
-
             return obj;
         }
 
