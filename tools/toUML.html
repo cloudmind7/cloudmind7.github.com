@@ -597,10 +597,12 @@ $(function() {
             const splits = s.split(/\s+\/\s+/).filter(s => s);
 
             if (findAll.test(s)) {
+                console.warn('parse:', splits);
                 const parsed = parseJsonKeys(splits, compare);
                 parsed.forEach(p => {
                     arr.push(p);
                 });
+                console.warn('parsed:', parsed);
 
             } else {
                 arr.push(splits);
@@ -640,11 +642,10 @@ $(function() {
                 children = arr.reduce((tmpArr, a) => {
                     const next = [...a, k];
                     const obj = getExistChild(next, compare);
-                    obj && tmpArr.push(next);
+                    obj !== undefined && obj !== null && tmpArr.push(next);
                     return tmpArr;
                 }, []);
             }
-
             return children;
         }, [[]]);
 
