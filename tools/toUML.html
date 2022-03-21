@@ -677,21 +677,21 @@ $(function() {
     function findKey(obj, key) {
         if (key.startsWith('*')) {
             key = key.substring(1, key.length);
-            return findRegexKey(obj, key);
+            return findRegexKey(obj, key, '^.*[[exp]]$');
 
         } else if (key.endsWith('*')) {
             key = key.substring(0, key.length - 1);
-            return findRegexKey(obj, key);
+            return findRegexKey(obj, key, '^[[exp]].*$');
 
         } else {
             return key;
         }
     }
 
-    function findRegexKey(obj, key) {
+    function findRegexKey(obj, key, exp) {
         const children = () => (typeof obj === 'object')? Object.keys(obj) : [];
         const escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const regex = new RegExp(`^${escape(key)}.*$`);
+        const regex = new RegExp(exp.replace('[[exp]]', escape(key)));
         return children().filter(k => regex.test(k))[0];
     }
 
