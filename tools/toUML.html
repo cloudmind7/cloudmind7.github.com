@@ -749,13 +749,14 @@ $(function() {
 
         const umlType = $("#umlType").val();
 
-        const uml =
+        let data =
             `@start${umlType}
             ${umlStyle}
             ${formatData}
             @end${umlType}`;
 
-        return uml.replace(/^[\t\s]+([^\t\s].*)$/gm, "$1");
+        data = window.data = data.replace(/^[\t\s]+([^\t\s].*)$/gm, "$1");
+        return data;
     }
 
     function getUmlFormat(opts) {
