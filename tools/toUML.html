@@ -225,24 +225,30 @@ $(function() {
             return;
         }
 
-        const options = window.opts = initOptions(args);
-        const viewer = {
-            default: plantUML,
-            show: function(opts) {
-                this[$("#viewType").val() || this.default](opts);
-            },
-            plantUML
-        };
+        try {
+            const options = window.opts = initOptions(args);
+            const viewer = {
+                default: plantUML,
+                show: function(opts) {
+                    this[$("#viewType").val() || this.default](opts);
+                },
+                plantUML
+            };
 
-        viewer.show(options);
+            viewer.show(options);
 
-        $(".input").blur().each(function() {
-            const $this = $(this);
-            const ow = $this.data("ow");
-            const oh = $this.data("oh");
-            ow && $this.css("width", ow);
-            oh && $this.css("height", oh);
-        });
+            $(".input").blur().each(function() {
+                const $this = $(this);
+                const ow = $this.data("ow");
+                const oh = $this.data("oh");
+                ow && $this.css("width", ow);
+                oh && $this.css("height", oh);
+            });
+        } catch (e) {
+            alert("오류가 발생했습니다.");
+            console.log(e);
+            removeLoading();
+        }
     });
 
     $("#resetBtn").click(function() {
