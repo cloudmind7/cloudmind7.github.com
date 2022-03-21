@@ -639,13 +639,13 @@ $(function() {
             } else {
                 children = arr.reduce((tmpArr, a) => {
                     if (a.length) {
-                        let next = [...a];
+                        let child = [...a];
                         const obj = getExistChild([...a], compare);
                         const key = findKey(obj, k);
                         if (key) {
                             keys[idx] = key;
-                            next.push(key);
-                            tmpArr.push(next);
+                            child.push(key);
+                            tmpArr.push(child);
                         }
 
                     } else {
