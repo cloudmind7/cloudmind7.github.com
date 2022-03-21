@@ -603,12 +603,10 @@ $(function() {
             const splits = s.split(/\s+\/\s+/).filter(s => s);
 
             if (findAll.test(s)) {
-                console.warn('parse:', splits);
                 const parsed = parseJsonKeys(splits, compare);
                 parsed.forEach(p => {
                     arr.push(p);
                 });
-                console.warn('parsed:', parsed);
 
             } else {
                 arr.push(splits);
