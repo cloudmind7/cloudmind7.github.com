@@ -477,14 +477,16 @@ $(function() {
 
         const visibles = $("#visibles").val();
         if (visibles.trim()) {
-            const list = parseJsonInput(visibles, data);
-            const result =
-                list.reduce((arr, t) => {
-                    const key = (t.length == 1) ? t[0] : t[t.length - 1];
-                    const obj = getExistChild(t, data);
-                    arr.push({ [key]: obj });
-                    return arr;
-                }, []);
+            const keys = parseJsonInput(visibles, data);
+            window.visible = keys;
+            const result = keys.reduce((mock, arr) => {
+                const obj = getExistChild(arr, data);
+                if (obj !== undefined) {
+                    const key = (arr.length == 1) ? arr[0] : arr[arr.length - 1];
+                    mock[key] = obj;
+                }
+                return mock;
+            }, {});
 
             opts.data = (result.length == 1) ? result[0] : result;
         }
@@ -602,7 +604,7 @@ $(function() {
     function parseJsonInput(str, compare) {
         return str.split("\n").map(s => s.trim()).filter(s => s).reduce((arr, s) => {
             const splits = s.split(/\s+\/\s+/).filter(s => s);
-            const parsed = parseJsonKeys(splits, compare);
+            const parsed = parseJsonKey(splits, compare);
             parsed.forEach(p => {
                 arr.push(p);
             });
@@ -610,7 +612,7 @@ $(function() {
         }, []);
     }
 
-    function parseJsonKeys(keys, compare) {
+    function parseJsonKey(keys, compare) {
         let allDepth = false;
 
         const getAllChild = (target) => {
