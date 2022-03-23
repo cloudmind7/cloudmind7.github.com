@@ -155,7 +155,7 @@
 const _global = {};
 $(function() {
     _global.params = function() {
-        const matcher = {
+        const dic = {
             d: "data",
             hi: "highlights",
             vi: "visibles",
@@ -171,25 +171,25 @@ $(function() {
             col: "compObjLen"
         };
 
-        let pdata = {
+        let matcher = {
             _pid(id) {
-                return Object.keys(matcher).filter(k => matcher[k] === id);
+                return Object.keys(dic).filter(k => dic[k] === id);
             }
         };
 
         const url = new URL(location.href);
-        const sp = new URLSearchParams(url.search);
-        Object.keys(matcher).forEach(k => {
-            pdata[matcher[k]] = sp.get(k);
+        const searchParams = new URLSearchParams(url.search);
+        Object.keys(dic).forEach(k => {
+            matcher[dic[k]] = searchParams.get(k);
         });
 
-        const ids = ['data', 'highlights', 'visibles'];
-        ids.forEach(k => {
-            const decomp = LZString.decompressFromEncodedURIComponent;
-            pdata[k] = pdata[k] && decomp(pdata[k]) || pdata[k];
+        const encedInputs = ['data', 'highlights', 'visibles'];
+        encedInputs.forEach(id => {
+            const dec = LZString.decompressFromEncodedURIComponent;
+            matcher[id] = matcher[id] && dec(matcher[id]) || matcher[id];
         });
 
-        return pdata;
+        return matcher;
     }();
 
     $(".input").each(function() {
@@ -223,13 +223,17 @@ $(function() {
         });
     });
 
-    $("#execBtn").click(function(e, args) {
-        if (!isValidInput("data")) {
+    $("#execBtn").click(function(e, args = {}) {
+        if (!isValidInput('data')) {
             return;
         }
 
+        if (!args.caller) {
+            args.caller = 'button';
+        }
+
         try {
-            const options = _global.opts = initOptions(args);
+            const options = _global.opts = initOpts(args);
             const viewer = {
                 default: plantUML,
                 show: function(opts) {
@@ -268,7 +272,7 @@ $(function() {
             tmpVal = $(this).val();
         })
         .change(function() {
-            if (!isEmptyInput("data") && !isValidInput("data")) {
+            if (!isEmptyInput("data") && !isValidInput('data')) {
                 $(this).val(tmpVal);
                 return;
             }
@@ -319,7 +323,7 @@ $(function() {
     });
 
     $("#shareBtn").click(function() {
-        if (!isValidInput("data")) {
+        if (!isValidInput('data')) {
             return;
         }
 
@@ -334,13 +338,13 @@ $(function() {
 
         makeQuery("data, highlights, visibles",
             (id) => {
-                let val = $("#" + id).val();
+                let val = document.getElementById(id).value;
                 return val && LZString.compressToEncodedURIComponent(val) || "";
             }
         );
 
         makeQuery("umlType, zoom, nodeDepth, showDepth, compArrLen, compObjLen",
-            (id) => $("#" + id).val()
+            (id) => document.getElementById(id).value
         );
 
         makeQuery("chkShadow, chkDepth, chkCompArr, chkCompObj",
@@ -366,7 +370,7 @@ $(function() {
 });
 </script>
 <script>
-    function initOptions(args) {
+    function initOpts(args) {
         const umlType = $("#umlType").val();
 
         return {
@@ -377,7 +381,7 @@ $(function() {
     }
 
     function mindmapOpts(args) {
-        const btnClicked = !args;
+        const btnClicked = args.caller === 'button';
         let nodeDepth = !btnClicked && $("#nodeDepth").val() || _global.params.nodeDepth || 1;
         let showDepth = !btnClicked && $("#showDepth").val() || _global.params.showDepth || Infinity;
 
@@ -428,8 +432,7 @@ $(function() {
     }
 
     function jsonOpts(args) {
-        const getMaxDepth = (obj, depth) => {
-            depth = depth || 0;
+        const getMaxDepth = (obj, depth = 0) => {
             let maxDepth = 0;
 
             if (Array.isArray(obj)) {
@@ -453,7 +456,7 @@ $(function() {
             return maxDepth;
         };
 
-        const btnClicked = !args;
+        const btnClicked = args.caller === 'button';
         let showDepth = !btnClicked && $("#showDepth").val() || _global.params.showDepth || Infinity;
 
         const opts = {
@@ -542,8 +545,8 @@ $(function() {
         return true;
     }
 
-    function execBtn(opts) {
-        opts = opts || {};
+    function execBtn(opts = {}) {
+        opts.caller = 'function';
         $("#execBtn").trigger("click", opts);
     }
 
@@ -552,10 +555,10 @@ $(function() {
             ? txt.replace(/(?<=")([^\t\s][^"]+)(?=")/gm, (v) => v.replace(/\n/g, "\\n"))
             : "";
         const notEmpty = (s) => s && !/^[ \t\n]+$/.test(s);
-        const removeTabTails = (s) => s.replace(/(.+[^\t\s])[\t\s]+$/, "$1").replace(/(?<=[^\t])\t+(?=\t[^\t])/g, (v) => v.replace(/\t/g, "\t."));
+        const removeTailsTab = (s) => s.replace(/(.+[^\t\s])[\t\s]+$/, "$1").replace(/(?<=[^\t])\t+(?=\t[^\t])/g, (v) => v.replace(/\t/g, "\t."));
 
         const reducer = (arr, txt) => {
-            const str = removeTabTails(txt);
+            const str = removeTailsTab(txt);
             const tabs = str.match(/^\t+/);
             const level = tabs ? tabs[0].length + 1 : 1;
             if (level == 1) ++topCnt;
@@ -616,7 +619,7 @@ $(function() {
     function parseJsonKey(keys, compare) {
         let allDepth = false;
 
-        const getAllChild = (target) => {
+        const getAllKey = (target) => {
             return target.reduce((tmpArr, t) => {
                 const childKeys = getChildKeys(t, compare);
                 if (childKeys && childKeys.length) {
@@ -631,23 +634,23 @@ $(function() {
                 return;
             }
 
-            let children;
+            let keyHierarchy;
             if (/^\*{2,}$/.test(k)) {
                 allDepth = true;
-                children = getAllChild(arr);
+                keyHierarchy = getAllKey(arr);
 
             } else if (k === '*') {
-                children = getAllChild(arr);
+                keyHierarchy = getAllKey(arr);
 
             } else if (k.startsWith('>')) {
                 if (k.length == 1) {
                     return;
                 }
                 const key = k.substring(1, k.length).trim();
-                children = findChildren(compare, getRegexKey(key));
+                keyHierarchy = getKeyHierarchy(compare, getRegexKey(key));
 
             } else {
-                children = arr.reduce((tmpArr, a) => {
+                keyHierarchy = arr.reduce((tmpArr, a) => {
                     if (a.length) {
                         let child = [...a];
                         const obj = getExistChild([...a], compare);
@@ -669,13 +672,13 @@ $(function() {
                     return tmpArr;
                 }, []);
             }
-            return children;
+            return keyHierarchy;
         }, [[]]);
 
         if (allDepth) {
             let childArr;
             let tmpArr = [...results];
-            while ((childArr = getAllChild(tmpArr)).length) {
+            while ((childArr = getAllKey(tmpArr)).length) {
                 childArr.forEach(c => results.push(c));
                 tmpArr = childArr;
             }
@@ -684,7 +687,7 @@ $(function() {
         return results;
     }
 
-    function findChildren(obj, RegexKey, crumbs = [], results = []) {
+    function getKeyHierarchy(obj, RegexKey, crumbs = [], results = []) {
         if (typeof obj === 'object') {
             Object.keys(obj).forEach(k => {
                 if (RegexKey.test(k)) {
@@ -692,7 +695,7 @@ $(function() {
                 }
 
                 if (typeof obj[k] === 'object') {
-                    findChildren(obj[k], RegexKey, [...crumbs, k], results);
+                    getKeyHierarchy(obj[k], RegexKey, [...crumbs, k], results);
                 }
             });
         }
@@ -744,21 +747,21 @@ $(function() {
     }
 
     function plantUML(opts) {
-        const encode = (s) => {
-            s = unescape(encodeURIComponent(s));
-            let arr = [];
-            for (let i = 0; i < s.length; i++) {
-                arr.push(s.charCodeAt(i));
-            }
-            let compressor = new Zopfli.RawDeflate(arr);
-            let compressed = compressor.compress();
-            return encode64_(compressed);
-        };
-
         showLoading();
         let uml = formatPlantUML(opts);
         uml = _global.uml = encode(uml);
         showUMLImage(uml);
+    }
+
+    function encode(s) {
+        s = unescape(encodeURIComponent(s));
+        let arr = [];
+        for (let i = 0; i < s.length; i++) {
+            arr.push(s.charCodeAt(i));
+        }
+        let compressor = new Zopfli.RawDeflate(arr);
+        let compressed = compressor.compress();
+        return encode64_(compressed);
     }
 
     function showLoading() {
@@ -829,8 +832,28 @@ $(function() {
 
         const addStar = data[0].depth == 0 ? 1 : 0;
 
-        return data.filter(d => d.show)
-            .map(d => {
+        data = data.reduce((opt, d) => {
+            if (!d.show) {
+                opt.depth = d.depth;
+                return opt;
+            }
+
+            if (d.value === '.') {
+                opt.tmp.push(d);
+            } else if (opt.depth < d.depth) {
+                opt.series.push(...opt.tmp, d);
+                opt.tmp = [];
+            } else {
+                opt.series.push(d);
+                opt.tmp = [];
+            }
+
+            opt.depth = d.depth;
+            return opt;
+
+        }, {series: [], tmp: [], depth: 0}).series;
+
+        return data.map(d => {
                 let star = new Array(d.depth + addStar).fill("*").join("").trim();
                 star += (nodeDepth < d.depth) ? "_" : `${colorset(d.depth)}`;
                 const showDepth = $("#chkDepth").is(":checked");
