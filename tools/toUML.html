@@ -41,8 +41,8 @@
     .btn-reset {margin-left: 73px;width: 60px;}
     .btn-download {margin-left: 137px;width: 60px;}
     .btn-share {margin-left: 201px;width: 60px;}
-    .btn-sample {margin-left: 265px;width: 60px;}
-    .btn-copy {margin-left: 329px;width: 60px;}
+    .btn-copy {margin-left: 265px;width: 60px;}
+    .btn-sample {margin-left: 329px;width: 60px;}
 </style>
 <body>
 <header>
@@ -55,7 +55,7 @@
         <select id="umlType" title="데이터 표현방식 선택" class="bg-green">
             <option selected>json</option>
             <option>mindmap</option>
-            <option>wbs</option>
+            <option value="wbs">tree</option>
         </select>
         <label class="check json">
             <input type="checkbox" id="chkCompArr" />
@@ -99,9 +99,9 @@
         <button id="execBtn" class="btn btn-exec">Run</button>
         <button id="resetBtn" class="btn btn-reset" title="설정 및 화면 초기화">Reset</button>
         <button id="downloadBtn" class="btn btn-download" onclick="download()" title="화면 이미지 저장">Save</button>
-        <button id="shareBtn" class="btn btn-share" title="화면 공유용 URL생성 후 클립보드 저장">Share</button>
+        <button id="shareBtn" class="btn btn-share" title="화면 공유용 URL을 생성 후 클립보드 저장">Share</button>
+        <button id="copyBtn" class="btn btn-copy" title="화면을 JSON 데이터로 클립보드에 저장">Copy</button>
         <button id="sampleBtn" class="btn btn-sample" title="샘플데이터 실행">Sample</button>
-        <button id="copyBtn" class="btn btn-copy json" title="화면의 JSON 데이터 클립보드에 저장">Copy</button>
     </div>
     <hr>
 </header>
@@ -125,7 +125,6 @@
       + <span class="bg-blue entry">[A]</span>: 배열 생략 - 활성화 시 보여지는 입력란의 숫자만큼만 배열 내용 표시
       + <span class="bg-blue entry">[O]</span>: 객체 생략 - 활성화 시 보여지는 입력란의 숫자만큼만 객체 내용 표시
       + <span class="bg-blue entry">[R]</span>: 키 검색에 정규표현식 사용 (<span class="bg-gray entry">&gt;A</span>, <span class="bg-gray entry">A*</span>등 아래 표현식의 고유 문법은 유지)
-      + <span class="bg-blue entry">Copy Button</span>: 화면의 JSON 데이터 클립보드에 저장
 
   <span class="ttl bg-green">mindmap, wbs</span>
     = 엑셀 시트의 내용을 시각적으로 출력
@@ -139,6 +138,9 @@
       + <span class="bg-blue">Show</span>: 화면에 표시할 단계 선택
         . 선택된 값이 마지막 Depth(전체표시)가 아닐 경우 배경이 <span class="bg-yellow entry">노란색</span>
       + <span class="bg-blue">Zoom</span>: 화면에 출력된 이미지 크기 조절
+      + <span class="bg-blue entry">Share</span>: 화면 공유용 URL을 생성 후 클립보드 저장
+      + <span class="bg-blue entry">Copy</span>: 화면을 JSON 데이터로 클립보드에 저장
+      + <span class="bg-blue entry">Sample</span>: 샘플 데이터를 화면에 표시
 
   <span class="ttl">테스트: </span>
     = <span class="bg-gray entry">Type</span> 선택 후 <span class="bg-gray entry">Sample</span> 버튼 클릭
