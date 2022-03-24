@@ -58,12 +58,12 @@
         </select>
         <label class="check json">
             <input type="checkbox" id="chkCompArr" />
-            <span class="checkmark" title="배열 생략">CA</span>
+            <span class="checkmark" title="배열 생략">A</span>
         </label>
         <input type="number" id="compArrLen" class="json square comp" value="5" title="배열 길이제한" maxlength="3" />
         <label class="check json">
             <input type="checkbox" id="chkCompObj" />
-            <span class="checkmark" title="객체 생략">CO</span>
+            <span class="checkmark" title="객체 생략">O</span>
         </label>
         <input type="number" id="compObjLen" class="json square comp" value="5" title="객체 길이제한" maxlength="3" />
         <label class="check checkShadow mindmap wbs">
@@ -76,7 +76,7 @@
         </label>
         <label class="check checkNoEmpty mindmap wbs">
             <input type="checkbox" id="checkNoEmpty" />
-            <span class="checkmark" title="비어있는 Depth 제거">NE</span>
+            <span class="checkmark" title="비어있는 Depth 제거">E</span>
         </label>
         <label for="nodeDepth" class="mindmap wbs">Focus: </label>
         <select id="nodeDepth" class="mindmap wbs" title="강조 표시 레벨 선택">
@@ -104,8 +104,8 @@
   <span class="ttl bg-green">json</span>
     = Json 데이터를 시각적으로 출력
     ! JSON 데이터를 <span class="bg-gray entry">Input Data</span> 입력란에 입력 후 <span class="bg-gray entry">Run</span>, <span class="bg-gray entry">Ctrl + Enter</span>
-      + <span class="bg-blue entry">[CA]</span>: 배열 생략 - 활성화 후 입력란의 숫자만큼만 배열 내용 표시
-      + <span class="bg-blue entry">[CO]</span>: 객체 생략 - 활성화 후 입력란의 숫자만큼만 객체 내용 표시
+      + <span class="bg-blue entry">[A]</span>: 배열 생략 - 활성화 후 입력란의 숫자만큼만 배열 내용 표시
+      + <span class="bg-blue entry">[O]</span>: 객체 생략 - 활성화 후 입력란의 숫자만큼만 객체 내용 표시
       + <span class="bg-blue entry">Focus Data</span>: 강조 표시할 대상 입력 (Enter로 구분하여 복수선택 가능) <span class="bg-gray entry">Run</span>, <span class="bg-gray entry">Ctrl + Enter</span>
         . <span class="bg-gray entry">&gt;A</span> : 키가 A인 요소 모두 선택
         . <span class="bg-gray entry">A*</span> : A로 시작하는 첫번째 요소 선택
@@ -125,6 +125,7 @@
     ! 엑셀 시트의 내용을 복사하여 <span class="bg-gray entry">Input Data</span> 입력란에 붙여넣은 후 <span class="bg-gray entry">Run</span>, <span class="bg-gray entry">Ctrl + Enter</span>
       + <span class="bg-blue">[S]</span>: 노드에 그림자 표시
       + <span class="bg-blue">[D]</span>: 노드의 깊이를 [Depth]로 표시
+      + <span class="bg-blue">[E]</span>: 비어있는 [Depth] 제거
       + <span class="bg-blue">Focus</span>: 강조 표시할 노드의 깊이
 
   <span class="ttl">공통</span>
