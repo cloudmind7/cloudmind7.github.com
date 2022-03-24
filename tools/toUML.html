@@ -240,6 +240,10 @@ $(function() {
 
         try {
             const options = _global.opts = initOpts(args);
+            if (!options) {
+                return;
+            }
+
             const viewer = {
                 default: plantUML,
                 show: function(opts) {
@@ -400,7 +404,7 @@ $(function() {
         const data = options.data = parseMindmap(options);
 
         if (data && 1 < data[0].depth) {
-            alert("잘못된 데이터입니다. 문자열이 Tab으로 시작할 수 없습니다.");
+            alert("첫번째 문자열은 Tab으로 시작할 수 없습니다.");
             $("#data").focus();
             return;
         }
