@@ -53,9 +53,9 @@
         <textarea id="visibles" placeholder="View Data" title="화면에 제한적으로 출력할 대상 입력란" class="input json"></textarea>
         <label for="umlType">Type: </label>
         <select id="umlType" title="데이터 표현방식 선택" class="bg-green">
-            <option selected>json</option>
-            <option>mindmap</option>
-            <option value="wbs">tree</option>
+            <option selected value="json">JSON</option>
+            <option value="mindmap">MindMap</option>
+            <option value="wbs">Tree</option>
         </select>
         <label class="check json">
             <input type="checkbox" id="chkCompArr" />
@@ -107,8 +107,8 @@
 </header>
 <main id="view" class="view">
 <pre>
-  <span class="ttl bg-green">json</span>
-    = Json 데이터를 시각적으로 출력
+  <span class="ttl bg-green">JSON</span>
+    = JSON 데이터를 시각적으로 출력
     ! JSON 데이터를 <span class="bg-gray entry">Input Data</span> 입력란에 입력 후 <span class="bg-gray entry">Run</span>, <span class="bg-gray entry">Ctrl + Enter</span>
       + <span class="bg-blue entry">Focus Data</span>: 강조 표시할 대상 입력후 <span class="bg-gray entry">Run</span>, <span class="bg-gray entry">Ctrl + Enter</span> (대소문자를 구분하지 않음, Enter로 구분하여 복수선택 가능)
         . <span class="bg-gray entry">&gt;A</span> : 키가 A인 요소 모두 선택 (표현식의 시작에 사용)
@@ -126,7 +126,7 @@
       + <span class="bg-blue entry">[O]</span>: 객체 생략 - 활성화 시 보여지는 입력란의 숫자만큼만 객체 내용 표시
       + <span class="bg-blue entry">[R]</span>: 키 검색에 정규표현식 사용 (<span class="bg-gray entry">&gt;A</span>, <span class="bg-gray entry">A*</span>등 아래 표현식의 고유 문법은 유지)
 
-  <span class="ttl bg-green">mindmap, wbs</span>
+  <span class="ttl bg-green">MindMap, Tree</span>
     = 엑셀 시트의 내용을 시각적으로 출력
     ! 엑셀 시트의 내용을 복사하여 <span class="bg-gray entry">Input Data</span> 입력란에 붙여넣은 후 <span class="bg-gray entry">Run</span>, <span class="bg-gray entry">Ctrl + Enter</span>
       + <span class="bg-blue">[S]</span>: 노드에 그림자 표시
