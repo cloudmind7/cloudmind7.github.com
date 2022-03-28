@@ -44,7 +44,7 @@
     .btn-share {margin-left: 201px;width: 60px;}
     .btn-copy {margin-left: 265px;width: 60px;}
     .btn-sample {margin-left: 329px;width: 60px;}
-    .btn-fold {border: 0;outline: 0;width: 25px;min-width: 25px;min-height: 25px;background-color: #93e2ff;font-weight: bold;}
+    .btn-fold {cursor: pointer;border: 0;outline: 0;width: 25px;min-width: 25px;min-height: 25px;background-color: #93e2ff;font-weight: bold;}
     .unfold {height: 25px;display: none;}
 </style>
 <body>
@@ -183,6 +183,10 @@
 <script>
 const _global = {
     params: undefined,
+    getParam(id) {
+        const target = this.params.filter(obj => obj.id === id)[0];
+        return target && target.value || undefined;
+    },
     opts: {
         compArrLen: 0,
         compObjLen: 0,
@@ -197,41 +201,37 @@ const _global = {
 };
 $(function() {
     _global.params = function() {
-        const dic = {
-            d: "data",
-            hi: "highlights",
-            vi: "visibles",
-            t: "umlType",
-            z: "zoom",
-            cs: "chkShadow",
-            cd: "chkDepth",
-            ne: "checkNoEmpty",
-            nd: "nodeDepth",
-            sd: "showDepth",
-            ca: "chkCompArr",
-            cal: "compArrLen",
-            co: "chkCompObj",
-            col: "compObjLen",
-            cr: "chkRegex",
-            f: "chkFixedInput"
-        };
-
-        let matcher = {
-            _pid(id) {
-                return Object.keys(dic).filter(k => dic[k] === id);
-            }
-        };
+        const _input = "input";
+        const _checkbox = "checkbox";
+        const _select = "select";
+        const matcher = [
+            { pid: "d", id: "data", value: "", type: _input, enc: true },
+            { pid: "hi", id: "highlights", value: "", type: _input, enc: true },
+            { pid: "vi", id: "visibles", value: "", type: _input, enc: true },
+            { pid: "z", id: "zoom", value: "", type: _input },
+            { pid: "cal", id: "compArrLen", value: "", type: _input },
+            { pid: "col", id: "compObjLen", value: "", type: _input },
+            { pid: "cs", id: "chkShadow", value: "", type: _checkbox },
+            { pid: "cd", id: "chkDepth", value: "", type: _checkbox },
+            { pid: "ne", id: "checkNoEmpty", value: "", type: _checkbox },
+            { pid: "cr", id: "chkRegex", value: "", type: _checkbox },
+            { pid: "f", id: "chkFixedInput", value: "", type: _checkbox },
+            { pid: "ca", id: "chkCompArr", value: "", type: _checkbox },
+            { pid: "co", id: "chkCompObj", value: "", type: _checkbox },
+            { pid: "t", id: "umlType", value: "", type: _select },
+            { pid: "nd", id: "nodeDepth", value: "", type: _select },
+            { pid: "sd", id: "showDepth", value: "", type: _select },
+        ];
 
         const url = new URL(location.href);
         const searchParams = new URLSearchParams(url.search);
-        Object.keys(dic).forEach(k => {
-            matcher[dic[k]] = searchParams.get(k);
-        });
 
-        const encedInputs = ['data', 'highlights', 'visibles'];
-        encedInputs.forEach(id => {
-            const dec = LZString.decompressFromEncodedURIComponent;
-            matcher[id] = matcher[id] && dec(matcher[id]) || matcher[id];
+        matcher.forEach(obj => {
+            let val = searchParams.get(obj.pid);
+            if (obj.enc && val) {
+                val = LZString.decompressFromEncodedURIComponent(val);
+            }
+            obj.value = val;
         });
 
         return matcher;
@@ -396,29 +396,29 @@ $(function() {
             return;
         }
 
-        let query = [];
-        const makeQuery = (ids, getValue) => {
-            ids.split(/\s*,\s*/).forEach(id => {
-                const pid = _global.params._pid(id);
-                const val = getValue(id);
-                val && query.push(`${pid}=${val}`);
-            });
-        };
+        let query = _global.params
+                        .filter(obj => obj.type === 'input' || obj.type === 'select')
+                        .reduce((query, obj) => {
+                            const enc = LZString.compressToEncodedURIComponent;
+                            let val = document.getElementById(obj.id).value;
 
-        makeQuery("data, highlights, visibles",
-            (id) => {
-                let val = document.getElementById(id).value;
-                return val && LZString.compressToEncodedURIComponent(val) || "";
-            }
-        );
+                            if (val) {
+                                val = (obj.enc && enc(val) || "") || val;
+                                query.push(`${obj.pid}=${val}`);
+                            }
+                            return query;
+                        }, []);
 
-        makeQuery("umlType, zoom, nodeDepth, showDepth, compArrLen, compObjLen",
-            (id) => document.getElementById(id).value
-        );
+        query = _global.params
+                    .filter(obj => obj.type === 'checkbox')
+                    .reduce((query, obj) => {
+                        const val = $("#" + obj.id).is(":checked") ? "y" : "";
 
-        makeQuery("chkShadow, chkDepth, checkNoEmpty, chkCompArr, chkCompObj, chkRegex, chkFixedInput",
-            (id) => $("#" + id).is(":checked") ? "y" : ""
-        );
+                        if (val) {
+                            query.push(`${obj.pid}=${val}`);
+                        }
+                        return query;
+                    }, query);
 
         const url = location.href.replace(/^([^?]+)\?.+/, "$1") + '?' + query.join('&');
         navigator.clipboard.writeText(url);
@@ -435,16 +435,28 @@ $(function() {
         alert("화면의 데이터가 클립보드에 저장되었습니다.");
     });
 
-    if (_global.params.data) {
-        const inputs = ["data", "highlights", "visibles", "zoom", "compArrLen", "compObjLen"];
-        inputs.forEach(k => _global.params[k] && $("#" + k).val(_global.params[k]));
+    if (_global.getParam('data')) {
+        let umlType;
+        _global.params.forEach(obj => {
+            if (obj.value === null || obj.value === undefined) {
+                return;
+            }
 
-        const checkboxes = ["chkShadow", "chkDepth", "checkNoEmpty", "chkRegex", "chkFixedInput"];
-        checkboxes.forEach(k => _global.params[k] && $("#" + k).prop("checked", true));
+            if (obj.id === 'umlType') {
+                umlType = obj.value;
+            }
 
-        _global.params.chkCompArr && $("#chkCompArr").prop("checked", true) && $("#compArrLen").show();
-        _global.params.chkCompObj && $("#chkCompObj").prop("checked", true) && $("#compObjLen").show();
-        _global.params.umlType && $("#umlType").val(_global.params.umlType).prop("selected", true).trigger("change");
+            if (obj.type === 'input') {
+                document.getElementById(obj.id).value = obj.value;
+
+            } else if (obj.type === 'checkbox') {
+                document.getElementById(obj.id).checked = true;
+            }
+        });
+
+        _global.getParam('chkCompArr') && $("#chkCompArr").prop("checked", true) && $("#compArrLen").show();
+        _global.getParam('chkCompObj') && $("#chkCompObj").prop("checked", true) && $("#compObjLen").show();
+        $("#umlType").val(umlType).prop("selected", true).trigger("change");
     }
 });
 </script>
@@ -461,8 +473,8 @@ $(function() {
 
     function mindmapOpts(args) {
         const btnClicked = (args.caller === 'button');
-        let nodeDepth = !btnClicked && $("#nodeDepth").val() || _global.params.nodeDepth || 1;
-        let showDepth = !btnClicked && $("#showDepth").val() || _global.params.showDepth || Infinity;
+        let nodeDepth = !btnClicked && $("#nodeDepth").val() || _global.getParam('nodeDepth') || 1;
+        let showDepth = !btnClicked && $("#showDepth").val() || _global.getParam('showDepth') || Infinity;
 
         const options = {
             inputText: $("#data").val(),
@@ -536,7 +548,7 @@ $(function() {
         };
 
         const btnClicked = (args.caller === 'button');
-        let showDepth = !btnClicked && $("#showDepth").val() || _global.params.showDepth || Infinity;
+        let showDepth = !btnClicked && $("#showDepth").val() || _global.getParam('showDepth') || Infinity;
 
         const opts = {
             inputText: $("#data").val(),
