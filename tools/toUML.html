@@ -270,7 +270,7 @@ $(function() {
         if (e.ctrlKey && e.keyCode == 13) execBtn();
 
     }).focus(function() {
-        $(".input").each(function() {
+        !isFixedInput() && $(".input").each(function() {
             const $this = $(this);
             const sw = $this.data("sw");
             const sh = $this.data("sh");
@@ -279,8 +279,7 @@ $(function() {
         });
 
     }).blur(function() {
-        const isFixed = $('#chkFixedInput').is(':checked');
-        !isFixed && $(".input").each(function() {
+        !isFixedInput() && $(".input").each(function() {
             const $this = $(this);
             const sw = $this.css("width");
             const sh = $this.css("height");
@@ -292,6 +291,10 @@ $(function() {
             oh && $this.css("height", oh);
         });
     });
+
+    function isFixedInput() {
+        return $('#chkFixedInput').is(':checked');
+    }
 
     $("#execBtn").click(function(e, args = {}) {
         if (!isValidInput('data')) {
