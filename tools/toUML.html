@@ -7,12 +7,13 @@
 </head>
 <style>
     header {position: fixed;padding: 5px;top: 0;left: 0;right: 0;display: flex;background: white;z-index: 100;}
-    body {padding-top: 35px;font-size: .9em;font-family: Arial, Dotum, "돋움", sans-serif;}
+    body {margin: 5px;padding-top: 35px;font-size: .9em;font-family: Arial, Dotum, "돋움", sans-serif;}
     button {font-weight: bold;background-color: #eaeaea;}
     hr {height: 1px;background-color: #bebebe;border: none;}
     select {height: 32px;padding-left: 10px;padding-right: 10px;}
     input[type=number] {padding: 0;text-align: center;}
-    .srch-div {padding: 5px;width: 100%;min-width: 1200px;box-shadow: 1px 1px 4px 1px rgba(0, 0, 0, 0.23);}
+    .shadow {box-shadow: 1px 1px 4px 1px rgba(0, 0, 0, 0.23);}
+    .srch-div {padding: 5px;width: 100%;min-width: 1200px;}
     .check {position: relative;padding-top: 9px;padding-left: 34px;margin-bottom: 12px;cursor: pointer;font-size: 12px;}
     .check input {position: absolute;opacity: 0;cursor: pointer;height: 0;width: 0;}
     .check input:checked ~ .checkmark {background-color: rgb(116, 216, 255);}
@@ -43,10 +44,14 @@
     .btn-share {margin-left: 201px;width: 60px;}
     .btn-copy {margin-left: 265px;width: 60px;}
     .btn-sample {margin-left: 329px;width: 60px;}
+    .btn-fold {border: 0;outline: 0;width: 25px;min-width: 25px;min-height: 25px;background-color: #93e2ff;font-weight: bold;}
+    .unfold {height: 25px;display: none;}
 </style>
 <body>
-<header>
-    <div class="srch-div">
+<button class="btn-fold unfold shadow" id="btnUnFold">&or;</button>
+<header class="srch">
+    <button class="btn-fold shadow" id="btnFold">&and;</button>
+    <div class="srch-div shadow">
         <input type="hidden" id="viewType" value="plantUML" />
         <textarea id="data" placeholder="Input Data" title="화면에 표시할 데이터 입력란" class="input"></textarea>
         <textarea id="highlights" placeholder="Focus Data" title="강조 표시할 대상 입력란" class="input json"></textarea>
@@ -152,8 +157,11 @@
     = <span class="bg-gray entry">Type</span> 선택 후 <span class="bg-gray entry">Sample</span> 버튼 클릭
 </pre>
 </main>
-<script src="https://code.jquery.com/jquery-3.6.0.slim.min.js"
-        integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
+<!--<script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>-->
+<script
+        src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+        crossorigin="anonymous"></script>
 <script src="https://plantuml.com/synchro2.min.js"></script>
 <script src="https://unpkg.com/json5@^2.0.0/dist/index.min.js"></script>
 <script>
@@ -228,6 +236,30 @@ $(function() {
 
         return matcher;
     }();
+
+    $(window).scroll(function() {
+        if (!visibleHeader() && $(window).scrollTop() > 25) {
+            $('#btnUnFold').css({position:'fixed', top:'5px'});
+        }
+    });
+
+    function visibleHeader() {
+        return $('.srch-div').is(':visible');
+    }
+
+    $(".btn-fold").click(function() {
+        if (visibleHeader()) {
+            $('.srch').slideToggle('fast', function() {
+                $('body').css('paddingTop', '0px');
+                $('#btnUnFold').show().css({position:'fixed', top:'5px'});
+            });
+        } else {
+            $('.srch').slideToggle('fast', function() {
+                $('body').css('paddingTop', '35px');
+                $('#btnUnFold').hide();
+            });
+        }
+    });
 
     $(".input").each(function() {
         const $this = $(this);
