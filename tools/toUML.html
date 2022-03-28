@@ -269,9 +269,6 @@ $(function() {
     }).keydown(function(e) {
         if (e.ctrlKey && e.keyCode == 13) execBtn();
 
-    }).resize(function() {
-        $(this).focus();
-
     }).focus(function() {
         $(".input").each(function() {
             const $this = $(this);
