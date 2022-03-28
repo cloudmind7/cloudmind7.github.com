@@ -83,6 +83,10 @@
             <input type="checkbox" id="checkNoEmpty" />
             <span class="checkmark" title="비어있는 Depth 제거">E</span>
         </label>
+        <label class="check">
+            <input type="checkbox" id="chkFixedInput" />
+            <span class="checkmark" title="데이터 입력란 리사이징 유지">F</span>
+        </label>
         <label for="nodeDepth" class="mindmap wbs">Focus: </label>
         <select id="nodeDepth" class="mindmap wbs" title="강조 표시 레벨 선택">
             <option value=""> -</option>
@@ -135,6 +139,7 @@
       + <span class="bg-blue">Focus</span>: 강조 표시할 노드의 깊이
 
   <span class="ttl">공통</span>
+      + <span class="bg-blue">[F]</span>: 데이터 입력란 리사이징 유지
       + <span class="bg-blue">Show</span>: 화면에 표시할 단계 선택
         . 선택된 값이 마지막 Depth(전체표시)가 아닐 경우 배경이 <span class="bg-yellow entry">노란색</span>
       + <span class="bg-blue">Zoom</span>: 화면에 출력된 이미지 크기 조절
@@ -199,7 +204,8 @@ $(function() {
             cal: "compArrLen",
             co: "chkCompObj",
             col: "compObjLen",
-            cr: "chkRegex"
+            cr: "chkRegex",
+            f: "chkFixedInput"
         };
 
         let matcher = {
@@ -231,26 +237,30 @@ $(function() {
     }).keydown(function(e) {
         if (e.ctrlKey && e.keyCode == 13) execBtn();
 
+    }).resize(function() {
+        $(this).focus();
+
     }).focus(function() {
         $(".input").each(function() {
             const $this = $(this);
             const sw = $this.data("sw");
             const sh = $this.data("sh");
-            sw && (sw != $this.data("ow")) && $this.css("width", sw);
-            sh && (sh != $this.data("oh")) && $this.css("height", sh);
+            sw && $this.css("width", sw);
+            sh && $this.css("height", sh);
         });
 
     }).blur(function() {
-        $(".input").each(function() {
+        const isFixed = $('#chkFixedInput').is(':checked');
+        !isFixed && $(".input").each(function() {
             const $this = $(this);
             const sw = $this.css("width");
             const sh = $this.css("height");
             const ow = $this.data("ow");
             const oh = $this.data("oh");
-            sw != ow && $this.data("sw", sw);
-            sh != oh && $this.data("sh", sh);
-            $this.css("width", ow);
-            $this.css("height", oh);
+            sw && $this.data("sw", sw);
+            sh && $this.data("sh", sh);
+            ow && $this.css("width", ow);
+            oh && $this.css("height", oh);
         });
     });
 
@@ -278,14 +288,6 @@ $(function() {
             };
 
             viewer.show(options);
-
-            $(".input").blur().each(function() {
-                const $this = $(this);
-                const ow = $this.data("ow");
-                const oh = $this.data("oh");
-                ow && $this.css("width", ow);
-                oh && $this.css("height", oh);
-            });
         } catch (e) {
             !e.alerted && alert("오류가 발생했습니다.");
             console.log(e);
@@ -382,7 +384,7 @@ $(function() {
             (id) => document.getElementById(id).value
         );
 
-        makeQuery("chkShadow, chkDepth, checkNoEmpty, chkCompArr, chkCompObj, chkRegex",
+        makeQuery("chkShadow, chkDepth, checkNoEmpty, chkCompArr, chkCompObj, chkRegex, chkFixedInput",
             (id) => $("#" + id).is(":checked") ? "y" : ""
         );
 
@@ -405,7 +407,7 @@ $(function() {
         const inputs = ["data", "highlights", "visibles", "zoom", "compArrLen", "compObjLen"];
         inputs.forEach(k => _global.params[k] && $("#" + k).val(_global.params[k]));
 
-        const checkboxes = ["chkShadow", "chkDepth", "checkNoEmpty", "chkRegex"];
+        const checkboxes = ["chkShadow", "chkDepth", "checkNoEmpty", "chkRegex", "chkFixedInput"];
         checkboxes.forEach(k => _global.params[k] && $("#" + k).prop("checked", true));
 
         _global.params.chkCompArr && $("#chkCompArr").prop("checked", true) && $("#compArrLen").show();
