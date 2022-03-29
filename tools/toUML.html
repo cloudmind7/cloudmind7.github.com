@@ -178,77 +178,80 @@
 })();
 </script>
 <script>
-const _global = {
-    params: undefined,
-    getParam(id) {
-        const target = this.params.filter(obj => obj.id === id)[0];
-        return target && target.value || undefined;
-    },
-    opts: {
-        compArrLen: 0,
-        compObjLen: 0,
-        data: undefined,
-        inputText: '',
-        showDepth: 0,
-        caller: ''
-    },
-    uml: '',
-    umlData: '',
-    vw: 0,
-};
 $(function() {
-    _global.params = function() {
+    window._global = {
+        elements: [],
+        getParam(id) {
+            const target = this.elements.filter(obj => obj.id === id)[0];
+            return target && target.value || undefined;
+        },
+        viewer: {
+            plantUML,
+            show: function(opts) {
+                this[$("#viewType").val() || plantUML](opts);
+            }
+        },
+        opts: {
+            compArrLen: 0,
+            compObjLen: 0,
+            data: undefined,
+            inputText: '',
+            showDepth: 0,
+            caller: ''
+        },
+        uml: '',
+        umlData: '',
+        vw: 0,
+    };
+
+    _global.elements = function() {
         const _input = "input";
         const _checkbox = "checkbox";
         const _select = "select";
-        const matcher = [
+        const _elements = [
             { pid: "d", id: "data", value: "", type: _input, enc: true },
             { pid: "hi", id: "highlights", value: "", type: _input, enc: true },
             { pid: "vi", id: "visibles", value: "", type: _input, enc: true },
+            { pid: "cal", id: "compArrLen", value: "", type: _input, exec: true },
+            { pid: "col", id: "compObjLen", value: "", type: _input, exec: true },
             { pid: "z", id: "zoom", value: "", type: _input },
-            { pid: "cal", id: "compArrLen", value: "", type: _input },
-            { pid: "col", id: "compObjLen", value: "", type: _input },
-            { pid: "cs", id: "chkShadow", value: "", type: _checkbox },
-            { pid: "cd", id: "chkDepth", value: "", type: _checkbox },
-            { pid: "ne", id: "checkNoEmpty", value: "", type: _checkbox },
-            { pid: "cr", id: "chkRegex", value: "", type: _checkbox },
+            { pid: "cs", id: "chkShadow", value: "", type: _checkbox, exec: true },
+            { pid: "cd", id: "chkDepth", value: "", type: _checkbox, exec: true },
+            { pid: "ne", id: "checkNoEmpty", value: "", type: _checkbox, exec: true },
+            { pid: "cr", id: "chkRegex", value: "", type: _checkbox, exec: true },
+            { pid: "ca", id: "chkCompArr", value: "", type: _checkbox, exec: true },
+            { pid: "co", id: "chkCompObj", value: "", type: _checkbox, exec: true },
             { pid: "f", id: "chkFixedInput", value: "", type: _checkbox },
-            { pid: "ca", id: "chkCompArr", value: "", type: _checkbox },
-            { pid: "co", id: "chkCompObj", value: "", type: _checkbox },
-            { pid: "t", id: "umlType", value: "", type: _select },
-            { pid: "nd", id: "nodeDepth", value: "", type: _select },
-            { pid: "sd", id: "showDepth", value: "", type: _select },
+            { pid: "t", id: "umlType", value: "", type: _select, exec: true },
+            { pid: "nd", id: "nodeDepth", value: "", type: _select, exec: true },
+            { pid: "sd", id: "showDepth", value: "", type: _select, exec: true },
         ];
 
         const url = new URL(location.href);
         const searchParams = new URLSearchParams(url.search);
 
-        matcher.forEach(obj => {
+        _elements.forEach(obj => {
             let val = searchParams.get(obj.pid);
-            if (obj.enc && val) {
+            if (val && obj.enc) {
                 val = LZString.decompressFromEncodedURIComponent(val);
             }
             obj.value = val;
         });
 
-        return matcher;
+        return _elements;
     }();
 
     $(window).scroll(function() {
         if (!visibleHeader() && $(window).scrollTop() > 25) {
-            $('#btnUnFold').css({position:'fixed', top:'5px'});
+            fixUnFoldButton();
         }
     });
-
-    function visibleHeader() {
-        return $('.srch-div').is(':visible');
-    }
 
     $(".btn-fold").click(function() {
         if (visibleHeader()) {
             $('.srch').slideToggle('fast', function() {
                 $('body').css('paddingTop', '0px');
-                $('#btnUnFold').show().css({position:'fixed', top:'5px'});
+                fixUnFoldButton().show();
             });
         } else {
             $('.srch').slideToggle('fast', function() {
@@ -289,10 +292,6 @@ $(function() {
         });
     });
 
-    function isFixedInput() {
-        return $('#chkFixedInput').is(':checked');
-    }
-
     $("#execBtn").click(function(e, args = {}) {
         if (!isValidInput('data')) {
             return;
@@ -304,21 +303,15 @@ $(function() {
 
         try {
             const options = _global.opts = initOpts(args);
+
             if (!options) {
-                return;
+                throw new Error("옵션 정보가 초기화 되지 않았습니다.");
             }
 
-            const viewer = {
-                default: plantUML,
-                show: function(opts) {
-                    this[$("#viewType").val() || this.default](opts);
-                },
-                plantUML
-            };
+            _global.viewer.show(options);
 
-            viewer.show(options);
         } catch (e) {
-            !e.alerted && alert("오류가 발생했습니다.");
+            !e.alerted && alert(`오류가 발생했습니다.\n내용: ${e.message}`);
             console.log(e);
             removeLoading();
         }
@@ -333,8 +326,12 @@ $(function() {
     });
 
     let tmpVal;
-    $("#viewType, #umlType, #chkShadow, #chkDepth, #checkNoEmpty, #nodeDepth, #showDepth, #chkCompArr, #chkCompObj, #chkRegex, #compArrLen, #compObjLen")
-        .focus(function() {
+    const executableIds = _global.elements.reduce((ids, obj) => {
+        obj.exec && ids.push('#' + obj.id);
+        return ids;
+    }, []).join(',');
+
+    $(executableIds).focus(function() {
             tmpVal = $(this).val();
         })
         .change(function() {
@@ -393,20 +390,19 @@ $(function() {
             return;
         }
 
-        let query = _global.params
+        let query = _global.elements
                         .filter(obj => obj.type === 'input' || obj.type === 'select')
                         .reduce((query, obj) => {
-                            const enc = LZString.compressToEncodedURIComponent;
                             let val = document.getElementById(obj.id).value;
-
                             if (val) {
+                                const enc = LZString.compressToEncodedURIComponent;
                                 val = (obj.enc && enc(val) || "") || val;
                                 query.push(`${obj.pid}=${val}`);
                             }
                             return query;
                         }, []);
 
-        query = _global.params
+        query = _global.elements
                     .filter(obj => obj.type === 'checkbox')
                     .reduce((query, obj) => {
                         const val = $("#" + obj.id).is(":checked") ? "y" : "";
@@ -434,7 +430,7 @@ $(function() {
 
     if (_global.getParam('data')) {
         let umlType;
-        _global.params.forEach(obj => {
+        _global.elements.forEach(obj => {
             if (obj.value === null || obj.value === undefined) {
                 return;
             }
@@ -458,6 +454,20 @@ $(function() {
 });
 </script>
 <script>
+    function visibleHeader() {
+        return $('.srch-div').is(':visible');
+    }
+
+    function fixUnFoldButton() {
+        const $btnUnFold = $('#btnUnFold');
+        $btnUnFold.css({position:'fixed', top:'5px'});
+        return $btnUnFold;
+    }
+
+    function isFixedInput() {
+        return $('#chkFixedInput').is(':checked');
+    }
+
     function initOpts(args) {
         const umlType = $("#umlType").val();
 
