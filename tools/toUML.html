@@ -199,32 +199,35 @@ $(function() {
             showDepth: 0,
             caller: ''
         },
+        type: {
+            input: 'input',
+            checkbox: 'checkbox',
+            select: 'select'
+        },
         uml: '',
         umlData: '',
         vw: 0,
     };
 
     _global.elements = function() {
-        const _input = "input";
-        const _checkbox = "checkbox";
-        const _select = "select";
+        const _type = _global.type;
         const _elements = [
-            { pid: "d", id: "data", value: "", type: _input, enc: true },
-            { pid: "hi", id: "highlights", value: "", type: _input, enc: true },
-            { pid: "vi", id: "visibles", value: "", type: _input, enc: true },
-            { pid: "cal", id: "compArrLen", value: "", type: _input, exec: true },
-            { pid: "col", id: "compObjLen", value: "", type: _input, exec: true },
-            { pid: "z", id: "zoom", value: "", type: _input },
-            { pid: "cs", id: "chkShadow", value: "", type: _checkbox, exec: true },
-            { pid: "cd", id: "chkDepth", value: "", type: _checkbox, exec: true },
-            { pid: "ne", id: "checkNoEmpty", value: "", type: _checkbox, exec: true },
-            { pid: "cr", id: "chkRegex", value: "", type: _checkbox, exec: true },
-            { pid: "ca", id: "chkCompArr", value: "", type: _checkbox, exec: true },
-            { pid: "co", id: "chkCompObj", value: "", type: _checkbox, exec: true },
-            { pid: "f", id: "chkFixedInput", value: "", type: _checkbox },
-            { pid: "t", id: "umlType", value: "", type: _select, exec: true },
-            { pid: "nd", id: "nodeDepth", value: "", type: _select, exec: true },
-            { pid: "sd", id: "showDepth", value: "", type: _select, exec: true },
+            { pid: "d", id: "data", value: "", type: _type.input, enc: true },
+            { pid: "hi", id: "highlights", value: "", type: _type.input, enc: true },
+            { pid: "vi", id: "visibles", value: "", type: _type.input, enc: true },
+            { pid: "cal", id: "compArrLen", value: "", type: _type.input, exec: true },
+            { pid: "col", id: "compObjLen", value: "", type: _type.input, exec: true },
+            { pid: "z", id: "zoom", value: "", type: _type.input },
+            { pid: "cs", id: "chkShadow", value: "", type: _type.checkbox, exec: true },
+            { pid: "cd", id: "chkDepth", value: "", type: _type.checkbox, exec: true },
+            { pid: "ne", id: "checkNoEmpty", value: "", type: _type.checkbox, exec: true },
+            { pid: "cr", id: "chkRegex", value: "", type: _type.checkbox, exec: true },
+            { pid: "ca", id: "chkCompArr", value: "", type: _type.checkbox, exec: true },
+            { pid: "co", id: "chkCompObj", value: "", type: _type.checkbox, exec: true },
+            { pid: "f", id: "chkFixedInput", value: "", type: _type.checkbox },
+            { pid: "t", id: "umlType", value: "", type: _type.select, exec: true },
+            { pid: "nd", id: "nodeDepth", value: "", type: _type.select, exec: true },
+            { pid: "sd", id: "showDepth", value: "", type: _type.select, exec: true },
         ];
 
         const url = new URL(location.href);
@@ -391,7 +394,7 @@ $(function() {
         }
 
         let query = _global.elements
-                        .filter(obj => obj.type === 'input' || obj.type === 'select')
+                        .filter(obj => obj.type === _global.type.input || obj.type === _global.type.select)
                         .reduce((query, obj) => {
                             let val = document.getElementById(obj.id).value;
                             if (val) {
@@ -403,7 +406,7 @@ $(function() {
                         }, []);
 
         query = _global.elements
-                    .filter(obj => obj.type === 'checkbox')
+                    .filter(obj => obj.type === _global.type.checkbox)
                     .reduce((query, obj) => {
                         const val = $("#" + obj.id).is(":checked") ? "y" : "";
 
@@ -439,10 +442,10 @@ $(function() {
                 umlType = obj.value;
             }
 
-            if (obj.type === 'input') {
+            if (obj.type === _global.type.input) {
                 document.getElementById(obj.id).value = obj.value;
 
-            } else if (obj.type === 'checkbox') {
+            } else if (obj.type === _global.type.checkbox) {
                 document.getElementById(obj.id).checked = true;
             }
         });
@@ -538,6 +541,7 @@ $(function() {
                     const tmpDepth = getMaxDepth(o, depth);
                     if (tmpDepth > maxDepth) maxDepth = tmpDepth;
                 });
+
             } else if (typeof obj === "object") {
                 const keys = Object.keys(obj);
                 keys.forEach(k => {
