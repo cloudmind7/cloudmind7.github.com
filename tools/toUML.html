@@ -81,7 +81,7 @@
             <span class="checkmark" title="비어있는 Depth 제거">E</span>
         </label>
         <label class="check">
-            <input type="checkbox" id="chkFixedInput" />
+            <input type="checkbox" id="chkFixedInput" checked />
             <span class="checkmark" title="데이터 입력란 리사이징 유지">F</span>
         </label>
         <label for="nodeDepth" class="mindmap wbs">Focus: </label>
@@ -401,7 +401,7 @@ $(function() {
         query = _global.elements
             .filter(obj => obj.type === _global.type.checkbox)
             .reduce((query, obj) => {
-                const val = $("#" + obj.id).is(":checked") ? "y" : "";
+                const val = $("#" + obj.id).is(":checked") ? "y" : "n";
 
                 if (val) {
                     query.push(`${obj.pid}=${val}`);
@@ -439,12 +439,19 @@ $(function() {
                 document.getElementById(obj.id).value = obj.value;
 
             } else if (obj.type === _global.type.checkbox) {
-                document.getElementById(obj.id).checked = true;
+                const checked = (obj.value === 'y');
+                document.getElementById(obj.id).checked = checked;
             }
         });
 
-        _global.getParam('chkCompArr') && $("#chkCompArr").prop("checked", true) && $("#compArrLen").show();
-        _global.getParam('chkCompObj') && $("#chkCompObj").prop("checked", true) && $("#compObjLen").show();
+        if (_global.getParam('chkCompArr') === 'y') {
+            $("#chkCompArr").prop("checked", true) && $("#compArrLen").show();
+        }
+
+        if (_global.getParam('chkCompObj') === 'y') {
+            $("#chkCompObj").prop("checked", true) && $("#compObjLen").show();
+        }
+
         $("#umlType").val(umlType).prop("selected", true).trigger("change");
     }
 });
