@@ -577,7 +577,6 @@ function jsonOpts(args) {
 
     let data = opts.data = parseJson(opts);
     $("#data").val(JSON.stringify(data, null, "\t"));
-    const maxDepth = getMaxDepth(opts.data);
 
     const visibles = $("#visibles").val();
     if (visibles.trim()) {
@@ -597,6 +596,7 @@ function jsonOpts(args) {
         }
     }
 
+    let maxDepth = getMaxDepth(opts.data);
     if (showDepth === Infinity || showDepth > maxDepth) {
         showDepth = opts.showDepth = maxDepth;
     }
