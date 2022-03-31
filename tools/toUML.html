@@ -205,22 +205,22 @@ $(function() {
     _global.elements = function() {
         const _type = _global.type;
         const _elements = [
-            { pid: "d", id: "data", value: "", type: _type.input, enc: true },
-            { pid: "hi", id: "highlights", value: "", type: _type.input, enc: true },
-            { pid: "vi", id: "visibles", value: "", type: _type.input, enc: true },
-            { pid: "cal", id: "compArrLen", value: "", type: _type.input, exec: true },
-            { pid: "col", id: "compObjLen", value: "", type: _type.input, exec: true },
-            { pid: "z", id: "zoom", value: "", type: _type.input },
-            { pid: "cs", id: "chkShadow", value: "", type: _type.checkbox, exec: true },
-            { pid: "cd", id: "chkDepth", value: "", type: _type.checkbox, exec: true },
-            { pid: "ne", id: "checkNoEmpty", value: "", type: _type.checkbox, exec: true },
-            { pid: "cr", id: "chkRegex", value: "", type: _type.checkbox, exec: true },
-            { pid: "ca", id: "chkCompArr", value: "", type: _type.checkbox, exec: true },
-            { pid: "co", id: "chkCompObj", value: "", type: _type.checkbox, exec: true },
-            { pid: "f", id: "chkFixedInput", value: "", type: _type.checkbox },
-            { pid: "t", id: "umlType", value: "", type: _type.select, exec: true },
-            { pid: "nd", id: "nodeDepth", value: "", type: _type.select, exec: true },
-            { pid: "sd", id: "showDepth", value: "", type: _type.select, exec: true },
+            { id: "data", pid: "d", value: "", type: _type.input, enc: true },
+            { id: "highlights", pid: "hi", value: "", type: _type.input, enc: true },
+            { id: "visibles", pid: "vi", value: "", type: _type.input, enc: true },
+            { id: "compArrLen", pid: "cal", value: "", type: _type.input, exec: true },
+            { id: "compObjLen", pid: "col", value: "", type: _type.input, exec: true },
+            { id: "zoom", pid: "z", value: "", type: _type.input },
+            { id: "chkShadow", pid: "cs", value: "", type: _type.checkbox, exec: true },
+            { id: "chkDepth", pid: "cd", value: "", type: _type.checkbox, exec: true },
+            { id: "checkNoEmpty", pid: "ne", value: "", type: _type.checkbox, exec: true },
+            { id: "chkRegex", pid: "cr", value: "", type: _type.checkbox, exec: true },
+            { id: "chkCompArr", pid: "ca", value: "", type: _type.checkbox, exec: true },
+            { id: "chkCompObj", pid: "co", value: "", type: _type.checkbox, exec: true },
+            { id: "chkFixedInput", pid: "f", value: "", type: _type.checkbox },
+            { id: "umlType", pid: "t", value: "", type: _type.select, exec: true },
+            { id: "nodeDepth", pid: "nd", value: "", type: _type.select, exec: true },
+            { id: "showDepth", pid: "sd", value: "", type: _type.select, exec: true },
         ];
 
         const url = new URL(location.href);
@@ -531,31 +531,6 @@ function wbsOpts(args) {
 }
 
 function jsonOpts(args) {
-    const getMaxDepth = (obj, depth = 0) => {
-        let maxDepth = 0;
-
-        if (Array.isArray(obj)) {
-            obj.forEach(o => {
-                const tmpDepth = getMaxDepth(o, depth);
-                if (tmpDepth > maxDepth) maxDepth = tmpDepth;
-            });
-
-        } else if (typeof obj === "object") {
-            const keys = Object.keys(obj);
-            keys.forEach(k => {
-                if (obj[k] === null) {
-                    obj[k] = "null";
-                    return;
-                }
-                const tmpDepth = getMaxDepth(obj[k], depth + 1);
-                if (tmpDepth > maxDepth) maxDepth = tmpDepth;
-            });
-        }
-
-        maxDepth = (maxDepth > depth) ? maxDepth : depth;
-        return maxDepth;
-    };
-
     const btnClicked = (args.caller === _global.type.button);
     let showDepth = !btnClicked && $("#showDepth").val() || _global.getParam('showDepth') || Infinity;
 
@@ -566,34 +541,22 @@ function jsonOpts(args) {
         compObjLen: $("#compObjLen").val()
     };
 
-    if (!opts.compArrLen || opts.compArrLen < 1) {
-        opts.compArrLen = 1;
-        $("#compArrLen").val(1);
+    const setMinValue = (id, min) => {
+        if (!opts[id] || opts[id] < min) {
+            opts[id] = min;
+            $('#' + id).val(min);
+        }
     }
-    if (!opts.compObjLen || opts.compObjLen < 1) {
-        opts.compObjLen = 1;
-        $("#compObjLen").val(1);
-    }
+
+    setMinValue('compArrLen', 1);
+    setMinValue('compObjLen', 1);
 
     let data = opts.data = parseJson(opts);
     $("#data").val(JSON.stringify(data, null, "\t"));
 
     const visibles = $("#visibles").val();
     if (visibles.trim()) {
-        const keys = parseJsonInput(visibles, data);
-
-        const result = keys.reduce((mock, arr) => {
-            const obj = getExistChild(arr, data);
-            if (obj !== undefined) {
-                const key = (arr.length == 1) ? arr[0] : arr[arr.length - 1];
-                mock.push({[key]: obj});
-            }
-            return mock;
-        }, []);
-
-        if (result.length) {
-            opts.data = (result.length == 1) ? result[0] : result;
-        }
+        setJsonViewData(visibles, opts);
     }
 
     let maxDepth = getMaxDepth(opts.data);
@@ -612,6 +575,48 @@ function jsonOpts(args) {
     }
 
     return opts;
+}
+
+function setJsonViewData(input, opts) {
+    const keys = parseJsonInput(input, opts.data);
+
+    const result = keys.reduce((mock, arr) => {
+        const obj = getExistChild(arr, opts.data);
+        if (obj !== undefined) {
+            const key = (arr.length == 1) ? arr[0] : arr[arr.length - 1];
+            mock.push({[key]: obj});
+        }
+        return mock;
+    }, []);
+
+    if (result.length) {
+        opts.data = (result.length == 1) ? result[0] : result;
+    }
+}
+
+function getMaxDepth(obj, depth = 0) {
+    let maxDepth = 0;
+
+    if (Array.isArray(obj)) {
+        obj.forEach(o => {
+            const tmpDepth = getMaxDepth(o, depth);
+            if (tmpDepth > maxDepth) maxDepth = tmpDepth;
+        });
+
+    } else if (typeof obj === "object") {
+        const keys = Object.keys(obj);
+        keys.forEach(k => {
+            if (obj[k] === null) {
+                obj[k] = "null";
+                return;
+            }
+            const tmpDepth = getMaxDepth(obj[k], depth + 1);
+            if (tmpDepth > maxDepth) maxDepth = tmpDepth;
+        });
+    }
+
+    maxDepth = (maxDepth > depth) ? maxDepth : depth;
+    return maxDepth;
 }
 
 function parseJson({ inputText }) {
@@ -693,6 +698,84 @@ function getExistChild(keys, compare) {
     return keys.reduce((obj, k) => obj && obj[k], compare);
 }
 
+function parseJsonInput(str, compare) {
+    return str.replace(/^(.*[^\s])\*\*\s*$/gm, '$1\n$1 / **')
+        .split("\n")
+        .filter(s => s && !(s.trim().startsWith('#')))
+        .reduce((keySet, lineStr) => {
+            const multipleKeySet = parseJsonKey(lineStr, compare);
+            multipleKeySet.forEach(p => keySet.push(p));
+            return keySet;
+        }, []);
+}
+
+function parseJsonKey(str, compare) {
+    let allDepth = false;
+    const keys = str.trim().split(/\s+\/\s+/).filter(s => s.trim());
+
+    let result = keys.reduce((multipleKeySet, key) => {
+        if (allDepth) {
+            return multipleKeySet;
+        }
+
+        if (/^\*{2,}$/.test(key)) {
+            allDepth = true;
+            return appendChildKey(multipleKeySet, compare);
+
+        } else if (key === '*') {
+            return appendChildKey(multipleKeySet, compare);
+
+        } else if (key.startsWith('>')) {
+            if (key.length == 1) {
+                return multipleKeySet;
+            }
+            const k = key.substring(1, key.length).trim();
+            return findKeyHierarchy(k, compare);
+
+        } else {
+            return multipleKeySet.reduce((tmpArr, a) => {
+                if (a.length) {
+                    let parents = [...a];
+                    const obj = getExistChild(parents, compare);
+
+                    const foundKey = findKey(key, obj);
+                    foundKey.forEach(fk => {
+                        tmpArr.push([...parents, fk]);
+                    });
+
+                } else {
+                    const foundKey = findKey(key, compare);
+                    foundKey.forEach(fk => {
+                        tmpArr.push([fk]);
+                    });
+                }
+                return tmpArr;
+            }, []);
+        }
+    }, [[]]);
+
+    if (allDepth) {
+        let childArr;
+        let tmpArr = [...result];
+        while ((childArr = appendChildKey(tmpArr)).length) {
+            childArr.forEach(c => result.push(c));
+            tmpArr = childArr;
+        }
+    }
+
+    return result;
+}
+
+function appendChildKey(target, compare)  {
+    return target.reduce((tmpArr, t) => {
+        const childKeys = getChildKeys(t, compare);
+        if (childKeys && childKeys.length) {
+            childKeys.forEach(c => tmpArr.push([...t, c]));
+        }
+        return tmpArr;
+    }, []);
+}
+
 function getChildKeys(keys, compare) {
     const obj = getExistChild(keys, compare);
 
@@ -707,104 +790,29 @@ function getChildKeys(keys, compare) {
     }
 }
 
-function parseJsonInput(str, compare) {
-    return str.replace(/^(.*[^\s])\*\*\s*$/gm, '$1\n$1 / **')
-        .split("\n")
-        .filter(s => s && !(s.trim().startsWith('#')))
-        .reduce((arr, s) => {
-            const splits = s.trim().split(/\s+\/\s+/).filter(s => s);
-            const parsed = parseJsonKey(splits, compare);
-            parsed.forEach(p => {
-                arr.push(p);
-            });
-            return arr;
-        }, []);
-}
-
-function parseJsonKey(keys, compare) {
-    let allDepth = false;
-
-    const getAllKey = (target) => {
-        return target.reduce((tmpArr, t) => {
-            const childKeys = getChildKeys(t, compare);
-            if (childKeys && childKeys.length) {
-                childKeys.forEach(c => tmpArr.push([...t, c]));
-            }
-            return tmpArr;
-        }, []);
-    };
-
-    let results = keys.reduce((arr, k) => {
-        if (allDepth) {
-            return arr;
-        }
-
-        let keyHierarchy;
-        if (/^\*{2,}$/.test(k)) {
-            allDepth = true;
-            keyHierarchy = getAllKey(arr);
-
-        } else if (k === '*') {
-            keyHierarchy = getAllKey(arr);
-
-        } else if (k.startsWith('>')) {
-            if (k.length == 1) {
-                return arr;
-            }
-            const key = k.substring(1, k.length).trim();
-            keyHierarchy = getKeyHierarchy(compare, getRegexKey(key));
-
-        } else {
-            keyHierarchy = arr.reduce((tmpArr, a) => {
-                if (a.length) {
-                    let parents = [...a];
-                    const obj = getExistChild(parents, compare);
-
-                    const foundKey = findKey(obj, k);
-                    foundKey.forEach(fk => {
-                        tmpArr.push([...parents, fk]);
-                    });
-
-                } else {
-                    const foundKey = findKey(compare, k);
-                    foundKey.forEach(fk => {
-                        tmpArr.push([fk]);
-                    });
-                }
-                return tmpArr;
-            }, []);
-        }
-        return keyHierarchy;
-    }, [[]]);
-
-    if (allDepth) {
-        let childArr;
-        let tmpArr = [...results];
-        while ((childArr = getAllKey(tmpArr)).length) {
-            childArr.forEach(c => results.push(c));
-            tmpArr = childArr;
-        }
+function findKeyHierarchy(key, obj, crumbs = [], results = []) {
+    if (typeof obj !== 'object') {
+        throw new Error("JSON 키 검색을 위한 객체가 올바르지 않습니다.");
     }
+
+    if (typeof key === 'string') {
+        key = getRegexKey(key);
+    }
+
+    Object.keys(obj).forEach(k => {
+        if (key.test(k)) {
+            results.push([...crumbs, k]);
+        }
+
+        if (typeof obj[k] === 'object') {
+            findKeyHierarchy(key, obj[k], [...crumbs, k], results);
+        }
+    });
 
     return results;
 }
 
-function getKeyHierarchy(obj, RegexKey, crumbs = [], results = []) {
-    if (typeof obj === 'object') {
-        Object.keys(obj).forEach(k => {
-            if (RegexKey.test(k)) {
-                results.push([...crumbs, k]);
-            }
-
-            if (typeof obj[k] === 'object') {
-                getKeyHierarchy(obj[k], RegexKey, [...crumbs, k], results);
-            }
-        });
-    }
-    return results;
-}
-
-function findKey(obj, key) {
+function findKey(key, obj) {
     const RegexKey = getRegexKey(key);
     return findRegexKey(obj, RegexKey);
 }
@@ -910,9 +918,9 @@ function formatPlantUML(opts) {
 
     let data =
         `@start${umlType}
-    ${umlStyle}
-    ${formatData}
-    @end${umlType}`;
+        ${umlStyle}
+        ${formatData}
+        @end${umlType}`;
 
     data = _global.umlData = data.replace(/^[\t\s]+([^\t\s].*)$/gm, "$1");
     return data;
@@ -1081,10 +1089,10 @@ function jsonStyle(opts) {
         return "";
     }
 
-    const list = parseJsonInput(input, opts.data);
+    const keys = parseJsonInput(input, opts.data);
 
-    if (list && list.length) {
-        return list.map(a => a.map(b => `"${b}"`))
+    if (keys.length) {
+        return keys.map(a => a.map(b => `"${b}"`))
             .map(a => "#highlight " + a.join(" / ")).join("\n");
 
     } else {
