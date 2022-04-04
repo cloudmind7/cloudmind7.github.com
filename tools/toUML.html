@@ -757,7 +757,7 @@ function parseJsonKey(str, compare) {
     if (allDepth) {
         let childArr;
         let tmpArr = [...result];
-        while ((childArr = appendChildKey(tmpArr)).length) {
+        while ((childArr = appendChildKey(tmpArr, compare)).length) {
             childArr.forEach(c => result.push(c));
             tmpArr = childArr;
         }
