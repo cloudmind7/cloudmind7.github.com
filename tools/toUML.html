@@ -244,13 +244,13 @@ $(function() {
     $(".btn-fold").click(function() {
         if (visibleHeader()) {
             $('.srch').slideToggle('fast', function() {
-                $('body').css('paddingTop', '0px');
                 fixUnFoldButton().show();
+                replacePaddingTop();
             });
         } else {
-            $('.srch').slideToggle('fast', function() {
-                $('body').css('paddingTop', '35px');
+            $('.srch').slideToggle('fast', function(){
                 $('#btnUnFold').hide();
+                replacePaddingTop();
             });
         }
     });
@@ -452,7 +452,23 @@ $(function() {
 
         $("#umlType").val(umlType).prop("selected", true).trigger("change");
     }
+
+    setObserver(['data', 'highlights', 'visibles'], replacePaddingTop);
 });
+
+function setObserver(target, callback) {
+    const observer = new MutationObserver(callback);
+    target.forEach(id => {
+        observer.observe(document.getElementById(id), { attributes: true });
+    });
+}
+
+function replacePaddingTop(mutations) {
+    let height = document.querySelector('.srch').offsetHeight;
+    height = !height? 35 : height;
+    document.body.style.paddingTop = height - 18 + 'px';
+}
+
 function visibleHeader() {
     return $('.srch-div').is(':visible');
 }
