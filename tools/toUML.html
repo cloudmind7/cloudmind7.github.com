@@ -818,7 +818,7 @@ function findKeyHierarchy(key, obj, crumbs = [], results = []) {
             results.push([...crumbs, k]);
         }
 
-        if (typeof obj[k] === 'object') {
+        if (obj[k] !== null && typeof obj[k] === 'object') {
             findKeyHierarchy(key, obj[k], [...crumbs, k], results);
         }
     });
