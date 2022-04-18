@@ -112,6 +112,7 @@
             <button id="shareBtn" class="btn" title="화면 공유용 URL을 생성 후 클립보드 저장">Share</button>
             <button id="copyBtn" class="btn" title="화면을 JSON 데이터로 클립보드에 저장">Copy</button>
             <button id="sampleBtn" class="btn" title="샘플데이터 실행">Sample</button>
+            <button id="guideBtn" class="btn" title="가이드 실행">Guide</button>
         </div>
     </div>
     <hr>
@@ -405,6 +406,10 @@ $(function() {
         };
 
         samples["plantUML"]();
+    });
+
+    $("#guideBtn").click(function() {
+        window.open("https://plantuml.com/ko/guide");
     });
 
     $("#shareBtn").click(function() {
