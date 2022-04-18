@@ -97,8 +97,8 @@
             <select id="nodeDepth" class="mindmap wbs" title="강조 표시 레벨 선택">
                 <option value=""> -</option>
             </select>
-            <label class="label json mindmap wbs" for="showDepth">Show: </label>
-            <select id="showDepth" class="json mindmap wbs" title="화면에 표시할 단계">
+            <label class="label" for="showDepth">Show: </label>
+            <select id="showDepth" title="화면에 표시할 단계">
                 <option value=""> -</option>
             </select>
             <label class="label" for="zoomIn">Zoom: </label>
@@ -111,7 +111,7 @@
             <button id="downloadBtn" class="btn" onclick="download()" title="화면 이미지 저장">Save</button>
             <button id="shareBtn" class="btn" title="화면 공유용 URL을 생성 후 클립보드 저장">Share</button>
             <button id="copyBtn" class="btn" title="화면을 JSON 데이터로 클립보드에 저장">Copy</button>
-            <button id="sampleBtn" class="btn json mindmap wbs" title="샘플데이터 실행">Sample</button>
+            <button id="sampleBtn" class="btn" title="샘플데이터 실행">Sample</button>
         </div>
     </div>
     <hr>
@@ -145,6 +145,7 @@
       + <span class="bg-blue">Focus</span>: 강조 표시할 노드의 깊이
 
   <span class="ttl">공통</span>
+      + <span class="bg-blue">[T]</span>: 검색란 투명 처리
       + <span class="bg-blue">[F]</span>: 데이터 입력란 리사이징 유지
       + <span class="bg-blue">Show</span>: 화면에 표시할 단계 선택
         . 선택된 값이 마지막 Depth(전체표시)가 아닐 경우 배경이 <span class="bg-yellow entry">노란색</span>
@@ -395,7 +396,8 @@ $(function() {
         const params = {
             mindmap: "?d=JYOwxgNgrgJgpgZwFwCgCQYD2BbbmQB0AngIbYQrwTABucATiQEYSKob4AucAHp+mmAx6cAGZoAFp3LoABPNmYonAA7K0BdGpbAwJTsHwDOjEAk5EVcSdIgBWASpKNsyAWmcBzBASwqiYAgIaESI7l4+gcEwwJwkALSYnPEwmGC+QeH03hkITpwSGJloJRG59JhJ7vmFAPQiCEr0YGElHtk+nnCEcQgA1gQQLGgAmgCiAMpZORLC7hIi4vWITS0ItRJwJPD0BDwybVLkdgScaQRdIAz61iCY7iAkNPFnYGhO9AYkFG0qFWsIUCeeJ4eBocz0XScIA&z=0&t=mindmap&nd=1&sd=5",
             wbs: "?d=JYOwxgNgrgJgpgZwFwCgCQYD2BbbmQB0AngIbYQrwTABucATiQEYSKob4AucAHp+mmAx6cAGZoAFp3LoABPNmYonAA7K0BdGpbAwJTsHwDOjEAk5EVcSdIgBWASpKNsyAWmcBzBASwqiYAgIaESI7l4+gcEwwJwkALSYnPEwmGC+QeH03hkITpwSGJloJRG59JhJ7vmFAPQiCEr0YGElHtk+nnCEcQgA1gQQLGgAmgCiAMpZORLC7hIi4vWITS0ItRJwJPD0BDwybVLkdgScaQRdIAz61iCY7iAkNPFnYGhO9AYkFG0qFWsIUCeeJ4eBocz0XScIA&z=0&t=wbs&nd=2&sd=5",
-            json: "?d=N4KAkARATgpgNjAhgZxgEUQFxhAXAAggCYAGARgBYBaEgNiqIFYAVEk3NjkgOjZIC0IAGnAQAJjAC2Aezz5MUAK4wRkAA4woyaQDs5oMJACWYuWSIBmCo1WQdiSTgIQAUtIAWO-Gmk5bENXddGGR9cEMIIMc5CAAONipzCyprWgB2YXDIGQAjIwQY2LS0xMtSqwhwgF9-KUR8uQBtLIgAKzEAARgADwc1BG4AY2lJTMNIdq7eyX6YbmkoAHNKwwBdfzEsGAB5ADMAISMoTHcYsgBOeJoyGiJWdk42XjZBf1hFo2RsWFMCBWVao4ljAdIMAJ4AYV0mEQg0woQIzXGBnGEHs0WcLkQOhg3l8Y1RgWChVisSojAppXMBIisDgWCMumQ7iMahiyDU0kUqBWhhqWRREXRTkILm5mCMXh8fiy6iCOMKxXKVKINMgdIZTJZbOcakQsB0mF5YCq4VW4FNVSAA&hi=A4UwTgzg9gdgBAejsAFlAVIu6BQA+GAQwFsR8RjCBLAG3VzwvEyQEZ6g&cal=5&col=5&z=0&t=json&sd=3"
+            json: "?d=N4KAkARATgpgNjAhgZxgEUQFxhAXAAggCYAGARgBYBaEgNiqIFYAVEk3NjkgOjZIC0IAGnAQAJjAC2Aezz5MUAK4wRkAA4woyaQDs5oMJACWYuWSIBmCo1WQdiSTgIQAUtIAWO-Gmk5bENXddGGR9cEMIIMc5CAAONipzCyprWgB2YXDIGQAjIwQY2LS0xMtSqwhwgF9-KUR8uQBtLIgAKzEAARgADwc1BG4AY2lJTMNIdq7eyX6YbmkoAHNKwwBdfzEsGAB5ADMAISMoTHcYsgBOeJoyGiJWdk42XjZBf1hFo2RsWFMCBWVao4ljAdIMAJ4AYV0mEQg0woQIzXGBnGEHs0WcLkQOhg3l8Y1RgWChVisSojAppXMBIisDgWCMumQ7iMahiyDU0kUqBWhhqWRREXRTkILm5mCMXh8fiy6iCOMKxXKVKINMgdIZTJZbOcakQsB0mF5YCq4VW4FNVSAA&hi=A4UwTgzg9gdgBAejsAFlAVIu6BQA+GAQwFsR8RjCBLAG3VzwvEyQEZ6g&cal=5&col=5&z=0&t=json&sd=3",
+            uml: "?d=AIZwLghgTmCuC2AbAUOaZlQKYAcsQwAJCAuAFS3EJAHt4swALASwDsBzAbmWOOYDNCACgDKdBiw6EA7llZgZUGhwD8ASkJM5w1jTU9exAMQ4IiLO2xySAeQDS3Q8QBG2CAGsDxOQBMBXwgBaAD4AOXtHXhIAQXMYQgAiAFEoJSgZZiZCRGV2TSwADzAE7mw8AhkWc2ExeiY2PNl5RVyMrJypMEKwdUJmEGEAT0oNXQUhXX0QgHpp+ih2LB9qLpxZ7hi4hQSRWABjPcoQEtQwGhxkYF8ERCA&z=0&t=uml&cs=n&cd=n&ne=n&cr=n&ca=n&co=n&cf=y&ct=n"
         }[umlType];
 
         const samples = {
