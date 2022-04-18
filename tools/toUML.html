@@ -53,6 +53,7 @@
             <option selected value="json">JSON</option>
             <option value="mindmap">MindMap</option>
             <option value="wbs">Tree</option>
+            <option value="uml">UML</option>
         </select>
         <label class="check json">
             <input type="checkbox" id="chkCompArr" />
@@ -88,8 +89,8 @@
         <select id="nodeDepth" class="mindmap wbs" title="강조 표시 레벨 선택">
             <option value=""> -</option>
         </select>
-        <label class="label" for="showDepth">Show: </label>
-        <select id="showDepth" title="화면에 표시할 단계">
+        <label class="label json mindmap wbs" for="showDepth">Show: </label>
+        <select id="showDepth" class="json mindmap wbs" title="화면에 표시할 단계">
             <option value=""> -</option>
         </select>
         <label class="label" for="zoomIn">Zoom: </label>
@@ -102,7 +103,7 @@
         <button id="downloadBtn" class="btn" onclick="download()" title="화면 이미지 저장">Save</button>
         <button id="shareBtn" class="btn" title="화면 공유용 URL을 생성 후 클립보드 저장">Share</button>
         <button id="copyBtn" class="btn" title="화면을 JSON 데이터로 클립보드에 저장">Copy</button>
-        <button id="sampleBtn" class="btn" title="샘플데이터 실행">Sample</button>
+        <button id="sampleBtn" class="btn json mindmap wbs" title="샘플데이터 실행">Sample</button>
     </div>
     <hr>
 </header>
@@ -328,41 +329,45 @@ $(function() {
     $(executableIds).focus(function() {
         storedVal = $(this).val();
     })
-        .change(function() {
-            if (!isEmptyInput("data") && !isValidInput('data')) {
-                $(this).val(storedVal);
-                return;
-            }
+    .change(function() {
+        if (!isEmptyInput("data") && !isValidInput('data')) {
+            $(this).val(storedVal);
+            return;
+        }
 
-            if (this.id === "showDepth") {
-                const $sd = $("#showDepth");
-                const isLast = $sd.children("option:selected").val() == $sd.children("option:last").val();
+        if (this.id === "showDepth") {
+            const $sd = $("#showDepth");
+            const isLast = $sd.children("option:selected").val() == $sd.children("option:last").val();
 
-                if (isLast) {
-                    $sd.removeClass("bg-yellow");
-                } else {
-                    $sd.addClass("bg-yellow");
-                }
-            }
-
-            const umlType = $("#umlType").val();
-            if (umlType === "json") {
-                $(".mindmap").hide();
-                $(".json").css("display", "inline-block");
-                $("#compArrLen").css("display",
-                    $("#chkCompArr").is(":checked") ? "inline-block" : "none"
-                );
-                $("#compObjLen").css("display",
-                    $("#chkCompObj").is(":checked") ? "inline-block" : "none"
-                );
-
+            if (isLast) {
+                $sd.removeClass("bg-yellow");
             } else {
-                $(".mindmap").show();
-                $(".json").val("").hide();
+                $sd.addClass("bg-yellow");
             }
+        }
 
-            !isEmptyInput("data") && execBtn();
-        });
+        const umlType = $("#umlType").val();
+        if (umlType === "json") {
+            $(".mindmap").hide();
+            $(".json").css("display", "inline-block");
+            $("#compArrLen").css("display",
+                $("#chkCompArr").is(":checked") ? "inline-block" : "none"
+            );
+            $("#compObjLen").css("display",
+                $("#chkCompObj").is(":checked") ? "inline-block" : "none"
+            );
+
+        } else if (umlType === "uml") {
+            $(".mindmap").val("").hide();
+            $(".json").val("").hide();
+
+        } else {
+            $(".mindmap").show();
+            $(".json").val("").hide();
+        }
+
+        !isEmptyInput("data") && execBtn();
+    });
 
     $("#sampleBtn").click(function() {
         const umlType = $("#umlType").val();
@@ -489,7 +494,8 @@ function initOpts(args) {
     return {
         mindmap: mindmapOpts,
         wbs: wbsOpts,
-        json: jsonOpts
+        json: jsonOpts,
+        uml: umlOpts
     } [umlType](args);
 }
 
@@ -589,6 +595,13 @@ function jsonOpts(args) {
     }
 
     return opts;
+}
+
+function umlOpts(args) {
+    return {
+        inputText: $("#data").val(),
+        data: $("#data").val()
+    }
 }
 
 function setJsonViewData(input, opts) {
@@ -925,16 +938,21 @@ function showUMLImage(uml) {
 }
 
 function formatPlantUML(opts) {
-    const formatData = getUmlFormat(opts);
-    const umlStyle = getUmlStyle(opts);
-
+    let data;
     const umlType = $("#umlType").val();
 
-    let data =
-        `@start${umlType}
-        ${umlStyle}
-        ${formatData}
-        @end${umlType}`;
+    if (umlType === 'uml') {
+        data = opts.data;
+
+    } else {
+        const formatData = getUmlFormat(opts);
+        const umlStyle = getUmlStyle(opts);
+
+        data = `@start${umlType}
+            ${umlStyle}
+            ${formatData}
+            @end${umlType}`;
+    }
 
     data = _global.umlData = data.replace(/^[\t\s]+([^\t\s].*)$/gm, "$1");
     return data;
@@ -945,7 +963,8 @@ function getUmlFormat(opts) {
     return {
         mindmap: mindmapFormat,
         wbs: wbsFormat,
-        json: jsonFormat
+        json: jsonFormat,
+        uml: umlFormat
     }[umlType](opts);
 }
 
