@@ -112,7 +112,6 @@
             <button id="shareBtn" class="btn" title="화면 공유용 URL을 생성 후 클립보드 저장">Share</button>
             <button id="copyBtn" class="btn" title="화면의 데이터를 클립보드에 저장">Copy</button>
             <button id="sampleBtn" class="btn" title="샘플데이터 실행">Sample</button>
-            <button id="guideBtn" class="btn" title="가이드 실행">Guide</button>
         </div>
     </div>
     <hr>
@@ -158,6 +157,10 @@
 
   <span class="ttl">테스트: </span>
     = <span class="bg-gray entry">Type</span> 선택 후 <span class="bg-gray entry">Sample</span> 버튼 클릭
+
+  <span class="ttl">작성 가이드: </span>
+    * <a href="https://plantuml.com/ko/guide" target="_blank">plantuml guide</a>
+    * <a href="https://real-world-plantuml.com/" target="_blank">real-world-plantuml</a>
 </pre>
 </main>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
@@ -406,10 +409,6 @@ $(function() {
         };
 
         samples["plantUML"]();
-    });
-
-    $("#guideBtn").click(function() {
-        window.open("https://plantuml.com/ko/guide");
     });
 
     $("#shareBtn").click(function() {
