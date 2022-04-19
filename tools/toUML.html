@@ -19,13 +19,15 @@
     .check input {position: absolute;opacity: 0;cursor: pointer;height: 0;width: 0;}
     .check input:checked ~ .checkmark {background-color: rgb(116, 216, 255);}
     .checkmark {text-align: center;position: absolute;top: 0;left: 0;font-size: 1.2em;line-height: 27px;height: 30px;width: 30px;background-color: white;border: 1px solid rgb(118, 118, 118);}
-    .input {min-width: 120px;min-height: 20px;width: 120px;height: 20px;padding: 5px;margin: 0;vertical-align: middle;}
-    .square {height: 27px;width: 27px;}
+    .input {min-width: 120px;min-height: 20px;width: 120px;height: 20px;padding: 5px;margin: 0;vertical-align: middle;border: 1px solid #767676FF;}
+    .input:focus, select:focus, .square:focus {outline: none !important;border: 2px solid #00bbff;}
+    /*.input:focus {outline: none !important;border-color: #00baff;}*/
+    .square {height: 27px;width: 27px;border: 1px solid #767676FF;}
     .comp {display: none;}
     .view {padding: 15px;text-align: center;}
     .view pre {line-height: 22px;text-align: left;}
     .ttl {font-size: 1em;font-weight: bold;padding: 2px;}
-    .mindmap {display: none;}
+    .mindmap, .uml {display: none;}
     .loading-div {position: fixed;top: 0;left: 0;z-index: 10;width: 100%;height: 100%;background: #fff;opacity: .85;filter: alpha(opacity=85);}
     .loading-img {position: relative;top: 40%;}
     /*.loading-img {position: relative;top: 40%;left: 50%;margin-left: -64px;}*/
@@ -36,16 +38,21 @@
     .entry {padding: 2px;}
     .btn {width: 60px;height: 30px;cursor: pointer;position: relative;border: 1px solid #000;}
     .zoom {width: 30px;}
-    .btn-exec {margin-left: 5px;background-color: #93e2ff;}
+    .btn-exec {background-color: #93e2ff;}
     .btn-fold {cursor: pointer;border: 0;outline: 0;width: 25px;min-width: 25px;min-height: 25px;background-color: #93e2ff;font-weight: bold;}
     .unfold {height: 25px;display: none;}
+    .checkbox-table-div {z-index: 10;display: none;max-height: 300px;overflow: scroll;position: fixed;background-color: #fff;border:1px solid #767676FF;}
+    .checkbox-table-div ul {padding: 15px 10px;list-style-type: none;}
+    .checkbox-table-div ul li {line-height: 10px;}
+    .tbl-close-div {position: fixed;line-height: 0;}
+    .tbl-close {cursor:pointer;color: #fff; border:0; width: 100%;height: 25px;margin:0; background-color: #93e2ff;}
 </style>
 <body>
 <button class="btn-fold unfold shadow" id="btnUnFold">&or;</button>
 <header class="srch">
     <button class="btn-fold shadow" id="btnFold">&and;</button>
     <div class="srch-div shadow">
-        <div style="float:left">
+        <div class="input-div" style="float:left">
             <label class="check">
                 <input type="checkbox" id="chkTransInput" />
                 <span class="checkmark" title="검색란 투명 처리">T</span>
@@ -63,6 +70,8 @@
                 <option value="wbs">TREE</option>
                 <option value="uml">UML</option>
             </select>
+            <button id="execBtn" class="btn btn-exec">Run</button>
+            <button id="loadBtn" class="btn uml" title="데이터 로딩">Load</button>
             <label class="check json">
                 <input type="checkbox" id="chkCompArr" />
                 <span class="checkmark" title="배열 생략">A</span>
@@ -106,7 +115,6 @@
             <button id="zoomOut" class="btn zoom" onclick="javascript:zoomOut()" title="이미지 축소"> -</button>
             <input type="number" id="zoom" class="square" value="0" title="줌 수치" maxlength="3" />
 
-            <button id="execBtn" class="btn btn-exec">Run</button>
             <button id="resetBtn" class="btn" title="설정 및 화면 초기화">Reset</button>
             <button id="downloadBtn" class="btn" onclick="download()" title="화면 이미지 저장">Save</button>
             <button id="shareBtn" class="btn" title="화면 공유용 URL을 생성 후 클립보드 저장">Share</button>
@@ -374,7 +382,7 @@ $(function() {
 
         const umlType = $("#umlType").val();
         if (umlType === "json") {
-            $(".mindmap").hide();
+            $(".mindmap, .uml").hide();
             $(".json").css("display", "inline-block");
             $("#compArrLen").css("display",
                 $("#chkCompArr").is(":checked") ? "inline-block" : "none"
@@ -384,12 +392,13 @@ $(function() {
             );
 
         } else if (umlType === "uml") {
+            $(".uml").show();
             $(".mindmap").val("").hide();
             $(".json").val("").hide();
 
         } else {
             $(".mindmap").show();
-            $(".json").val("").hide();
+            $(".json, .uml").val("").hide();
         }
 
         !isEmptyInput("data") && execBtn();
@@ -409,6 +418,30 @@ $(function() {
         };
 
         samples["plantUML"]();
+    });
+
+    $("#loadBtn").click(function() {
+        const input = document.createElement("input");
+        input.type = "file";
+        // input.accept = "text/plain";
+        input.onchange = function (event) {
+            const file = event.target.files[0];
+            const isVaildExt = file && /.+\.xsd/.test(file.name);
+            if (! isVaildExt) {
+                alert("지원하지않는 파일 형식입니다.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function () {
+                const content = loadContents(reader.result);
+                $('#data').val(content);
+                execBtn();
+            };
+            reader.readAsText(file, /* optional */ "utf8");
+        };
+
+        input.click();
     });
 
     $("#shareBtn").click(function() {
@@ -492,6 +525,257 @@ $(function() {
 
     setObserver(['data', 'highlights', 'visibles'], replacePaddingTop);
 });
+
+function loadContents(content) {
+    const getAttributes = (str) => {
+        const getName = (v) => v.match(/(?<=name=").+?(?=")/)[0];
+        const isRequired = (v) => v.indexOf('use="required"') !== -1;
+        const matched = str.match(/(?<=<xs:attribute\s+)([\s\S\n]+?)(?=<\/xs:attribute>)/gm);
+
+        if (!matched) {
+            return [];
+        }
+
+        return matched.reduce((arr, s) => {
+            arr.push({
+                name: getName(s),
+                required: isRequired(s)
+            });
+
+            return arr;
+        }, []);
+    }
+
+    const pks = content.match(/(?<=<xs:key [^>]+>)([\s\S\n]+?)(?=<\/xs:key>)/gm).reduce((obj, f) => {
+        const tableName = f.match(/(?<=<xs:selector xpath=".\/\/)([^"]+?)(?=")/g)[0];
+        const fields = f.match(/(?<=field xpath="@)([^"]+?)(?=")/gm);
+        obj[tableName] = obj[tableName] || [];
+        obj[tableName] = obj[tableName].concat(fields);
+        return obj;
+    }, {});
+
+    const fks = content.match(/(?<=<xs:keyref )([\s\S\n]+?)(?=<\/xs:keyref>)/gm).reduce((obj, f) => {
+        const tableName = f.match(/(?<=<xs:selector xpath=".\/\/)([^"]+?)(?=")/g)[0];
+        const refer = f.match(/(?<=refer="XPK)([^"]+?)(?=")/g);
+        const fields = f.match(/(?<=field xpath="@)([^"]+?)(?=")/gm);
+        obj[tableName] = obj[tableName] || [];
+        obj[tableName].push({refer, fields})
+        return obj;
+    }, {});
+
+    const matched = content.match(/<xs:complexType [\s\S\n]+?<\/xs:complexType>/gm);
+
+    _global.tables = matched.reduce((arr, m) => {
+        const tableName = m.match(/(?<=\<xs:complexType name=").+?(?=">)/m)[0];
+        const attributes = getAttributes(m);
+        let refer = [];
+
+        pks[tableName] && pks[tableName].forEach(p => {
+            attributes.filter( a => a.name === p).forEach(a => a['pk'] = true);
+        });
+
+        fks[tableName] && fks[tableName].forEach(fk => {
+            refer = refer.concat(fk.refer);
+            fk.fields.forEach(f => {
+                attributes.filter( a => a.name === f).forEach(a => a['fk'] = true);
+            });
+        });
+
+        const table = {
+            tableName,
+            attributes,
+            refer,
+            visible: false
+        };
+
+        arr.push(table);
+        return arr;
+    }, []);
+
+    showTableSelections();
+    $('#srchTable').trigger('focus');
+    return makeEntity();
+}
+
+function makeEntity() {
+    const viewTables = _global.tables.filter(t => t.visible);
+    const relations = (viewTables.length != _global.tables.length)
+        ? viewTables.reduce((arr, table) =>  {
+                table.refer && table.refer.forEach(refName => {
+                    const exist = viewTables.filter(vt => vt.tableName === refName).length;
+                    if (exist) arr.push(`${refName.replace(/_+/g, '')} --|{ ${table.tableName.replace(/_+/g, '')}`);
+                });
+
+                return arr;
+            }, [])
+        : [];
+
+    const notes = parseInputNote(viewTables);
+
+    let uml = viewTables.map(t => {
+        const comparator = (a, b) => {
+            if ((a.fk && b.fk) || (!a.fk && !b.fk)) return 0;
+            else if (!a.fk && b.fk) return 1;
+            else return 1;
+        }
+
+        const att = t.attributes.sort(comparator).reduce((obj, a) => {
+            let atName = a.name.replace(/_+/g, ' ') + (a.fk? ' (FK)' : '');
+            if (a.pk) {
+                obj.primaryKey.push(atName);
+            } else {
+                obj.attributes.push(atName);
+            }
+            return obj;
+        }, { primaryKey: [], attributes: [] });
+
+        return `entity "**${t.tableName.replace(/_+/g, ' ')}**" as ${t.tableName.replace(/_+/g, '')} {
+    ${att.primaryKey.join('\n    ')}
+    --
+    ${att.attributes.join('\n    ')}
+}
+`;
+    });
+
+    return `@startuml
+hide circle
+skinparam lineType ortho
+
+${uml.join('\n')}
+
+'notes ----------'
+${notes.join('\n')}
+
+'relations ----------'
+${relations.join('\n')}
+
+@enduml`;
+}
+
+function parseInputNote(viewTables) {
+    const input = $('#data').val();
+    const matched = input.match(/note\s+\w+\s+of\s+[\s\S\n]+end\s+note/gmi);
+    if (!matched) {
+        return [];
+    }
+
+    return matched.reduce((arr, n) => {
+        let name = n.match(/(?<=note.+of\s+).+/g)[0];
+        name = name.split('::')[0].trim();
+        const exist = viewTables.filter(t => t.tableName.replace(/_+/g, '') === name).length;
+        if (exist) {
+            arr.push(n);
+        }
+       return arr;
+    }, []);
+}
+
+function showTableSelections() {
+    if (!$('#srchTable').length) {
+        const $input = $('<input type="text" id="srchTable" class="input" />');
+        const $div = $('<div class="checkbox-table-div">');
+        const $cancelBtn = $('<div class="tbl-close-div"><button id="tblClose" class="tbl-close">X</button></div>');
+        const $ul = $(`<ul>
+                <li>
+                <label>
+                    <input type="checkbox" id="chkAllTable" class="checkbox-table-all" value="all">
+                    Select All
+                </label>
+                </li>
+            </ul>`);
+        $div.append($cancelBtn).append($ul);
+        $('.input-div').append($input).append($div);
+
+    } else {
+        $('#srchTable').val("");
+    }
+
+    makeCheckTables(_global.tables);
+    bindTablesEvent();
+}
+
+function makeCheckTables(tables) {
+    let li = [];
+    tables.forEach(t =>
+        li.push(`
+            <li>
+                <label>
+                    <input type="checkbox" class="checkbox-table-li" value="${t.tableName}" ${t.visible? 'checked' : ''}>
+                    ${t.tableName.replace(/_+/g, ' ')}
+                </label>
+            </li>`)
+    );
+
+    $('.checkbox-table-div').find('li').eq(0).nextAll().remove()
+    li.length && $('.checkbox-table-div ul').append($(li.join('\n')));
+    const $div = $('.checkbox-table-div');
+    const uml = makeEntity();
+    $('#data').val(uml);
+
+    $('#srchTable').val().length == 0 && $div.css('minWidth', $div.css('width'));
+    $('.tbl-close-div').css('width', $div.css('width'));
+
+    $('.checkbox-table-all').bind('change', function() {
+        if (this.checked) {
+            $('.checkbox-table-li').prop('checked', true);
+            setTablesVisible(true);
+
+        } else {
+            $('.checkbox-table-li').prop('checked', false);
+            setTablesVisible(false);
+        }
+        const uml = makeEntity();
+        $('#data').val(uml);
+    });
+
+    $('.checkbox-table-li').bind('change', function() {
+        const table = _global.tables.filter(t => t.tableName === $(this).val())[0];
+
+        if (this.checked) {
+            table.visible = true;
+        } else {
+            table.visible = false;
+        }
+
+        const uml = makeEntity();
+        $('#data').val(uml);
+    });
+}
+
+function setTablesVisible(visible) {
+    $('.checkbox-table-div').find('input[type=checkbox]').each((i, c) => {
+        _global.tables.filter(t => t.tableName === c.value).forEach(t => t.visible = visible);
+    });
+}
+
+function bindTablesEvent() {
+    let isMouseOver = false;
+    $('.checkbox-table-div').bind('mouseover', function() {
+        isMouseOver = true;
+    })
+    .bind('mouseout', function() {
+        isMouseOver = false;
+    });
+
+    $('#tblClose').bind('click', function() {
+        $('#srchTable').val("");
+        $('.checkbox-table-div').hide();
+    });
+
+    $('#srchTable').bind('focus', function() {
+        const rect = document.getElementById('srchTable').getBoundingClientRect();
+
+        $('.checkbox-table-div').css({
+            left: rect.left + 'px',
+            top: rect.bottom + 'px'
+        }).show();
+    })
+    .bind('keyup', function() {
+        if (!_global.tables) return;
+        const tables = _global.tables.filter(t => t.tableName.replace(/_+/g, '').indexOf(this.value) !== -1);
+        makeCheckTables(tables);
+    });
+}
 
 function setObserver(target, callback) {
     const observer = new MutationObserver(callback);
@@ -964,7 +1248,7 @@ function showUMLImage(uml) {
     };
     img.onerror = () => {
         removeLoading();
-        $('#view').html("<br/><br/>화면을 표시할 수 없습니다. 데이터 및 조회 조건을 다시한번 확인해주세요.");
+        $('#view').html("<br/><br/>화면을 표시할 수 없습니다.<br/>데이터의 처리량이 허용치를 초과했거나, 데이터 및 조회 조건이 원인일 수 있습니다.");
     };
     img.src = src;
 }
