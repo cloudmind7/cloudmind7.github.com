@@ -603,7 +603,7 @@ function makeEntity() {
         ? viewTables.reduce((arr, table) =>  {
                 table.refer && table.refer.forEach(refName => {
                     const exist = viewTables.filter(vt => vt.tableName === refName).length;
-                    if (exist) arr.push(`${refName.replace(/_+/g, '')} --|{ ${table.tableName.replace(/_+/g, '')}`);
+                    if (exist) arr.push(`${refName.replace(/_+/g, '')} --o{ ${table.tableName.replace(/_+/g, '')}`);
                 });
 
                 return arr;
