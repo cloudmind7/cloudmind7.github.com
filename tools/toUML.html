@@ -679,7 +679,7 @@ function showTableSelections() {
                 <li>
                 <label>
                     <input type="checkbox" id="chkAllTable" class="checkbox-table-all" value="all">
-                    Select All
+                    <span id="selectAll">Select All</span>
                 </label>
                 </li>
             </ul>`);
@@ -724,8 +724,10 @@ function makeCheckTables(tables) {
             $('.checkbox-table-li').prop('checked', false);
             setTablesVisible(false);
         }
+
         const uml = makeEntity();
         $('#data').val(uml);
+        showTablesVisibleCnt();
     });
 
     $('.checkbox-table-li').bind('change', function() {
@@ -739,7 +741,13 @@ function makeCheckTables(tables) {
 
         const uml = makeEntity();
         $('#data').val(uml);
+        showTablesVisibleCnt();
     });
+}
+
+function showTablesVisibleCnt() {
+    const visibleCnt = _global.tables.filter(t => t.visible).length;
+    $('#selectAll').text(`Select All (${visibleCnt})`);
 }
 
 function setTablesVisible(visible) {
