@@ -556,7 +556,7 @@ function loadContents(content) {
 
     const fks = content.match(/(?<=<xs:keyref )([\s\S\n]+?)(?=<\/xs:keyref>)/gm).reduce((obj, f) => {
         const tableName = f.match(/(?<=<xs:selector xpath=".\/\/)([^"]+?)(?=")/g)[0];
-        const refer = f.match(/(?<=refer="XPK)([^"]+?)(?=")/g);
+        const refer = f.match(/(?<=refer="XPK)([^"]+?)(?=")/g)[0];
         const fields = f.match(/(?<=field xpath="@)([^"]+?)(?=")/gm);
         obj[tableName] = obj[tableName] || [];
         obj[tableName].push({refer, fields})
@@ -575,9 +575,12 @@ function loadContents(content) {
         });
 
         fks[tableName] && fks[tableName].forEach(fk => {
-            refer = refer.concat(fk.refer);
+            refer.push(fk.refer);
             fk.fields.forEach(f => {
-                attributes.filter( a => a.name === f).forEach(a => a['fk'] = true);
+                attributes.filter( a => a.name === f).forEach(a => {
+                    a['fk'] = true;
+                    a['refer'] = fk.refer;
+                });
             });
         });
 
@@ -602,8 +605,9 @@ function makeEntity() {
     const relations = (viewTables.length != _global.tables.length)
         ? viewTables.reduce((arr, table) =>  {
                 table.refer && table.refer.forEach(refName => {
+                    const identifying = (table.attributes.filter(a => a.pk && a.fk && a.refer === refName).length != 0)? '--' : '..';
                     const exist = viewTables.filter(vt => vt.tableName === refName).length;
-                    if (exist) arr.push(`${refName.replace(/_+/g, '')} --o{ ${table.tableName.replace(/_+/g, '')}`);
+                    if (exist) arr.push(`${refName.replace(/_+/g, '')} ${identifying}o{ ${table.tableName.replace(/_+/g, '')}`);
                 });
 
                 return arr;
@@ -766,8 +770,8 @@ function bindTablesEvent() {
     });
 
     $('#tblClose').bind('click', function() {
-        $('#srchTable').val("");
         $('.checkbox-table-div').hide();
+        $('#srchTable').val("").trigger('keyup');
     });
 
     $('#srchTable').bind('focus', function() {
