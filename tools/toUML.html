@@ -620,7 +620,7 @@ function makeEntity() {
         const comparator = (a, b) => {
             if ((a.fk && b.fk) || (!a.fk && !b.fk)) return 0;
             else if (!a.fk && b.fk) return 1;
-            else return 1;
+            else return -1;
         }
 
         const att = t.attributes.sort(comparator).reduce((obj, a) => {
