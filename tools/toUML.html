@@ -13,7 +13,6 @@
     input[type=number] {padding: 0;text-align: center;}
     .label {margin-left: 5px;}
     .shadow {box-shadow: 1px 1px 4px 1px rgba(0, 0, 0, 0.23);}
-    .transpt {opacity:0.5}
     .srch-div {padding: 5px;width: 100%;line-height: 32px;}
     .check {position: relative;padding-top: 9px;padding-left: 34px;margin-bottom: 12px;cursor: pointer;font-size: 12px;}
     .check input {position: absolute;opacity: 0;cursor: pointer;height: 0;width: 0;}
@@ -62,79 +61,72 @@
 <header class="srch">
     <button class="btn-fold shadow" id="btnFold">&and;</button>
     <div class="srch-div shadow">
-        <div class="input-div" style="float:left">
-            <label class="check">
-                <input type="checkbox" id="chkTransInput" />
-                <span class="checkmark" title="검색란 투명 처리">T</span>
-            </label>
-            <label class="check">
-                <input type="checkbox" id="chkWinInput" class="windowInput" />
-                <span class="checkmark" title="데이터 입력란 새창열기">W</span>
-            </label>
-            <input type="hidden" id="viewType" value="plantUML" />
-            <textarea id="data" placeholder="Input Data" title="화면에 표시할 데이터 입력란" class="input"></textarea>
-            <textarea id="highlights" placeholder="Focus Data" title="강조 표시할 대상 입력란" class="input json"></textarea>
-            <textarea id="visibles" placeholder="View Data" title="화면에 제한적으로 출력할 대상 입력란" class="input json"></textarea>
-        </div>
-        <div class="opts-div">
-            <label class="label" for="umlType">Type: </label>
-            <select id="umlType" title="데이터 표현방식 선택" class="bg-green">
-                <option selected value="json">JSON</option>
-                <option value="mindmap">MIND_MAP</option>
-                <option value="wbs">TREE</option>
-                <option value="uml">UML</option>
-            </select>
-            <button id="execBtn" class="btn btn-exec">Run</button>
-            <button id="loadBtn" class="btn uml" title="데이터 로딩">Load</button>
-            <label class="check json">
-                <input type="checkbox" id="chkCompArr" />
-                <span class="checkmark" title="배열 생략">A</span>
-            </label>
-            <input type="number" id="compArrLen" class="json square comp" value="5" title="배열 길이제한" maxlength="3" />
-            <label class="check json">
-                <input type="checkbox" id="chkCompObj" />
-                <span class="checkmark" title="객체 생략">O</span>
-            </label>
-            <input type="number" id="compObjLen" class="json square comp" value="5" title="객체 길이제한" maxlength="3" />
-            <label class="check json">
-                <input type="checkbox" id="chkRegex" />
-                <span class="checkmark" title="키 검색에 정규표현식 사용">R</span>
-            </label>
-            <label class="check checkShadow mindmap wbs">
-                <input type="checkbox" id="chkShadow" />
-                <span class="checkmark" title="그림자 표시">S</span>
-            </label>
-            <label class="check checkDepth mindmap wbs">
-                <input type="checkbox" id="chkDepth" />
-                <span class="checkmark" title="[ Depth ] 표시">D</span>
-            </label>
-            <label class="check checkNoEmpty mindmap wbs">
-                <input type="checkbox" id="checkNoEmpty" />
-                <span class="checkmark" title="비어있는 Depth 제거">E</span>
-            </label>
-            <label class="check">
-                <input type="checkbox" id="chkFixedInput" checked />
-                <span class="checkmark" title="데이터 입력란 리사이징 유지">F</span>
-            </label>
-            <label for="nodeDepth" class="mindmap wbs">Focus: </label>
-            <select id="nodeDepth" class="mindmap wbs" title="강조 표시 레벨 선택">
-                <option value=""> -</option>
-            </select>
-            <label class="label" for="showDepth">Show: </label>
-            <select id="showDepth" title="화면에 표시할 단계">
-                <option value=""> -</option>
-            </select>
-            <label class="label" for="zoomIn">Zoom: </label>
-            <button id="zoomIn" class="btn zoom" onclick="javascript:zoom(1)" title="이미지 확대"> +</button>
-            <button id="zoomOut" class="btn zoom" onclick="javascript:zoom(-1)" title="이미지 축소"> -</button>
-            <input type="number" id="zoom" class="square" value="0" title="줌 수치" maxlength="3" />
+        <label class="check">
+            <input type="checkbox" id="chkWinInput" class="windowInput" />
+            <span class="checkmark" title="데이터 입력란 새창열기">W</span>
+        </label>
+        <input type="hidden" id="viewType" value="plantUML" />
+        <textarea id="data" placeholder="Input Data" title="화면에 표시할 데이터 입력란" class="input"></textarea>
+        <textarea id="highlights" placeholder="Focus Data" title="강조 표시할 대상 입력란" class="input json"></textarea>
+        <textarea id="visibles" placeholder="View Data" title="화면에 제한적으로 출력할 대상 입력란" class="input json"></textarea>
 
-            <button id="resetBtn" class="btn" title="설정 및 화면 초기화">Reset</button>
-            <button id="downloadBtn" class="btn" onclick="download()" title="화면 이미지 저장">Save</button>
-            <button class="btn share-btn" title="화면 공유용 URL을 생성 후 클립보드 저장">Share</button>
-            <button id="copyBtn" class="btn" title="화면의 데이터를 클립보드에 저장">Copy</button>
-            <button id="sampleBtn" class="btn" title="샘플데이터 실행">Sample</button>
-        </div>
+        <label class="label" for="umlType">Type: </label>
+        <select id="umlType" title="데이터 표현방식 선택" class="bg-green">
+            <option selected value="json">JSON</option>
+            <option value="mindmap">MIND_MAP</option>
+            <option value="wbs">TREE</option>
+            <option value="uml">UML</option>
+        </select>
+        <button id="execBtn" class="btn btn-exec">Run</button>
+        <button id="loadBtn" class="btn uml" title="데이터 로딩">Load</button>
+        <label class="check json">
+            <input type="checkbox" id="chkCompArr" />
+            <span class="checkmark" title="배열 생략">A</span>
+        </label>
+        <input type="number" id="compArrLen" class="json square comp" value="5" title="배열 길이제한" maxlength="3" />
+        <label class="check json">
+            <input type="checkbox" id="chkCompObj" />
+            <span class="checkmark" title="객체 생략">O</span>
+        </label>
+        <input type="number" id="compObjLen" class="json square comp" value="5" title="객체 길이제한" maxlength="3" />
+        <label class="check json">
+            <input type="checkbox" id="chkRegex" />
+            <span class="checkmark" title="키 검색에 정규표현식 사용">R</span>
+        </label>
+        <label class="check checkShadow mindmap wbs">
+            <input type="checkbox" id="chkShadow" />
+            <span class="checkmark" title="그림자 표시">S</span>
+        </label>
+        <label class="check checkDepth mindmap wbs">
+            <input type="checkbox" id="chkDepth" />
+            <span class="checkmark" title="[ Depth ] 표시">D</span>
+        </label>
+        <label class="check checkNoEmpty mindmap wbs">
+            <input type="checkbox" id="checkNoEmpty" />
+            <span class="checkmark" title="비어있는 Depth 제거">E</span>
+        </label>
+        <label class="check">
+            <input type="checkbox" id="chkFixedInput" checked />
+            <span class="checkmark" title="데이터 입력란 리사이징 유지">F</span>
+        </label>
+        <label for="nodeDepth" class="mindmap wbs">Focus: </label>
+        <select id="nodeDepth" class="mindmap wbs" title="강조 표시 레벨 선택">
+            <option value=""> -</option>
+        </select>
+        <label class="label" for="showDepth">Show: </label>
+        <select id="showDepth" title="화면에 표시할 단계">
+            <option value=""> -</option>
+        </select>
+        <label class="label" for="zoomIn">Zoom: </label>
+        <button id="zoomIn" class="btn zoom" onclick="javascript:zoom(1)" title="이미지 확대"> +</button>
+        <button id="zoomOut" class="btn zoom" onclick="javascript:zoom(-1)" title="이미지 축소"> -</button>
+        <input type="number" id="zoom" class="square" value="0" title="줌 수치" maxlength="3" />
+
+        <button id="resetBtn" class="btn" title="설정 및 화면 초기화">Reset</button>
+        <button id="downloadBtn" class="btn" onclick="download()" title="화면 이미지 저장">Save</button>
+        <button class="btn share-btn" title="화면 공유용 URL을 생성 후 클립보드 저장">Share</button>
+        <button id="copyBtn" class="btn" title="화면의 데이터를 클립보드에 저장">Copy</button>
+        <button id="sampleBtn" class="btn" title="샘플데이터 실행">Sample</button>
     </div>
     <hr>
 </header>
@@ -167,7 +159,7 @@
       + <span class="bg-blue">Focus</span>: 강조 표시할 노드의 깊이
 
   <span class="ttl">공통</span>
-      + <span class="bg-blue">[T]</span>: 검색란 투명 처리
+      + <span class="bg-blue">[W]</span>: 데이터 입력창 열기
       + <span class="bg-blue">[F]</span>: 데이터 입력란 리사이징 유지
       + <span class="bg-blue">Show</span>: 화면에 표시할 단계 선택
         . 선택된 값이 마지막 Depth(전체표시)가 아닐 경우 배경이 <span class="bg-yellow entry">노란색</span>
@@ -253,7 +245,6 @@ $(function() {
             { id: "chkCompArr", pid: "ca", value: "", type: _type.checkbox, exec: true },
             { id: "chkCompObj", pid: "co", value: "", type: _type.checkbox, exec: true },
             { id: "chkFixedInput", pid: "cf", value: "", type: _type.checkbox },
-            { id: "chkTransInput", pid: "ct", value: "", type: _type.checkbox },
             { id: "umlType", pid: "t", value: "", type: _type.select, exec: true },
             { id: "nodeDepth", pid: "nd", value: "", type: _type.select, exec: true },
             { id: "showDepth", pid: "sd", value: "", type: _type.select, exec: true },
@@ -288,7 +279,7 @@ $(function() {
             });
         } else {
             $('.srch').slideToggle('fast', function(){
-                $('#btnUnFold').hide();
+                $('.unfold').hide();
                 replacePaddingTop();
             });
         }
@@ -325,17 +316,6 @@ $(function() {
         });
     });
 
-    $("#chkTransInput").click(function() {
-        if ($(this).is(':checked')) {
-            $('.srch').addClass('transpt');
-            $('.opts-div').hide();
-
-        } else {
-            $('.srch').removeClass('transpt');
-            $('.opts-div').show();
-        }
-    });
-
     $('.windowInput').click(function() {
         const $chkWinInput = $('#chkWinInput');
         if (this.type === 'submit') {
@@ -366,9 +346,7 @@ $(function() {
             </style>
         </head>
         <body>
-            <textarea id="data" placeholder="Input Data" title="화면에 표시할 데이터 입력란" class="input">
-${data}
-            </textarea>
+            <textarea id="data" title="화면에 표시할 데이터 입력란" class="input">${data}</textarea>
             <script>
             const data = document.getElementById('data');
             window.addEventListener('keyup', function(e) {
@@ -601,11 +579,6 @@ function applyParam() {
         $("#chkCompObj").prop("checked", true) && $("#compObjLen").show();
     }
 
-    if (_global.getParam('chkTransInput') === 'y') {
-        $('.srch').addClass('transpt');
-        $('.opts-div').hide();
-    }
-
     if (_global.getParam('btnUnFold') === 'y') {
         $('#btnFold').trigger('click');
     }
@@ -763,7 +736,7 @@ function parseInputNote(viewTables) {
 
 function showTableSelections() {
     if (!$('#srchTable').length) {
-        const $input = $('<input type="text" id="srchTable" class="input" />');
+        const $input = $('<input type="text" id="srchTable" class="input" style="margin-left: 2px" />');
         const $div = $('<div class="checkbox-table-div">');
         const $cancelBtn = $('<div class="tbl-close-div"><button id="tblClose" class="tbl-close">X</button></div>');
         const $ul = $(`<ul>
@@ -775,7 +748,7 @@ function showTableSelections() {
                 </li>
             </ul>`);
         $div.append($cancelBtn).append($ul);
-        $('.input-div').append($input).append($div);
+        $('#data').after($input).after($div);
 
     } else {
         $('#srchTable').val("");
