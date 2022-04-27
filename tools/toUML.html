@@ -59,6 +59,10 @@
                 <input type="checkbox" id="chkTransInput" />
                 <span class="checkmark" title="검색란 투명 처리">T</span>
             </label>
+            <label class="check">
+                <input type="checkbox" id="windowInput" />
+                <span class="checkmark" title="데이터 입력란 새창열기">W</span>
+            </label>
             <input type="hidden" id="viewType" value="plantUML" />
             <textarea id="data" placeholder="Input Data" title="화면에 표시할 데이터 입력란" class="input"></textarea>
             <textarea id="highlights" placeholder="Focus Data" title="강조 표시할 대상 입력란" class="input json"></textarea>
@@ -323,7 +327,49 @@ $(function() {
             $('.opts-div').show();
         }
     });
-    
+
+    $("#windowInput").change(function() {
+        if (!this.checked) {
+            window.windowInput && window.windowInput.close();
+            return;
+        }
+
+        const data = $('#data').val();
+        const opts = 'location=no,menubar=no,status=no,scrollbars=no,toolbar=no,height=400,width=500';
+        const windowInput = window.windowInput = open('', 'windowInput',opts);
+        windowInput.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <title>데이터 입력창</title>
+        <head>
+            <style>
+                html, body {height: 100%;padding: 4px;margin: 0;overflow: hidden}
+                .input {width:100%;height:100%;border: none;outline: none;}
+            </style>
+        </head>
+        <body>
+            <textarea id="data" placeholder="Input Data" title="화면에 표시할 데이터 입력란" class="input">
+${data}
+            </textarea>
+            <script>
+            const data = document.getElementById('data');
+            data.addEventListener('keyup', function(e) {
+                if (e.ctrlKey && e.keyCode == 13) {
+                    window.opener.execBtn();
+                } else {
+                    window.opener._setData(data.value);
+                }
+            });
+
+            window.addEventListener("beforeunload", function() {
+                window.opener._uncheckWindowInput();
+            });
+            <\/script>
+        <\/body>
+        <\/html>
+        `);
+    });
+
     $("#execBtn").click(function(e, args = {}) {
         if (!isValidInput('data')) {
             return;
@@ -495,47 +541,59 @@ $(function() {
     });
 
     if (_global.getParam('data')) {
-        let umlType;
-        _global.elements.forEach(obj => {
-            if (obj.value === null || obj.value === undefined) {
-                return;
-            }
-
-            if (obj.id === 'umlType') {
-                umlType = obj.value;
-            }
-
-            if (obj.type === _global.type.input) {
-                document.getElementById(obj.id).value = obj.value;
-
-            } else if (obj.type === _global.type.checkbox) {
-                const checked = (obj.value === 'y');
-                document.getElementById(obj.id).checked = checked;
-            }
-        });
-
-        if (_global.getParam('chkCompArr') === 'y') {
-            $("#chkCompArr").prop("checked", true) && $("#compArrLen").show();
-        }
-
-        if (_global.getParam('chkCompObj') === 'y') {
-            $("#chkCompObj").prop("checked", true) && $("#compObjLen").show();
-        }
-
-        if (_global.getParam('chkTransInput') === 'y') {
-            $('.srch').addClass('transpt');
-            $('.opts-div').hide();
-        }
-
-        if (_global.getParam('btnUnFold') === 'y') {
-            $('#btnFold').trigger('click');
-        }
-
-        $("#umlType").val(umlType).prop("selected", true).trigger("change");
+        applyParam();
     }
 
     setObserver(['data', 'highlights', 'visibles'], replacePaddingTop);
 });
+
+function _setData(data) {
+    $('#data').val(data);
+}
+
+function _uncheckWindowInput() {
+    $('#windowInput').prop('checked', false);
+}
+
+function applyParam() {
+    let umlType;
+    _global.elements.forEach(obj => {
+        if (obj.value === null || obj.value === undefined) {
+            return;
+        }
+
+        if (obj.id === 'umlType') {
+            umlType = obj.value;
+        }
+
+        if (obj.type === _global.type.input) {
+            document.getElementById(obj.id).value = obj.value;
+
+        } else if (obj.type === _global.type.checkbox) {
+            const checked = (obj.value === 'y');
+            document.getElementById(obj.id).checked = checked;
+        }
+    });
+
+    if (_global.getParam('chkCompArr') === 'y') {
+        $("#chkCompArr").prop("checked", true) && $("#compArrLen").show();
+    }
+
+    if (_global.getParam('chkCompObj') === 'y') {
+        $("#chkCompObj").prop("checked", true) && $("#compObjLen").show();
+    }
+
+    if (_global.getParam('chkTransInput') === 'y') {
+        $('.srch').addClass('transpt');
+        $('.opts-div').hide();
+    }
+
+    if (_global.getParam('btnUnFold') === 'y') {
+        $('#btnFold').trigger('click');
+    }
+
+    $("#umlType").val(umlType).prop("selected", true).trigger("change");
+}
 
 function loadContents(content) {
     const getAttributes = (str) => {
