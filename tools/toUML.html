@@ -39,19 +39,25 @@
     .btn {width: 60px;height: 30px;cursor: pointer;position: relative;border: 1px solid #000;}
     .zoom {width: 30px;}
     .btn-exec {background-color: #93e2ff;}
-    .btn-fold {cursor: pointer;border: 0;outline: 0;width: 25px;min-width: 25px;min-height: 25px;background-color: #93e2ff;font-weight: bold;}
-    .unfold {height: 25px;display: none;}
     .checkbox-table-div {z-index: 10;display: none;max-height: 300px;overflow: scroll;position: fixed;background-color: #fff;border:1px solid #767676FF;}
     .checkbox-table-div ul {padding: 15px 10px;list-style-type: none;}
     .checkbox-table-div ul li {line-height: 10px;}
     .tbl-close-div {position: fixed;line-height: 0;}
     .tbl-close {cursor:pointer;color: #fff; border:0; width: 100%;height: 25px;margin:0; background-color: #93e2ff;}
-    .share-unfold {cursor:pointer;left: 36px;border: 0;outline: 0;font-weight: bold;}
-    .doc-unfold {cursor:pointer;left: 92px;border: 0;outline: 0;font-weight: bold;}
+    .btn-fold {cursor: pointer;border: 0;outline: 0;width: 25px;min-width: 25px;min-height: 25px;background-color: #93e2ff;font-weight: bold;}
+    .unfold {border-radius: 50%;height: 25px;display: none;cursor:pointer;border: 0;outline: 0;font-weight: bold;}
+    .input-unfold {left: 36px;border-radius: 10%;}
+    .share-unfold {left: 86px;border-radius: 10%;}
+    .doc-unfold {left: 141px;border-radius: 10%;}
+    .zin-unfold {left: 184px;width: 25px;}
+    .zout-unfold {left: 214px;width: 25px;}
 </style>
 <body>
 <button class="btn-fold unfold shadow" id="btnUnFold">&or;</button>
-<button class="share-btn unfold share-unfold shadow" title="화면 공유용 URL을 생성 후 클립보드 저장">Share</button>
+<button class="unfold input-unfold shadow windowInput" title="데이터 입력창 열기">Input</button>
+<button class="unfold share-btn share-unfold shadow" title="화면 공유용 URL을 생성 후 클립보드 저장">Share</button>
+<button class="unfold shadow zin-unfold" onclick="javascript:zoom(1)" title="이미지 확대"> +</button>
+<button class="unfold shadow zout-unfold" onclick="javascript:zoom(-1)" title="이미지 축소"> -</button>
 <a href="https://plantuml.com/ko/guide" target="_blank"><button class="unfold doc-unfold shadow" title="plantuml 도큐먼트 페이지 열기">Doc</button></a>
 <header class="srch">
     <button class="btn-fold shadow" id="btnFold">&and;</button>
@@ -62,7 +68,7 @@
                 <span class="checkmark" title="검색란 투명 처리">T</span>
             </label>
             <label class="check">
-                <input type="checkbox" id="windowInput" />
+                <input type="checkbox" id="chkWinInput" class="windowInput" />
                 <span class="checkmark" title="데이터 입력란 새창열기">W</span>
             </label>
             <input type="hidden" id="viewType" value="plantUML" />
@@ -119,8 +125,8 @@
                 <option value=""> -</option>
             </select>
             <label class="label" for="zoomIn">Zoom: </label>
-            <button id="zoomIn" class="btn zoom" onclick="javascript:zoomIn()" title="이미지 확대"> +</button>
-            <button id="zoomOut" class="btn zoom" onclick="javascript:zoomOut()" title="이미지 축소"> -</button>
+            <button id="zoomIn" class="btn zoom" onclick="javascript:zoom(1)" title="이미지 확대"> +</button>
+            <button id="zoomOut" class="btn zoom" onclick="javascript:zoom(-1)" title="이미지 축소"> -</button>
             <input type="number" id="zoom" class="square" value="0" title="줌 수치" maxlength="3" />
 
             <button id="resetBtn" class="btn" title="설정 및 화면 초기화">Reset</button>
@@ -330,19 +336,29 @@ $(function() {
         }
     });
 
-    $("#windowInput").change(function() {
-        if (!this.checked) {
-            window.windowInput && window.windowInput.close();
+    $('.windowInput').click(function() {
+        const $chkWinInput = $('#chkWinInput');
+        if (this.type === 'submit') {
+            $chkWinInput.prop('checked', function() {
+                return !this.checked;
+            });
+        }
+
+        if (!$chkWinInput.is(':checked')) {
+            if (window.winInput) {
+                window.winInput.close();
+                delete window.winInput;
+            }
             return;
         }
 
         const data = $('#data').val();
         const opts = 'location=no,menubar=no,status=no,scrollbars=no,toolbar=no,height=400,width=500';
-        const windowInput = window.windowInput = open('', 'windowInput',opts);
-        windowInput.document.write(`
+        const winInput = window.winInput = open('', 'windowInput',opts);
+        winInput.document.write(`
         <!DOCTYPE html>
         <html>
-        <title>데이터 입력창</title>
+        <title>Ctrl + Enter 실행</title>
         <head>
             <style>
                 html, body {height: 100%;padding: 4px;margin: 0;overflow: hidden}
@@ -355,7 +371,7 @@ ${data}
             </textarea>
             <script>
             const data = document.getElementById('data');
-            data.addEventListener('keyup', function(e) {
+            window.addEventListener('keyup', function(e) {
                 if (e.ctrlKey && e.keyCode == 13) {
                     window.opener.execBtn();
                 } else {
@@ -554,7 +570,7 @@ function _setData(data) {
 }
 
 function _uncheckWindowInput() {
-    $('#windowInput').prop('checked', false);
+    $('#chkWinInput').prop('checked', false);
 }
 
 function applyParam() {
@@ -1529,14 +1545,6 @@ function jsonStyle(opts) {
     } else {
         return "";
     }
-}
-
-function zoomIn() {
-    zoom(1);
-}
-
-function zoomOut() {
-    zoom(-1);
 }
 
 function zoom(val) {
