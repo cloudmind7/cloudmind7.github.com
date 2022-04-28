@@ -642,13 +642,18 @@ function loadContents(content) {
         });
 
         keys[tableName] && keys[tableName].fks && keys[tableName].fks.forEach(fk => {
-            refer.push(fk.refer);
+            let identifying = false;
+
             fk.fields.forEach(fkName => {
                 attributes.filter( a => a.name === fkName).forEach(a => {
                     a['fk'] = true;
-                    a['refer'] = fk.refer;
+                    if (a.pk) {
+                        identifying = true;
+                    }
                 });
             });
+
+            refer.push({ n: fk.refer, i: identifying });
         });
 
         const table = {
@@ -671,12 +676,13 @@ function makeEntity() {
     const viewTables = _global.tables.filter(t => t.visible);
     const relations = (viewTables.length != _global.tables.length)
         ? viewTables.reduce((arr, table) =>  {
-                table.refer && table.refer.forEach(refName => {
-                    const identifying = (table.attributes.filter(a => a.pk && a.fk && a.refer === refName).length != 0)? '--' : '..';
-                    const exist = viewTables.filter(vt => vt.tableName === refName).length;
-                    if (exist) arr.push(`${refName.replace(/_+/g, '')} ${identifying}o{ ${table.tableName.replace(/_+/g, '')}`);
+                table.refer && table.refer.forEach(ref => {
+                    const exist = viewTables.filter(vt => vt.tableName === ref.n).length;
+                    if (exist) {
+                        const identifying = (ref.i)? '--' : '..';
+                        arr.push(`${ref.n.replace(/_+/g, '')} ${identifying}o{ ${table.tableName.replace(/_+/g, '')}`);
+                    }
                 });
-
                 return arr;
             }, [])
         : [];
