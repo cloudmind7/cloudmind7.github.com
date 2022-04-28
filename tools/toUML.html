@@ -934,13 +934,11 @@ function bindTablesEvent() {
                         .filter(t => t.tableName === this.value)
                         .forEach(t => t.visible = true);
                 }
-            }).promise().done(function() {
-                console.log('bind change');
-                $('#data').val(makeTablesUML());
-                execBtn();
-                $('.checkbox-table-li').on('change', handleChkTableLi);
             });
 
+            $('#data').val(makeTablesUML());
+            execBtn();
+            $('.checkbox-table-li').on('change', handleChkTableLi);
             return;
         }
 
