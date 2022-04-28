@@ -273,6 +273,14 @@ $(function() {
         }
     });
 
+    $('#data').keyup(function() {
+        if (!window.winInput) {
+            return;
+        }
+
+        window.winInput.document.getElementById('data').value = this.value;
+    });
+
     $('.btn-fold').click(function() {
         if (visibleHeader()) {
             $('.srch').slideToggle('fast', function() {
