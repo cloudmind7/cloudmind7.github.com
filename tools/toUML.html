@@ -932,7 +932,7 @@ function bindTablesEvent() {
                 if (this.value) {
                     _global.tables
                         .filter(t => t.tableName === this.value)
-                        .forEach(t => t.visible = !t.visible);
+                        .forEach(t => t.visible = true);
                 }
             }).promise().done(function() {
                 console.log('bind change');
