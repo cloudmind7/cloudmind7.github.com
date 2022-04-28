@@ -492,7 +492,6 @@ $(function() {
                 loadContents(reader.result);
                 showTableSelections();
                 $('#srchTable').trigger('focus');
-                $('#data').val(makeTablesUML());
                 execBtn();
             };
             reader.readAsText(file, /* optional */ "utf8");
@@ -662,7 +661,6 @@ function applyParam() {
 
         showTableSelections();
         $('#srchTable').trigger('focus');
-        $('#data').val(makeTablesUML());
         execBtn();
     }
 }
@@ -879,8 +877,6 @@ function makeCheckTables(tables) {
             setTablesVisible(false);
         }
 
-        const uml = makeTablesUML();
-        $('#data').val(uml);
         showTablesVisibleCnt();
     });
 
