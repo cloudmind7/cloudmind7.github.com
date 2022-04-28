@@ -525,7 +525,8 @@ $(function() {
             query.push('fld=y');
         }
 
-        if ($('#umlType').val() === 'uml') {
+        if ($('#umlType').val() === 'uml'
+                && confirm("테이블 정보를 포함 하시겠습니까?")) {
             const tbl = _global.tables && enc(JSON.stringify(_global.tables)) || "";
             query.push('tbl=' + tbl);
         }
