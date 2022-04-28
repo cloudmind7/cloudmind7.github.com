@@ -288,7 +288,7 @@ $(function() {
                 replacePaddingTop();
             });
         } else {
-            $('.srch').slideToggle('fast', function(){
+            $('.srch').slideToggle('fast', function() {
                 $('.unfold').hide();
                 replacePaddingTop();
             });
@@ -541,14 +541,20 @@ $(function() {
             _tables.forEach(t => {
                 t.attributes && t.attributes.forEach(a => {
                     a['name'] && (a['n'] = a['name']);
-                    a['required'] && (a['r'] = a['required']);
                     a['pk'] && (a['p'] = a['pk']);
                     a['fk'] && (a['f'] = a['fk']);
 
                     delete a['name'];
-                    delete a['required'];
                     delete a['pk'];
                     delete a['fk'];
+                });
+
+                t.refer && t.refer.forEach(a => {
+                    a['name'] && (a['n'] = a['name']);
+                    a['identifying'] && (a['i'] = a['identifying']);
+
+                    delete a['name'];
+                    delete a['identifying'];
                 });
 
                 t['tableName'] && (t['n'] = t['tableName']);
@@ -638,14 +644,20 @@ function applyParam() {
         _global.tables.forEach(t => {
             t.a && t.a.forEach(a => {
                 a['n'] && (a['name'] = a['n']);
-                a['r'] && (a['required'] = a['r']);
                 a['p'] && (a['pk'] = a['p']);
                 a['f'] && (a['fk'] = a['f']);
 
                 delete a['n'];
-                delete a['r'];
                 delete a['p'];
                 delete a['f'];
+            });
+
+            t.r && t.r.forEach(a => {
+                a['n'] && (a['name'] = a['n']);
+                a['i'] && (a['identifying'] = a['i']);
+
+                delete a['n'];
+                delete a['i'];
             });
 
             t['n'] && (t['tableName'] = t['n']);
@@ -668,7 +680,6 @@ function applyParam() {
 function loadContents(content) {
     const getAttributes = (str) => {
         const getName = (v) => v.match(/(?<=name=").+?(?=")/)[0];
-        const isRequired = (v) => v.indexOf('use="required"') !== -1;
         const matched = str.match(/(?<=<xs:attribute\s+)([\s\S\n]+?)(?=<\/xs:attribute>)/gm);
 
         if (!matched) {
@@ -677,8 +688,7 @@ function loadContents(content) {
 
         return matched.reduce((arr, s) => {
             arr.push({
-                name: getName(s),
-                required: isRequired(s)
+                name: getName(s)
             });
 
             return arr;
@@ -717,29 +727,28 @@ function loadContents(content) {
         let refer = [];
 
         keys[tableName] && keys[tableName].pks && keys[tableName].pks.forEach(pkName => {
-            attributes.filter( a => a.name === pkName).forEach(a => a['pk'] = true);
+            attributes.filter( a => a.name === pkName).forEach(a => a['pk'] = 'y');
         });
 
         keys[tableName] && keys[tableName].fks && keys[tableName].fks.forEach(fk => {
-            let identifying = false;
+            let ref = { name: fk.refer };
 
             fk.fields.forEach(fkName => {
                 attributes.filter( a => a.name === fkName).forEach(a => {
-                    a['fk'] = true;
+                    a['fk'] = 'y';
                     if (a.pk) {
-                        identifying = true;
+                        ref.identifying = 'y';
                     }
                 });
             });
 
-            refer.push({ n: fk.refer, i: identifying });
+            refer.push(ref);
         });
 
         const table = {
             tableName,
             attributes,
-            refer,
-            visible: false
+            refer
         };
 
         arr.push(table);
@@ -752,10 +761,10 @@ function makeTablesUML() {
     const relations = (viewTables.length != _global.tables.length)
         ? viewTables.reduce((arr, table) =>  {
                 table.refer && table.refer.forEach(ref => {
-                    const exist = viewTables.filter(vt => vt.tableName === ref.n).length;
+                    const exist = viewTables.filter(vt => vt.tableName === ref.name).length;
                     if (exist) {
-                        const identifying = (ref.i)? '--' : '..';
-                        arr.push(`${ref.n.replace(/_+/g, '')} ${identifying}o{ ${table.tableName.replace(/_+/g, '')}`);
+                        const identifying = (ref.identifying)? '--' : '..';
+                        arr.push(`${ref.name.replace(/_+/g, '')} ${identifying}o{ ${table.tableName.replace(/_+/g, '')}`);
                     }
                 });
                 return arr;
@@ -887,9 +896,9 @@ function handleChkTableLi() {
     const table = _global.tables.filter(t => t.tableName === $(this).val())[0];
 
     if (this.checked) {
-        table.visible = true;
+        table.visible = 'y';
     } else {
-        table.visible = false;
+        delete table.visible;
     }
 
     const uml = makeTablesUML();
@@ -938,7 +947,7 @@ function bindTablesEvent() {
                 if (this.value) {
                     _global.tables
                         .filter(t => t.tableName === this.value)
-                        .forEach(t => t.visible = true);
+                        .forEach(t => t.visible = 'y');
                 }
             });
 
