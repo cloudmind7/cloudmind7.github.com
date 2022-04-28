@@ -526,8 +526,36 @@ $(function() {
         }
 
         if ($('#umlType').val() === 'uml'
+                && _global.tables
                 && confirm("테이블 정보를 포함 하시겠습니까?")) {
-            const tbl = _global.tables && enc(JSON.stringify(_global.tables)) || "";
+
+            const _tables = [..._global.tables];
+
+            _tables.forEach(t => {
+                t.attributes && t.attributes.forEach(a => {
+                    a['name'] && (a['n'] = a['name']);
+                    a['required'] && (a['r'] = a['required']);
+                    a['pk'] && (a['p'] = a['pk']);
+                    a['fk'] && (a['f'] = a['fk']);
+
+                    delete a['name'];
+                    delete a['required'];
+                    delete a['pk'];
+                    delete a['fk'];
+                });
+
+                t['tableName'] && (t['n'] = t['tableName']);
+                t['attributes'] && (t['a'] = t['attributes']);
+                t['refer'] && (t['r'] = t['refer']);
+                t['visible'] && (t['v'] = t['visible']);
+
+                delete t['tableName'];
+                delete t['attributes'];
+                delete t['refer'];
+                delete t['visible'];
+            });
+
+            const tbl = _tables && enc(JSON.stringify(_tables)) || "";
             query.push('tbl=' + tbl);
         }
 
@@ -599,7 +627,31 @@ function applyParam() {
 
     $("#umlType").val(umlType).prop("selected", true).trigger("change");
 
-    if (umlType === 'uml') {
+    if (umlType === 'uml' && _global.tables) {
+        _global.tables.forEach(t => {
+            t.attributes && t.attributes.forEach(a => {
+                a['n'] && (a['name'] = a['n']);
+                a['r'] && (a['required'] = a['r']);
+                a['p'] && (a['pk'] = a['p']);
+                a['f'] && (a['fk'] = a['f']);
+
+                delete a['n'];
+                delete a['r'];
+                delete a['p'];
+                delete a['f'];
+            });
+
+            t['n'] && (t['tableName'] = t['n']);
+            t['a'] && (t['attributes'] = t['a']);
+            t['r'] && (t['refer'] = t['r']);
+            t['v'] && (t['visible'] = t['v']);
+
+            delete t['n'];
+            delete t['a'];
+            delete t['r'];
+            delete t['v'];
+        });
+
         showTableSelections();
         $('#srchTable').trigger('focus');
         $('#data').val(makeTablesUML());
