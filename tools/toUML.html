@@ -629,7 +629,7 @@ function applyParam() {
 
     if (umlType === 'uml' && _global.tables) {
         _global.tables.forEach(t => {
-            t.attributes && t.attributes.forEach(a => {
+            t.a && t.a.forEach(a => {
                 a['n'] && (a['name'] = a['n']);
                 a['r'] && (a['required'] = a['r']);
                 a['p'] && (a['pk'] = a['p']);
