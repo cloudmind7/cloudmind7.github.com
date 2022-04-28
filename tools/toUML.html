@@ -606,20 +606,27 @@ function loadContents(content) {
         }, []);
     }
 
-    const pks = content.match(/(?<=<xs:key [^>]+>)([\s\S\n]+?)(?=<\/xs:key>)/gm).reduce((obj, f) => {
-        const tableName = f.match(/(?<=<xs:selector xpath=".\/\/)([^"]+?)(?=")/g)[0];
-        const fields = f.match(/(?<=field xpath="@)([^"]+?)(?=")/gm);
-        obj[tableName] = obj[tableName] || [];
-        obj[tableName] = obj[tableName].concat(fields);
-        return obj;
-    }, {});
+    const keys = content.match(/(?<=<xs:element )[\s\S\n]+?(?=<\/xs:element>)/gm).reduce((obj, el) => {
+        const tableName = el.match(/(?<=name=")([^"]+)/g)[0];
+        const table = obj[tableName] = obj[tableName] || {};
 
-    const fks = content.match(/(?<=<xs:keyref )([\s\S\n]+?)(?=<\/xs:keyref>)/gm).reduce((obj, f) => {
-        const tableName = f.match(/(?<=<xs:selector xpath=".\/\/)([^"]+?)(?=")/g)[0];
-        const refer = f.match(/(?<=refer="XPK)([^"]+?)(?=")/g)[0];
-        const fields = f.match(/(?<=field xpath="@)([^"]+?)(?=")/gm);
-        obj[tableName] = obj[tableName] || [];
-        obj[tableName].push({refer, fields})
+        const matchedPK = el.match(/(?<=<xs:key [^>]+>)[\s\S\n]+?(?=<\/xs:key>)/g);
+        table.pks = (matchedPK && matchedPK[0].match(/(?<=<xs:field xpath="@)[^"]+/gm) || []);
+
+        const matchedFK = el.match(/(?<=<xs:keyref [^>]+>)[\s\S\n]+?(?=<\/xs:keyref>)/gm);
+        matchedFK && matchedFK.forEach(ref => {
+            const name = ref.match(/(?<=<xs:selector xpath=".\/\/)[^"]+/g)[0];
+            const matched = ref.match(/(?<=<xs:field xpath="@)[^"]+/gm);
+
+            const table = obj[name] = obj[name] || {};
+            table.fks = table.fks || [];
+
+            table.fks.push({
+                refer: tableName,
+                fields: matched
+            });
+        });
+
         return obj;
     }, {});
 
@@ -630,14 +637,14 @@ function loadContents(content) {
         const attributes = getAttributes(m);
         let refer = [];
 
-        pks[tableName] && pks[tableName].forEach(p => {
-            attributes.filter( a => a.name === p).forEach(a => a['pk'] = true);
+        keys[tableName] && keys[tableName].pks && keys[tableName].pks.forEach(pkName => {
+            attributes.filter( a => a.name === pkName).forEach(a => a['pk'] = true);
         });
 
-        fks[tableName] && fks[tableName].forEach(fk => {
+        keys[tableName] && keys[tableName].fks && keys[tableName].fks.forEach(fk => {
             refer.push(fk.refer);
-            fk.fields.forEach(f => {
-                attributes.filter( a => a.name === f).forEach(a => {
+            fk.fields.forEach(fkName => {
+                attributes.filter( a => a.name === fkName).forEach(a => {
                     a['fk'] = true;
                     a['refer'] = fk.refer;
                 });
