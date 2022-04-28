@@ -222,7 +222,8 @@ $(function() {
             input: 'input',
             checkbox: 'checkbox',
             select: 'select',
-            button: 'button'
+            button: 'button',
+            etc: 'etc'
         },
         uml: '',
         umlData: '',
@@ -249,6 +250,7 @@ $(function() {
             { id: "nodeDepth", pid: "nd", value: "", type: _type.select, exec: true },
             { id: "showDepth", pid: "sd", value: "", type: _type.select, exec: true },
             { id: "btnUnFold", pid: "fld", value: "", type: _type.button },
+            { id: "tables", pid: "tbl", value: "", type: _type.etc, enc: true },
         ];
 
         const url = new URL(location.href);
@@ -271,7 +273,7 @@ $(function() {
         }
     });
 
-    $(".btn-fold").click(function() {
+    $('.btn-fold').click(function() {
         if (visibleHeader()) {
             $('.srch').slideToggle('fast', function() {
                 fixUnFoldButton().show();
@@ -285,7 +287,7 @@ $(function() {
         }
     });
 
-    $(".input").each(function() {
+    $('.input').each(function() {
         const $this = $(this);
         $this.data("ow", $this.css("width"));
         $this.data("oh", $this.css("height"));
@@ -366,7 +368,7 @@ $(function() {
         `);
     });
 
-    $("#execBtn").click(function(e, args = {}) {
+    $('#execBtn').click(function(e, args = {}) {
         if (!isValidInput('data')) {
             return;
         }
@@ -391,11 +393,11 @@ $(function() {
         }
     });
 
-    $("#resetBtn").click(function() {
+    $('#resetBtn').click(function() {
         location.href = location.href.replace(/^([^?]+)\?.+/, "$1");
     });
 
-    $("#zoom").change(function() {
+    $('#zoom').change(function() {
         zoom();
     });
 
@@ -449,7 +451,7 @@ $(function() {
         !isEmptyInput("data") && execBtn();
     });
 
-    $("#sampleBtn").click(function() {
+    $('#sampleBtn').click(function() {
         const umlType = $("#umlType").val();
         const params = {
             mindmap: "?d=JYOwxgNgrgJgpgZwFwCgCQYD2BbbmQB0AngIbYQrwTABucATiQEYSKob4AucAHp+mmAx6cAGZoAFp3LoABPNmYonAA7K0BdGpbAwJTsHwDOjEAk5EVcSdIgBWASpKNsyAWmcBzBASwqiYAgIaESI7l4+gcEwwJwkALSYnPEwmGC+QeH03hkITpwSGJloJRG59JhJ7vmFAPQiCEr0YGElHtk+nnCEcQgA1gQQLGgAmgCiAMpZORLC7hIi4vWITS0ItRJwJPD0BDwybVLkdgScaQRdIAz61iCY7iAkNPFnYGhO9AYkFG0qFWsIUCeeJ4eBocz0XScIA&z=0&t=mindmap&nd=1&sd=5",
@@ -465,7 +467,7 @@ $(function() {
         samples["plantUML"]();
     });
 
-    $("#loadBtn").click(function() {
+    $('#loadBtn').click(function() {
         const input = document.createElement("input");
         input.type = "file";
         // input.accept = "text/plain";
@@ -479,8 +481,10 @@ $(function() {
 
             const reader = new FileReader();
             reader.onload = function () {
-                const content = loadContents(reader.result);
-                $('#data').val(content);
+                loadContents(reader.result);
+                showTableSelections();
+                $('#srchTable').trigger('focus');
+                $('#data').val(makeTablesUML());
                 execBtn();
             };
             reader.readAsText(file, /* optional */ "utf8");
@@ -489,17 +493,17 @@ $(function() {
         input.click();
     });
 
-    $(".share-btn").click(function() {
+    $('.share-btn').click(function() {
         if (!isValidInput('data')) {
             return;
         }
 
+        const enc = LZString.compressToEncodedURIComponent;
         let query = _global.elements
             .filter(obj => obj.type === _global.type.input || obj.type === _global.type.select)
             .reduce((query, obj) => {
                 let val = document.getElementById(obj.id).value;
                 if (val) {
-                    const enc = LZString.compressToEncodedURIComponent;
                     val = (obj.enc && enc(val) || "") || val;
                     query.push(`${obj.pid}=${val}`);
                 }
@@ -521,12 +525,17 @@ $(function() {
             query.push('fld=y');
         }
 
+        if ($('#umlType').val() === 'uml') {
+            const tbl = _global.tables && enc(JSON.stringify(_global.tables)) || "";
+            query.push('tbl=' + tbl);
+        }
+
         const url = location.href.replace(/^([^?]+)\?.+/, "$1") + '?' + query.join('&');
         navigator.clipboard.writeText(url);
         alert("URL이 클립보드에 저장되었습니다.\n붙여넣기(Ctrl+V)로 화면을 공유할 수 있습니다.");
     });
 
-    $("#copyBtn").click(function() {
+    $('#copyBtn').click(function() {
         const data = _global.opts.data;
         if (!data) {
             alert("복사할 데이터가 없습니다.");
@@ -569,6 +578,10 @@ function applyParam() {
             const checked = (obj.value === 'y');
             document.getElementById(obj.id).checked = checked;
         }
+
+        if (umlType === 'uml' && obj.id === 'tables' && obj.value) {
+            _global.tables = JSON.parse(obj.value);
+        }
     });
 
     if (_global.getParam('chkCompArr') === 'y') {
@@ -584,6 +597,13 @@ function applyParam() {
     }
 
     $("#umlType").val(umlType).prop("selected", true).trigger("change");
+
+    if (umlType === 'uml') {
+        showTableSelections();
+        $('#srchTable').trigger('focus');
+        $('#data').val(makeTablesUML());
+        execBtn();
+    }
 }
 
 function loadContents(content) {
@@ -666,13 +686,9 @@ function loadContents(content) {
         arr.push(table);
         return arr;
     }, []);
-
-    showTableSelections();
-    $('#srchTable').trigger('focus');
-    return makeEntity();
 }
 
-function makeEntity() {
+function makeTablesUML() {
     const viewTables = _global.tables.filter(t => t.visible);
     const relations = (viewTables.length != _global.tables.length)
         ? viewTables.reduce((arr, table) =>  {
@@ -786,7 +802,7 @@ function makeCheckTables(tables) {
     $('.checkbox-table-div').find('li').eq(0).nextAll().remove()
     li.length && $('.checkbox-table-div ul').append($(li.join('\n')));
     const $div = $('.checkbox-table-div');
-    const uml = makeEntity();
+    const uml = makeTablesUML();
     $('#data').val(uml);
 
     $('#srchTable').val().length == 0 && $div.css('minWidth', $div.css('width'));
@@ -802,7 +818,7 @@ function makeCheckTables(tables) {
             setTablesVisible(false);
         }
 
-        const uml = makeEntity();
+        const uml = makeTablesUML();
         $('#data').val(uml);
         showTablesVisibleCnt();
     });
@@ -816,7 +832,7 @@ function makeCheckTables(tables) {
             table.visible = false;
         }
 
-        const uml = makeEntity();
+        const uml = makeTablesUML();
         $('#data').val(uml);
         showTablesVisibleCnt();
     });
