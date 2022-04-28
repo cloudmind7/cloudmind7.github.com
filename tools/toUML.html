@@ -927,7 +927,9 @@ function bindTablesEvent() {
         }).show();
     })
     .on('keyup', function(e) {
-        if (e.ctrlKey && e.keyCode == 13) {
+        const ENTER = 13, ESC = 27;
+
+        if (e.ctrlKey && e.keyCode === ENTER) {
             $('.checkbox-table-li').off('chanbe').each(function() {
                 if (this.value) {
                     _global.tables
@@ -939,6 +941,11 @@ function bindTablesEvent() {
             $('#data').val(makeTablesUML());
             execBtn();
             $('.checkbox-table-li').on('change', handleChkTableLi);
+            return;
+
+        } else if (e.keyCode === ESC) {
+            $('#tblClose').trigger('click');
+            $('#srchTable').blur();
             return;
         }
 
