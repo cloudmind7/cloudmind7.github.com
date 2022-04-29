@@ -229,11 +229,7 @@ $(function() {
     });
 
     $('#data').keyup(function() {
-        if (!window.winInput) {
-            return;
-        }
-
-        window.winInput.document.getElementById('data').value = this.value;
+        syncInputData();
     });
 
     $('.btn-fold').click(function() {
@@ -243,7 +239,7 @@ $(function() {
                 replacePaddingTop();
             });
         } else {
-            $('.srch').slideToggle('fast', function(){
+            $('.srch').slideToggle('fast', function() {
                 $('.unfold').hide();
                 replacePaddingTop();
             });
@@ -445,9 +441,8 @@ $(function() {
             const reader = new FileReader();
             reader.onload = function () {
                 loadContents(reader.result);
-                showTableSelections();
+                makeCheckTablesPop();
                 $('#srchTable').trigger('focus');
-                execBtn();
             };
             reader.readAsText(file, /* optional */ "utf8");
         };
@@ -496,14 +491,20 @@ $(function() {
             _tables.forEach(t => {
                 t.attributes && t.attributes.forEach(a => {
                     a['name'] && (a['n'] = a['name']);
-                    a['required'] && (a['r'] = a['required']);
                     a['pk'] && (a['p'] = a['pk']);
                     a['fk'] && (a['f'] = a['fk']);
 
                     delete a['name'];
-                    delete a['required'];
                     delete a['pk'];
                     delete a['fk'];
+                });
+
+                t.refer && t.refer.forEach(a => {
+                    a['name'] && (a['n'] = a['name']);
+                    a['identifying'] && (a['i'] = a['identifying']);
+
+                    delete a['name'];
+                    delete a['identifying'];
                 });
 
                 t['tableName'] && (t['n'] = t['tableName']);
@@ -551,6 +552,13 @@ function _uncheckWindowInput() {
     $('#chkWinInput').prop('checked', false);
 }
 
+function syncInputData() {
+    if (!window.winInput) {
+        return;
+    }
+    window.winInput.document.getElementById('data').value = $('#data').val();
+}
+
 function applyParam() {
     let umlType;
     _global.elements.forEach(obj => {
@@ -593,14 +601,20 @@ function applyParam() {
         _global.tables.forEach(t => {
             t.a && t.a.forEach(a => {
                 a['n'] && (a['name'] = a['n']);
-                a['r'] && (a['required'] = a['r']);
                 a['p'] && (a['pk'] = a['p']);
                 a['f'] && (a['fk'] = a['f']);
 
                 delete a['n'];
-                delete a['r'];
                 delete a['p'];
                 delete a['f'];
+            });
+
+            t.r && t.r.forEach(a => {
+                a['n'] && (a['name'] = a['n']);
+                a['i'] && (a['identifying'] = a['i']);
+
+                delete a['n'];
+                delete a['i'];
             });
 
             t['n'] && (t['tableName'] = t['n']);
@@ -614,7 +628,7 @@ function applyParam() {
             delete t['v'];
         });
 
-        showTableSelections();
+        makeCheckTablesPop();
         $('#srchTable').trigger('focus');
         execBtn();
     }
@@ -623,7 +637,6 @@ function applyParam() {
 function loadContents(content) {
     const getAttributes = (str) => {
         const getName = (v) => v.match(/(?<=name=").+?(?=")/)[0];
-        const isRequired = (v) => v.indexOf('use="required"') !== -1;
         const matched = str.match(/(?<=<xs:attribute\s+)([\s\S\n]+?)(?=<\/xs:attribute>)/gm);
 
         if (!matched) {
@@ -632,8 +645,7 @@ function loadContents(content) {
 
         return matched.reduce((arr, s) => {
             arr.push({
-                name: getName(s),
-                required: isRequired(s)
+                name: getName(s)
             });
 
             return arr;
@@ -672,29 +684,28 @@ function loadContents(content) {
         let refer = [];
 
         keys[tableName] && keys[tableName].pks && keys[tableName].pks.forEach(pkName => {
-            attributes.filter( a => a.name === pkName).forEach(a => a['pk'] = true);
+            attributes.filter( a => a.name === pkName).forEach(a => a['pk'] = 'y');
         });
 
         keys[tableName] && keys[tableName].fks && keys[tableName].fks.forEach(fk => {
-            let identifying = false;
+            let ref = { name: fk.refer };
 
             fk.fields.forEach(fkName => {
                 attributes.filter( a => a.name === fkName).forEach(a => {
-                    a['fk'] = true;
+                    a['fk'] = 'y';
                     if (a.pk) {
-                        identifying = true;
+                        ref.identifying = 'y';
                     }
                 });
             });
 
-            refer.push({ n: fk.refer, i: identifying });
+            refer.push(ref);
         });
 
         const table = {
             tableName,
             attributes,
-            refer,
-            visible: false
+            refer
         };
 
         arr.push(table);
@@ -703,14 +714,28 @@ function loadContents(content) {
 }
 
 function makeTablesUML() {
+    const inputEntities = getInputEntities();
+    const inputRelations = getInputRelations();
+    const existRelation = (name1, name2) => {
+        return inputRelations[name1 + name2] || inputRelations[name2 + name1];
+    }
+
     const viewTables = _global.tables.filter(t => t.visible);
     const relations = (viewTables.length != _global.tables.length)
-        ? viewTables.reduce((arr, table) =>  {
-                table.refer && table.refer.forEach(ref => {
-                    const exist = viewTables.filter(vt => vt.tableName === ref.n).length;
+        ? viewTables.reduce((arr, t) =>  {
+                t.refer && t.refer.forEach(ref => {
+                    const exist = viewTables.filter(vt => vt.tableName === ref.name).length;
                     if (exist) {
-                        const identifying = (ref.i)? '--' : '..';
-                        arr.push(`${ref.n.replace(/_+/g, '')} ${identifying}o{ ${table.tableName.replace(/_+/g, '')}`);
+                        const refName = ref.name.replace(/_/g, '');
+                        const tbName = t.tableName.replace(/_/g, '');
+                        const relation = existRelation(refName, tbName);
+
+                        if (relation) {
+                            arr.push(relation);
+                        } else {
+                            const identifying = (ref.identifying)? '--' : '..';
+                            arr.push(`${refName} ${identifying}o{ ${tbName}`);
+                        }
                     }
                 });
                 return arr;
@@ -720,6 +745,12 @@ function makeTablesUML() {
     const notes = parseInputNote(viewTables);
 
     let uml = viewTables.map(t => {
+        const compactTableName = t.tableName.replace(/_/g, '');
+        const entity = inputEntities[compactTableName];
+        if (entity) {
+            return entity + '\n';
+        }
+
         const comparator = (a, b) => {
             if ((a.fk && b.fk) || (!a.fk && !b.fk)) return 0;
             else if (!a.fk && b.fk) return 1;
@@ -727,7 +758,7 @@ function makeTablesUML() {
         }
 
         const att = t.attributes.sort(comparator).reduce((obj, a) => {
-            let atName = a.name.replace(/_+/g, ' ') + (a.fk? ' (FK)' : '');
+            let atName = a.name.replace(/_/g, ' ') + (a.fk? ' (FK)' : '');
             if (a.pk) {
                 obj.primaryKey.push(atName);
             } else {
@@ -736,7 +767,7 @@ function makeTablesUML() {
             return obj;
         }, { primaryKey: [], attributes: [] });
 
-        return `entity "**${t.tableName.replace(/_+/g, ' ')}**" as ${t.tableName.replace(/_+/g, '')} {
+        return `entity "**${t.tableName.replace(/_/g, ' ')}**" as ${compactTableName} {
     ${att.primaryKey.join('\n    ')}
     --
     ${att.attributes.join('\n    ')}
@@ -759,6 +790,38 @@ ${relations.join('\n')}
 @enduml`;
 }
 
+function getInputEntities() {
+    const matched = $('#data').val().match(/entity [\s\S\n]+?}/gi);
+    if (!matched) {
+        return {};
+    }
+
+    return matched.reduce((obj, e) => {
+        const matched = e.match(/(?<=entity.+as\s+).+(?=\s+{)/);
+        if (matched) {
+            obj[matched[0]] = e;
+        }
+        return obj;
+    }, {});
+}
+
+function getInputRelations() {
+    const matched = $('#data').val().match(/(?<='relations[^']+')[\s\S\n]+(?=@enduml)/g);
+    if (!matched) {
+        return {};
+    }
+
+    return matched[0]
+            .replace(/(?<="[^"]*)\n+?(?=[^"]*")/gm, '\\n')
+            .split('\n')
+            .filter(s => s.replace(/\s+/g, ''))
+            .reduce((obj, s) => {
+                const name = s.trim().replace(/^([^\s]+)\s+[^\s]+\s+([^\s]+).*/g, '$1$2');
+                obj[name] = s.replace('\\n', '\n');
+                return obj;
+            }, {});
+}
+
 function parseInputNote(viewTables) {
     const input = $('#data').val();
     const matched = input.match(/note\s+\w+\s+of\s+[\s\S\n]+end\s+note/gmi);
@@ -769,7 +832,7 @@ function parseInputNote(viewTables) {
     return matched.reduce((arr, n) => {
         let name = n.match(/(?<=note.+of\s+).+/g)[0];
         name = name.split('::')[0].trim();
-        const exist = viewTables.filter(t => t.tableName.replace(/_+/g, '') === name).length;
+        const exist = viewTables.filter(t => t.tableName.replace(/_/g, '') === name).length;
         if (exist) {
             arr.push(n);
         }
@@ -777,7 +840,7 @@ function parseInputNote(viewTables) {
     }, []);
 }
 
-function showTableSelections() {
+function makeCheckTablesPop() {
     if (!$('#srchTable').length) {
         const $input = $('<input type="text" id="srchTable" placeholder="검색후 Ctrl + Enter" class="input" style="margin-left: 2px" />');
         const $div = $('<div class="checkbox-table-div">');
@@ -797,18 +860,18 @@ function showTableSelections() {
         $('#srchTable').val("");
     }
 
-    makeCheckTables(_global.tables);
+    makeCheckTablesList(_global.tables);
     bindTablesEvent();
 }
 
-function makeCheckTables(tables) {
+function makeCheckTablesList(tables) {
     let li = [];
     tables.forEach(t =>
         li.push(`
             <li>
                 <label>
                     <input type="checkbox" class="checkbox-table-li" value="${t.tableName}" ${t.visible? 'checked' : ''}>
-                    ${t.tableName.replace(/_+/g, ' ')}
+                    ${t.tableName.replace(/_/g, ' ')}
                 </label>
             </li>`)
     );
@@ -816,11 +879,10 @@ function makeCheckTables(tables) {
     $('.checkbox-table-div').find('li').eq(0).nextAll().remove()
     li.length && $('.checkbox-table-div ul').append($(li.join('\n')));
     const $div = $('.checkbox-table-div');
-    const uml = makeTablesUML();
-    $('#data').val(uml);
 
     $('#srchTable').val().length == 0 && $div.css('minWidth', $div.css('width'));
     $('.tbl-close-div').css('width', $div.css('width'));
+    showTablesVisibleCnt();
 
     $('.checkbox-table-all').on('change', function() {
         if (this.checked) {
@@ -842,14 +904,15 @@ function handleChkTableLi() {
     const table = _global.tables.filter(t => t.tableName === $(this).val())[0];
 
     if (this.checked) {
-        table.visible = true;
+        table.visible = 'y';
     } else {
-        table.visible = false;
+        delete table.visible;
     }
 
+    showTablesVisibleCnt();
     const uml = makeTablesUML();
     $('#data').val(uml);
-    showTablesVisibleCnt();
+    syncInputData();
 }
 
 function showTablesVisibleCnt() {
@@ -864,14 +927,6 @@ function setTablesVisible(visible) {
 }
 
 function bindTablesEvent() {
-    let isMouseOver = false;
-    $('.checkbox-table-div').on('mouseover', function() {
-        isMouseOver = true;
-    })
-    .on('mouseout', function() {
-        isMouseOver = false;
-    });
-
     $('#tblClose').on('click', function() {
         $('.checkbox-table-div').hide();
         $('#srchTable').val("").trigger('keyup');
@@ -888,29 +943,36 @@ function bindTablesEvent() {
     .on('keyup', function(e) {
         const ENTER = 13, ESC = 27;
 
-        if (e.ctrlKey && e.keyCode === ENTER) {
-            $('.checkbox-table-li').off('chanbe').each(function() {
-                if (this.value) {
-                    _global.tables
-                        .filter(t => t.tableName === this.value)
-                        .forEach(t => t.visible = true);
-                }
-            });
-
-            $('#data').val(makeTablesUML());
-            execBtn();
-            $('.checkbox-table-li').on('change', handleChkTableLi);
+        if (e.keyCode === ESC) {
+            $('#tblClose').trigger('click');
+            $('#srchTable').text("").blur();
+            makeCheckTablesList(_global.tables);
             return;
 
-        } else if (e.keyCode === ESC) {
-            $('#tblClose').trigger('click');
-            $('#srchTable').blur();
+        } else if (!_global.tables) {
+            return;
+
+        }
+
+        if (e.ctrlKey && e.keyCode === ENTER) {
+            $('.checkbox-table-li').off('change').each(function() {
+                _global.tables
+                    .filter(t => t.tableName === this.value)
+                    .forEach(t => t.visible = 'y');
+            });
+
+            showTablesVisibleCnt();
+            $('.checkbox-table-li').on('change', handleChkTableLi);
+            $('#data').val(makeTablesUML());
+            syncInputData();
+            execBtn();
             return;
         }
 
-        if (!_global.tables) return;
-        const tables = _global.tables.filter(t => t.tableName.replace(/_+/g, '').indexOf(this.value) !== -1);
-        makeCheckTables(tables);
+        let srch = this.value.replace(/\s/g, '');
+        const regex = srch && new RegExp(srch.match(/./g).join('.*'));
+        const tables = (regex)? _global.tables.filter((t) => regex.test(t.tableName)) : _global.tables;
+        makeCheckTablesList(tables);
     });
 }
 
