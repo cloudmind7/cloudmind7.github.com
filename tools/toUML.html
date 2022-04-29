@@ -274,11 +274,7 @@ $(function() {
     });
 
     $('#data').keyup(function() {
-        if (!window.winInput) {
-            return;
-        }
-
-        window.winInput.document.getElementById('data').value = this.value;
+        syncInputData();
     });
 
     $('.btn-fold').click(function() {
@@ -492,7 +488,6 @@ $(function() {
                 loadContents(reader.result);
                 makeCheckTablesPop();
                 $('#srchTable').trigger('focus');
-                execBtn();
             };
             reader.readAsText(file, /* optional */ "utf8");
         };
@@ -600,6 +595,13 @@ function _setData(data) {
 
 function _uncheckWindowInput() {
     $('#chkWinInput').prop('checked', false);
+}
+
+function syncInputData() {
+    if (!window.winInput) {
+        return;
+    }
+    window.winInput.document.getElementById('data').value = $('#data').val();
 }
 
 function applyParam() {
@@ -757,14 +759,28 @@ function loadContents(content) {
 }
 
 function makeTablesUML() {
+    const inputEntities = getInputEntities();
+    const inputRelations = getInputRelations();
+    const existRelation = (name1, name2) => {
+        return inputRelations[name1 + name2] || inputRelations[name2 + name1];
+    }
+
     const viewTables = _global.tables.filter(t => t.visible);
     const relations = (viewTables.length != _global.tables.length)
-        ? viewTables.reduce((arr, table) =>  {
-                table.refer && table.refer.forEach(ref => {
+        ? viewTables.reduce((arr, t) =>  {
+                t.refer && t.refer.forEach(ref => {
                     const exist = viewTables.filter(vt => vt.tableName === ref.name).length;
                     if (exist) {
-                        const identifying = (ref.identifying)? '--' : '..';
-                        arr.push(`${ref.name.replace(/_+/g, '')} ${identifying}o{ ${table.tableName.replace(/_+/g, '')}`);
+                        const refName = ref.name.replace(/_/g, '');
+                        const tbName = t.tableName.replace(/_/g, '');
+                        const relation = existRelation(refName, tbName);
+
+                        if (relation) {
+                            arr.push(relation);
+                        } else {
+                            const identifying = (ref.identifying)? '--' : '..';
+                            arr.push(`${refName} ${identifying}o{ ${tbName}`);
+                        }
                     }
                 });
                 return arr;
@@ -774,6 +790,12 @@ function makeTablesUML() {
     const notes = parseInputNote(viewTables);
 
     let uml = viewTables.map(t => {
+        const compactTableName = t.tableName.replace(/_/g, '');
+        const entity = inputEntities[compactTableName];
+        if (entity) {
+            return entity + '\n';
+        }
+
         const comparator = (a, b) => {
             if ((a.fk && b.fk) || (!a.fk && !b.fk)) return 0;
             else if (!a.fk && b.fk) return 1;
@@ -781,7 +803,7 @@ function makeTablesUML() {
         }
 
         const att = t.attributes.sort(comparator).reduce((obj, a) => {
-            let atName = a.name.replace(/_+/g, ' ') + (a.fk? ' (FK)' : '');
+            let atName = a.name.replace(/_/g, ' ') + (a.fk? ' (FK)' : '');
             if (a.pk) {
                 obj.primaryKey.push(atName);
             } else {
@@ -790,7 +812,7 @@ function makeTablesUML() {
             return obj;
         }, { primaryKey: [], attributes: [] });
 
-        return `entity "**${t.tableName.replace(/_+/g, ' ')}**" as ${t.tableName.replace(/_+/g, '')} {
+        return `entity "**${t.tableName.replace(/_/g, ' ')}**" as ${compactTableName} {
     ${att.primaryKey.join('\n    ')}
     --
     ${att.attributes.join('\n    ')}
@@ -813,6 +835,38 @@ ${relations.join('\n')}
 @enduml`;
 }
 
+function getInputEntities() {
+    const matched = $('#data').val().match(/entity [\s\S\n]+?}/gi);
+    if (!matched) {
+        return {};
+    }
+
+    return matched.reduce((obj, e) => {
+        const matched = e.match(/(?<=entity.+as\s+).+(?=\s+{)/);
+        if (matched) {
+            obj[matched[0]] = e;
+        }
+        return obj;
+    }, {});
+}
+
+function getInputRelations() {
+    const matched = $('#data').val().match(/(?<='relations[^']+')[\s\S\n]+(?=@enduml)/g);
+    if (!matched) {
+        return {};
+    }
+
+    return matched[0]
+            .replace(/(?<="[^"]*)\n+?(?=[^"]*")/gm, '\\n')
+            .split('\n')
+            .filter(s => s.replace(/\s+/g, ''))
+            .reduce((obj, s) => {
+                const name = s.trim().replace(/^([^\s]+)\s+[^\s]+\s+([^\s]+).*/g, '$1$2');
+                obj[name] = s.replace('\\n', '\n');
+                return obj;
+            }, {});
+}
+
 function parseInputNote(viewTables) {
     const input = $('#data').val();
     const matched = input.match(/note\s+\w+\s+of\s+[\s\S\n]+end\s+note/gmi);
@@ -823,7 +877,7 @@ function parseInputNote(viewTables) {
     return matched.reduce((arr, n) => {
         let name = n.match(/(?<=note.+of\s+).+/g)[0];
         name = name.split('::')[0].trim();
-        const exist = viewTables.filter(t => t.tableName.replace(/_+/g, '') === name).length;
+        const exist = viewTables.filter(t => t.tableName.replace(/_/g, '') === name).length;
         if (exist) {
             arr.push(n);
         }
@@ -862,7 +916,7 @@ function makeCheckTablesList(tables) {
             <li>
                 <label>
                     <input type="checkbox" class="checkbox-table-li" value="${t.tableName}" ${t.visible? 'checked' : ''}>
-                    ${t.tableName.replace(/_+/g, ' ')}
+                    ${t.tableName.replace(/_/g, ' ')}
                 </label>
             </li>`)
     );
@@ -870,8 +924,6 @@ function makeCheckTablesList(tables) {
     $('.checkbox-table-div').find('li').eq(0).nextAll().remove()
     li.length && $('.checkbox-table-div ul').append($(li.join('\n')));
     const $div = $('.checkbox-table-div');
-    const uml = makeTablesUML();
-    $('#data').val(uml);
 
     $('#srchTable').val().length == 0 && $div.css('minWidth', $div.css('width'));
     $('.tbl-close-div').css('width', $div.css('width'));
@@ -905,6 +957,7 @@ function handleChkTableLi() {
     showTablesVisibleCnt();
     const uml = makeTablesUML();
     $('#data').val(uml);
+    syncInputData();
 }
 
 function showTablesVisibleCnt() {
@@ -938,6 +991,7 @@ function bindTablesEvent() {
         if (e.keyCode === ESC) {
             $('#tblClose').trigger('click');
             $('#srchTable').text("").blur();
+            makeCheckTablesList(_global.tables);
             return;
 
         } else if (!_global.tables) {
@@ -945,32 +999,24 @@ function bindTablesEvent() {
 
         }
 
-        const srch = this.value.replace(/\s/g, '');
-        if (!srch) {
-            makeCheckTablesList(_global.tables);
-            return;
-        }
-
-        const regex = srch && new RegExp(srch.match(/./g).join('.*'));
-        const srchFilter = (t) => regex.test(t.tableName);
-
         if (e.ctrlKey && e.keyCode === ENTER) {
-            $('.checkbox-table-li').off('chanbe').each(function() {
-                if (regex) {
-                    _global.tables
-                        .filter(srchFilter)
-                        .forEach(t => t.visible = 'y');
-                }
+            $('.checkbox-table-li').off('change').each(function() {
+                _global.tables
+                    .filter(t => t.tableName === this.value)
+                    .forEach(t => t.visible = 'y');
             });
 
             showTablesVisibleCnt();
-            $('#data').val(makeTablesUML());
-            execBtn();
             $('.checkbox-table-li').on('change', handleChkTableLi);
+            $('#data').val(makeTablesUML());
+            syncInputData();
+            execBtn();
             return;
         }
 
-        const tables = _global.tables.filter(srchFilter);
+        let srch = this.value.replace(/\s/g, '');
+        const regex = srch && new RegExp(srch.match(/./g).join('.*'));
+        const tables = (regex)? _global.tables.filter((t) => regex.test(t.tableName)) : _global.tables;
         makeCheckTablesList(tables);
     });
 }
