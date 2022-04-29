@@ -490,7 +490,7 @@ $(function() {
             const reader = new FileReader();
             reader.onload = function () {
                 loadContents(reader.result);
-                showTableSelections();
+                makeCheckTablesPop();
                 $('#srchTable').trigger('focus');
                 execBtn();
             };
@@ -671,7 +671,7 @@ function applyParam() {
             delete t['v'];
         });
 
-        showTableSelections();
+        makeCheckTablesPop();
         $('#srchTable').trigger('focus');
         execBtn();
     }
@@ -831,7 +831,7 @@ function parseInputNote(viewTables) {
     }, []);
 }
 
-function showTableSelections() {
+function makeCheckTablesPop() {
     if (!$('#srchTable').length) {
         const $input = $('<input type="text" id="srchTable" placeholder="검색후 Ctrl + Enter" class="input" style="margin-left: 2px" />');
         const $div = $('<div class="checkbox-table-div">');
@@ -851,11 +851,11 @@ function showTableSelections() {
         $('#srchTable').val("");
     }
 
-    makeCheckTables(_global.tables);
+    makeCheckTablesList(_global.tables);
     bindTablesEvent();
 }
 
-function makeCheckTables(tables) {
+function makeCheckTablesList(tables) {
     let li = [];
     tables.forEach(t =>
         li.push(`
@@ -875,6 +875,7 @@ function makeCheckTables(tables) {
 
     $('#srchTable').val().length == 0 && $div.css('minWidth', $div.css('width'));
     $('.tbl-close-div').css('width', $div.css('width'));
+    showTablesVisibleCnt();
 
     $('.checkbox-table-all').on('change', function() {
         if (this.checked) {
@@ -901,9 +902,9 @@ function handleChkTableLi() {
         delete table.visible;
     }
 
+    showTablesVisibleCnt();
     const uml = makeTablesUML();
     $('#data').val(uml);
-    showTablesVisibleCnt();
 }
 
 function showTablesVisibleCnt() {
@@ -918,14 +919,6 @@ function setTablesVisible(visible) {
 }
 
 function bindTablesEvent() {
-    let isMouseOver = false;
-    $('.checkbox-table-div').on('mouseover', function() {
-        isMouseOver = true;
-    })
-    .on('mouseout', function() {
-        isMouseOver = false;
-    });
-
     $('#tblClose').on('click', function() {
         $('.checkbox-table-div').hide();
         $('#srchTable').val("").trigger('keyup');
@@ -942,29 +935,43 @@ function bindTablesEvent() {
     .on('keyup', function(e) {
         const ENTER = 13, ESC = 27;
 
+        if (e.keyCode === ESC) {
+            $('#tblClose').trigger('click');
+            $('#srchTable').text("").blur();
+            return;
+
+        } else if (!_global.tables) {
+            return;
+
+        }
+
+        const srch = this.value.replace(/\s/g, '');
+        if (!srch) {
+            makeCheckTablesList(_global.tables);
+            return;
+        }
+
+        const regex = srch && new RegExp(srch.match(/./g).join('.*'));
+        const srchFilter = (t) => regex.test(t.tableName);
+
         if (e.ctrlKey && e.keyCode === ENTER) {
             $('.checkbox-table-li').off('chanbe').each(function() {
-                if (this.value) {
+                if (regex) {
                     _global.tables
-                        .filter(t => t.tableName === this.value)
+                        .filter(srchFilter)
                         .forEach(t => t.visible = 'y');
                 }
             });
 
+            showTablesVisibleCnt();
             $('#data').val(makeTablesUML());
             execBtn();
             $('.checkbox-table-li').on('change', handleChkTableLi);
             return;
-
-        } else if (e.keyCode === ESC) {
-            $('#tblClose').trigger('click');
-            $('#srchTable').blur();
-            return;
         }
 
-        if (!_global.tables) return;
-        const tables = _global.tables.filter(t => t.tableName.replace(/_+/g, '').indexOf(this.value) !== -1);
-        makeCheckTables(tables);
+        const tables = _global.tables.filter(srchFilter);
+        makeCheckTablesList(tables);
     });
 }
 
