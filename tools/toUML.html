@@ -597,9 +597,20 @@ $(function() {
             query.push('tbl=' + tbl);
         }
 
-        const url = location.href.replace(/^([^?]+)\?.+/, "$1") + '?' + query.join('&');
-        navigator.clipboard.writeText(url);
-        alert("URL이 클립보드에 저장되었습니다.\n붙여넣기(Ctrl+V)로 화면을 공유할 수 있습니다.");
+        let url = location.href.replace(/^([^?]+)\?.+/, "$1") + '?' + query.join('&');
+
+        $.get(url.replace(/.+(\/cloudmind7.+)/, 'https://$1'))
+            .fail(function() {
+                if ($('#umlType').val() === 'uml' && _global.tables && agree) {
+                    alert("데이터가 많아 처리가 불가능하여 테이블 정보를 제외합니다.");
+                    query = query.filter(q => q.indexOf('tbl=') == -1);
+                    url = location.href.replace(/^([^?]+)\?.+/, "$1") + '?' + query.join('&');
+                }
+            })
+            .always(function() {
+                navigator.clipboard.writeText(url);
+                alert("URL이 클립보드에 저장되었습니다.\n붙여넣기(Ctrl+V)로 화면을 공유할 수 있습니다.");
+            });
     });
 
     $('#copyBtn').click(function() {
