@@ -277,20 +277,7 @@ $(function() {
         const umlType = $('#umlType').val();
 
         if (umlType === 'uml') {
-            const inputEntities = getInputEntities();
-            let viewTables = _global.tables.filter(t => t.visible);
-
-            if (Object.keys(inputEntities).length != viewTables.length) {
-                _global.tables.forEach(t => {
-                    const name = t.tableName.replace(/_/g, '').trim();
-                    if (inputEntities[name]) {
-                        t.visible = 'y';
-                    }
-                });
-
-                makeCheckTablesList(_global.tables);
-                showTablesVisibleCnt();
-            }
+            syncEntities();
         }
 
         syncInputData();
@@ -515,6 +502,10 @@ $(function() {
 
                 makeCheckTablesPop();
                 $('#srchTable').trigger('focus');
+
+                if ($('#data').val().replace(/\s/g, '')) {
+                    syncEntities();
+                }
             };
             reader.readAsText(file, /* optional */ "utf8");
         };
@@ -636,6 +627,28 @@ function _setData(data) {
 
 function _uncheckWindowInput() {
     $('#chkWinInput').prop('checked', false);
+}
+
+function syncEntities() {
+    if (!_global.tables) {
+        return;
+    }
+
+    const inputEntities = getInputEntities();
+    const entitiesKey = Object.keys(inputEntities);
+    let viewTables = _global.tables.filter(t => t.visible);
+
+    if (entitiesKey.length && (viewTables.length != entitiesKey.length)) {
+        _global.tables.forEach(t => {
+            const name = t.tableName.replace(/_/g, '').trim();
+            if (inputEntities[name]) {
+                t.visible = 'y';
+            }
+        });
+
+        makeCheckTablesList(_global.tables);
+        showTablesVisibleCnt();
+    }
 }
 
 function syncInputData() {
