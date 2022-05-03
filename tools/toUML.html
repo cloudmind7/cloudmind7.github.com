@@ -485,7 +485,15 @@ $(function() {
 
             const reader = new FileReader();
             reader.onload = function () {
-                loadContents(reader.result);
+                const content = reader.result;
+                const isPhysical = /<xs:element[^>]+>[\s\S\n]+?<xs:complexType>[\s\S\n]+?<\/xs:complexType>[\s\S\n]+?<\/xs:element>/.test(content);
+
+                if (isPhysical) {
+                    loadPhysicalContents(content);
+                } else {
+                    loadLogicalContents(content);
+                }
+
                 makeCheckTablesPop();
                 $('#srchTable').trigger('focus');
             };
@@ -536,10 +544,12 @@ $(function() {
             _tables.forEach(t => {
                 t.attributes && t.attributes.forEach(a => {
                     a['name'] && (a['n'] = a['name']);
+                    a['comment'] && (a['c'] = a['comment']);
                     a['pk'] && (a['p'] = a['pk']);
                     a['fk'] && (a['f'] = a['fk']);
 
                     delete a['name'];
+                    delete a['comment'];
                     delete a['pk'];
                     delete a['fk'];
                 });
@@ -553,11 +563,13 @@ $(function() {
                 });
 
                 t['tableName'] && (t['n'] = t['tableName']);
+                t['comment'] && (t['c'] = t['comment']);
                 t['attributes'] && (t['a'] = t['attributes']);
                 t['refer'] && (t['r'] = t['refer']);
                 t['visible'] && (t['v'] = t['visible']);
 
                 delete t['tableName'];
+                delete t['comment'];
                 delete t['attributes'];
                 delete t['refer'];
                 delete t['visible'];
@@ -646,10 +658,12 @@ function applyParam() {
         _global.tables.forEach(t => {
             t.a && t.a.forEach(a => {
                 a['n'] && (a['name'] = a['n']);
+                a['c'] && (a['comment'] = a['c']);
                 a['p'] && (a['pk'] = a['p']);
                 a['f'] && (a['fk'] = a['f']);
 
                 delete a['n'];
+                delete a['c'];
                 delete a['p'];
                 delete a['f'];
             });
@@ -663,11 +677,13 @@ function applyParam() {
             });
 
             t['n'] && (t['tableName'] = t['n']);
+            t['c'] && (t['comment'] = t['c']);
             t['a'] && (t['attributes'] = t['a']);
             t['r'] && (t['refer'] = t['r']);
             t['v'] && (t['visible'] = t['v']);
 
             delete t['n'];
+            delete t['c'];
             delete t['a'];
             delete t['r'];
             delete t['v'];
@@ -679,7 +695,103 @@ function applyParam() {
     }
 }
 
-function loadContents(content) {
+function loadPhysicalContents(content) {
+    const matched = content.match(/<xs:element[\s\S\n]+?<\/xs:element>/g);
+    const fks = [];
+
+    const tables = _global.tables = matched.reduce((tables, m) => {
+        const getComment = (s) => {
+            const label = s.match(/(?<=<xs:documentation>)[^<]+?(?=<\/xs:documentation>)/g);
+            return (label)? label[0] : '';
+        }
+
+        try {
+            const tableName = m.match(/(?<=<xs:element name=")[^"]+(?=">)/g)[0];
+
+            const matchedPK = m.match(/(?<=<xs:key [^>]+>)[\s\S\n]+?(?=<\/xs:key>)/g);
+            const pks = matchedPK && matchedPK.reduce((arr, pk) => {
+                const matched = pk.match(/(?<=<xs:field xpath="@)[^"]+/gm);
+                if (matched) {
+                    arr = [...arr, ...matched];
+                }
+                return arr;
+            }, []) || [];
+
+            const matchedFK = m.match(/(?<=<xs:keyref [^>]+>)[\s\S\n]+?(?=<\/xs:keyref>)/gm);
+            matchedFK && matchedFK.forEach(fk => {
+                const name = fk.match(/(?<=<xs:selector xpath=".\/\/)[^"]+/g)[0];
+                const matched = fk.match(/(?<=<xs:field xpath="@)[^"]+/g);
+
+                const table = fks[name] = fks[name] || [];
+                const refer = table.filter(t => t.refer === name);
+                if (refer.length) {
+                    refer[0].fields = [...refer.fields, ...matched];
+
+                } else {
+                    table.push({
+                        refer: tableName,
+                        fields: matched
+                    })
+                }
+            });
+
+            const matchedAttr = m.match(/<xs:attribute[\s\S\n]+?<\/xs:attribute>/g);
+            const attributes = matchedAttr && matchedAttr.reduce((arr, att) => {
+                const name = att.match(/(?<=name=")[^"]+/g)[0];
+                const pk = pks.indexOf(name) != -1;
+
+                const attr = {
+                    name,
+                    comment: getComment(att)
+                };
+
+                pk && (attr.pk = 'y');
+                arr.push(attr);
+                return arr;
+            }, []) || [];
+
+            const table = {
+                tableName,
+                comment: getComment(m),
+                attributes
+            };
+
+            tables.push(table);
+
+        } catch(e) {
+            console.error(e);
+        }
+
+        return tables;
+    }, []);
+
+    tables.forEach(t => {
+        const refTable = fks[t.tableName];
+        if (! refTable) {
+            return;
+        }
+
+        const refer = refTable.reduce((arr, r) => {
+            let ref = { name: r.refer };
+
+            r.fields.forEach(field => {
+                t.attributes.filter(a => a.name === field).forEach(a => {
+                    a.fk = 'y';
+
+                    if (a.pk) {
+                        ref.identifying = 'y';
+                    }
+                });
+            });
+            arr.push(ref);
+            return arr;
+        }, []);
+
+        t.refer = refer;
+    });
+}
+
+function loadLogicalContents(content) {
     const getAttributes = (str) => {
         const getName = (v) => v.match(/(?<=name=").+?(?=")/)[0];
         const matched = str.match(/(?<=<xs:attribute\s+)([\s\S\n]+?)(?=<\/xs:attribute>)/gm);
@@ -724,36 +836,40 @@ function loadContents(content) {
     const matched = content.match(/<xs:complexType [\s\S\n]+?<\/xs:complexType>/gm);
 
     _global.tables = matched.reduce((arr, m) => {
-        const tableName = m.match(/(?<=\<xs:complexType name=").+?(?=">)/m)[0];
-        const attributes = getAttributes(m);
-        let refer = [];
+        try {
+            const tableName = m.match(/(?<=\<xs:complexType name=").+?(?=">)/m)[0];
+            const attributes = getAttributes(m);
+            let refer = [];
 
-        keys[tableName] && keys[tableName].pks && keys[tableName].pks.forEach(pkName => {
-            attributes.filter( a => a.name === pkName).forEach(a => a['pk'] = 'y');
-        });
-
-        keys[tableName] && keys[tableName].fks && keys[tableName].fks.forEach(fk => {
-            let ref = { name: fk.refer };
-
-            fk.fields.forEach(fkName => {
-                attributes.filter( a => a.name === fkName).forEach(a => {
-                    a['fk'] = 'y';
-                    if (a.pk) {
-                        ref.identifying = 'y';
-                    }
-                });
+            keys[tableName] && keys[tableName].pks && keys[tableName].pks.forEach(pkName => {
+                attributes.filter( a => a.name === pkName).forEach(a => a['pk'] = 'y');
             });
 
-            refer.push(ref);
-        });
+            keys[tableName] && keys[tableName].fks && keys[tableName].fks.forEach(fk => {
+                let ref = { name: fk.refer };
 
-        const table = {
-            tableName,
-            attributes,
-            refer
-        };
+                fk.fields.forEach(fkName => {
+                    attributes.filter( a => a.name === fkName).forEach(a => {
+                        a['fk'] = 'y';
+                        if (a.pk) {
+                            ref.identifying = 'y';
+                        }
+                    });
+                });
 
-        arr.push(table);
+                refer.push(ref);
+            });
+
+            const table = {
+                tableName,
+                attributes,
+                refer
+            };
+
+            arr.push(table);
+        } catch (e) {
+            console.error(e);
+        }
         return arr;
     }, []);
 }
@@ -803,7 +919,11 @@ function makeTablesUML() {
         }
 
         const att = t.attributes.sort(comparator).reduce((obj, a) => {
-            let atName = a.name.replace(/_/g, ' ') + (a.fk? ' (FK)' : '');
+            let atName = a.name + (a.fk? ' (FK)' : '');
+            if (a.comment) {
+                atName += ` /* ${a.comment} */`;
+            }
+
             if (a.pk) {
                 obj.primaryKey.push(atName);
             } else {
@@ -812,7 +932,9 @@ function makeTablesUML() {
             return obj;
         }, { primaryKey: [], attributes: [] });
 
-        return `entity "**${t.tableName.replace(/_/g, ' ')}**" as ${compactTableName} {
+        const comment = (t.comment)? ` /* ${t.comment} */` : '';
+
+        return `entity "**${t.tableName}**${comment}" as ${compactTableName} {
     ${att.primaryKey.join('\n    ')}
     --
     ${att.attributes.join('\n    ')}
@@ -916,7 +1038,7 @@ function makeCheckTablesList(tables) {
             <li>
                 <label>
                     <input type="checkbox" class="checkbox-table-li" value="${t.tableName}" ${t.visible? 'checked' : ''}>
-                    ${t.tableName.replace(/_/g, ' ')}
+                    ${t.tableName}${t.comment? ' (' + t.comment + ')': ''}
                 </label>
             </li>`)
     );
@@ -1015,8 +1137,8 @@ function bindTablesEvent() {
         }
 
         let srch = this.value.replace(/\s/g, '');
-        const regex = srch && new RegExp(srch.match(/./g).join('.*'));
-        const tables = (regex)? _global.tables.filter((t) => regex.test(t.tableName)) : _global.tables;
+        const regex = srch && new RegExp(srch.match(/./g).join('.*'), 'i');
+        const tables = (regex)? _global.tables.filter((t) => regex.test(t.tableName) || (t.comment && regex.test(t.comment))) : _global.tables;
         makeCheckTablesList(tables);
     });
 }
