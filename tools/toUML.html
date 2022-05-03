@@ -700,16 +700,25 @@ function loadPhysicalContents(content) {
     const fks = [];
 
     const tables = _global.tables = matched.reduce((tables, m) => {
-        const getComment = (s) => {
-            const label = s.match(/(?<=<xs:documentation>)[^<]+?(?=<\/xs:documentation>)/g);
-            return (label)? label[0] : '';
+        const getComment = (s, type) => {
+            const regex = (type === 'table')
+                ? /(?<=<xs:element[^>]+>[\r\n]+<xs:annotation>[\r\n]+<xs:documentation>)[^<]+?(?=<\/xs:documentation>)/g
+                : /(?<=<xs:documentation>)[^<]+?(?=<\/xs:documentation>)/g;
+            const comment = s.match(regex);
+            return (comment)? comment[0] : '';
         }
 
         try {
             const tableName = m.match(/(?<=<xs:element name=")[^"]+(?=">)/g)[0];
+            let tableComment = getComment(m, 'table');
 
-            const matchedPK = m.match(/(?<=<xs:key [^>]+>)[\s\S\n]+?(?=<\/xs:key>)/g);
+            const matchedPK = m.match(/<xs:key [^>]+>[\s\S\n]+?<\/xs:key>/g);
             const pks = matchedPK && matchedPK.reduce((arr, pk) => {
+                if (!tableComment) {
+                    const comm = pk.match(/(?<=<xs:key name="XPK)[^"]+/g);
+                    comm && (tableComment = comm[0]);
+                }
+
                 const matched = pk.match(/(?<=<xs:field xpath="@)[^"]+/gm);
                 if (matched) {
                     arr = [...arr, ...matched];
@@ -752,7 +761,7 @@ function loadPhysicalContents(content) {
 
             const table = {
                 tableName,
-                comment: getComment(m),
+                comment: tableComment,
                 attributes
             };
 
