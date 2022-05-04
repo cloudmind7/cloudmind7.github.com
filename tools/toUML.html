@@ -661,7 +661,6 @@ function syncEntities() {
         });
 
         makeCheckTablesList(_global.tables);
-        showTablesVisibleCnt();
     }
 }
 
@@ -1086,8 +1085,8 @@ function makeCheckTablesPop() {
                 </li>
                 <li>
                 <label>
-                    <input type="checkbox" id="chkViewTable" class="checkbox-table-all" value="all">
-                    <span id="selectVisisble">Select Visible</span>
+                    <input type="checkbox" id="chkViewTable">
+                    <span id="selectVisible">Select Visible</span>
                 </label>
                 </li>
             </ul>`);
@@ -1114,13 +1113,48 @@ function makeCheckTablesList(tables) {
             </li>`)
     );
 
-    $('.checkbox-table-div').find('li').eq(1).nextAll().remove()
+    $('.checkbox-table-div').find('li').eq(1).nextAll().remove();
     li.length && $('.checkbox-table-div ul').append($(li.join('\n')));
     const $div = $('.checkbox-table-div');
 
     $('#srchTable').val().length == 0 && $div.css('minWidth', $div.css('width'));
     $('.tbl-close-div').css('width', $div.css('width'));
     showTablesVisibleCnt();
+
+    $('.checkbox-table-li').on('change', handleChkTableLi);
+}
+
+function handleChkTableLi() {
+    const table = _global.tables.filter(t => t.tableName === $(this).val())[0];
+
+    if (this.checked) {
+        table.visible = 'y';
+    } else {
+        delete table.visible;
+    }
+
+    showTablesVisibleCnt();
+    const uml = makeTablesUML();
+    $('#data').val(uml);
+    syncInputData();
+}
+
+function showTablesVisibleCnt() {
+    const visibleCnt = _global.tables.filter(t => t.visible).length;
+    $('#selectVisible').text(`Select Visible (${visibleCnt})`);
+}
+
+function setTablesVisible(visible) {
+    $('.checkbox-table-div').find('input[type=checkbox]').each((i, c) => {
+        _global.tables.filter(t => t.tableName === c.value).forEach(t => t.visible = visible);
+    });
+}
+
+function bindTablesEvent() {
+    $('#tblClose').on('click', function() {
+        $('.checkbox-table-div').hide();
+        $('#srchTable').val("").trigger('keyup');
+    });
 
     $('#chkAllTable').on('change', function() {
         if (this.checked) {
@@ -1145,42 +1179,6 @@ function makeCheckTablesList(tables) {
         }
 
         makeCheckTablesList(tables);
-        showTablesVisibleCnt();
-    });
-
-    $('.checkbox-table-li').on('change', handleChkTableLi);
-}
-
-function handleChkTableLi() {
-    const table = _global.tables.filter(t => t.tableName === $(this).val())[0];
-
-    if (this.checked) {
-        table.visible = 'y';
-    } else {
-        delete table.visible;
-    }
-
-    showTablesVisibleCnt();
-    const uml = makeTablesUML();
-    $('#data').val(uml);
-    syncInputData();
-}
-
-function showTablesVisibleCnt() {
-    const visibleCnt = _global.tables.filter(t => t.visible).length;
-    $('#selectVisisble').text(`Select Visible (${visibleCnt})`);
-}
-
-function setTablesVisible(visible) {
-    $('.checkbox-table-div').find('input[type=checkbox]').each((i, c) => {
-        _global.tables.filter(t => t.tableName === c.value).forEach(t => t.visible = visible);
-    });
-}
-
-function bindTablesEvent() {
-    $('#tblClose').on('click', function() {
-        $('.checkbox-table-div').hide();
-        $('#srchTable').val("").trigger('keyup');
     });
 
     $('#srchTable').on('focus', function() {
