@@ -551,43 +551,44 @@ $(function() {
 
         const agree = $('#umlType').val() === 'uml' && _global.tables && confirm("테이블 정보를 포함 하시겠습니까?");
         if (agree) {
-            const _tables = [..._global.tables];
+            const tables = _global.tables.reduce((arr, t) => {
+                const attributes = t.attributes && t.attributes.reduce((attrs, a) => {
+                    attrs.push({
+                        n: a['name'],
+                        c: a['comment'],
+                        p: a['pk'],
+                        f: a['fk']
+                    });
+                    return attrs;
+                }, []);
 
-            _tables.forEach(t => {
-                t.attributes && t.attributes.forEach(a => {
-                    a['name'] && (a['n'] = a['name']);
-                    a['comment'] && (a['c'] = a['comment']);
-                    a['pk'] && (a['p'] = a['pk']);
-                    a['fk'] && (a['f'] = a['fk']);
+                const refer = t.refer && t.refer.reduce((refs, r) => {
+                    refs.push({
+                       n: r['name'],
+                       i: r['identifying']
+                    });
+                    return refs;
+                }, []);
 
-                    delete a['name'];
-                    delete a['comment'];
-                    delete a['pk'];
-                    delete a['fk'];
-                });
+                const table = {
+                    n: t['tableName'],
+                    c: t['comment'],
+                    v: t['visible']
+                };
 
-                t.refer && t.refer.forEach(a => {
-                    a['name'] && (a['n'] = a['name']);
-                    a['identifying'] && (a['i'] = a['identifying']);
+                if (attributes && attributes.length) {
+                    table.a = attributes;
+                }
 
-                    delete a['name'];
-                    delete a['identifying'];
-                });
+                if (refer && refer.length) {
+                    table.r = refer;
+                }
 
-                t['tableName'] && (t['n'] = t['tableName']);
-                t['comment'] && (t['c'] = t['comment']);
-                t['attributes'] && (t['a'] = t['attributes']);
-                t['refer'] && (t['r'] = t['refer']);
-                t['visible'] && (t['v'] = t['visible']);
+                arr.push(table);
+                return arr;
+            }, []);
 
-                delete t['tableName'];
-                delete t['comment'];
-                delete t['attributes'];
-                delete t['refer'];
-                delete t['visible'];
-            });
-
-            const tbl = _tables && enc(JSON.stringify(_tables)) || "";
+            const tbl = tables && enc(JSON.stringify(tables)) || "";
             query.push('tbl=' + tbl);
         }
 
