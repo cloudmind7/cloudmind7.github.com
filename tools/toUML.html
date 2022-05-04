@@ -197,6 +197,14 @@
 })();
 
 $(function() {
+    window.addEventListener('keyup', function(e) {
+        if (e.keyCode == 187) {
+            zoom(1);
+        } else if (e.keyCode == 189) {
+            zoom(-1);
+        }
+    });
+
     window._global = {
         elements: [],
         getParam(id) {
@@ -361,15 +369,15 @@ $(function() {
             <textarea id="data" title="화면에 표시할 데이터 입력란" class="input">${data}</textarea>
             <script>
             const data = document.getElementById('data');
+            data.addEventListener('keyup', function(e) {
+                window.opener._setData(data.value);
+                window.opener._syncEntities();
+            });
+
             window.addEventListener('keyup', function(e) {
                 if (e.ctrlKey && e.keyCode == 13) {
                     window.opener.execBtn();
                 }
-            });
-
-            data.addEventListener('keyup', function(e) {
-                window.opener._setData(data.value);
-                window.opener._syncEntities();
             });
 
             window.addEventListener("beforeunload", function() {
