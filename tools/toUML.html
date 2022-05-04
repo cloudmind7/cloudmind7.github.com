@@ -368,7 +368,6 @@ $(function() {
             });
 
             data.addEventListener('keyup', function(e) {
-                console.log('check');
                 window.opener._setData(data.value);
                 window.opener._syncEntities();
             });
@@ -487,6 +486,7 @@ $(function() {
         // input.accept = "text/plain";
         input.onchange = function (event) {
             const file = event.target.files[0];
+            _global.fileName = file.name;
             const isVaildExt = file && /.+\.xsd/.test(file.name);
             if (! isVaildExt) {
                 alert("지원하지않는 파일 형식입니다.");
@@ -1009,10 +1009,13 @@ function makeTablesUML() {
     let title = $('#data').val().match(/^title .+/);
     title = title && '\n' + title[0] + '\n' || '';
 
+    let caption = _global.fileName;
+    caption = caption && '\ncaption ' + caption + '\n' || '';
+
     return `@startuml
 hide circle
 skinparam lineType ortho
-${title}
+${title}${caption}
 ${uml.join('\n')}
 'notes ----------'
 ${notes.join('\n')}
