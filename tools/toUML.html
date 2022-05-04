@@ -1169,7 +1169,13 @@ function showTablesVisibleCnt() {
 
 function setTablesVisible(visible) {
     $('.checkbox-table-div').find('input[type=checkbox]').each((i, c) => {
-        _global.tables.filter(t => t.tableName === c.value).forEach(t => t.visible = visible);
+        _global.tables.filter(t => t.tableName === c.value).forEach(t => {
+            if (visible) {
+                t.visible = 'y';
+            } else {
+                delete t.visible;
+            }
+        });
     });
 }
 
@@ -1180,6 +1186,8 @@ function bindTablesEvent() {
     });
 
     $('#chkAllTable').on('change', function() {
+        $('.checkbox-table-li').off('change');
+
         if (this.checked) {
             $('.checkbox-table-li').prop('checked', true);
             setTablesVisible(true);
@@ -1190,6 +1198,9 @@ function bindTablesEvent() {
         }
 
         showTablesVisibleCnt();
+        $('.checkbox-table-li').on('change', handleChkTableLi);
+        $('#data').val(makeTablesUML());
+        syncInputData();
     });
 
     $('#chkViewTable').on('change', function() {
