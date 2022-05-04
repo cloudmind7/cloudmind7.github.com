@@ -549,9 +549,8 @@ $(function() {
             query.push('fld=y');
         }
 
-        const agree = confirm("테이블 정보를 포함 하시겠습니까?");
-        if ($('#umlType').val() === 'uml' && _global.tables && agree) {
-
+        const agree = $('#umlType').val() === 'uml' && _global.tables && confirm("테이블 정보를 포함 하시겠습니까?");
+        if (agree) {
             const _tables = [..._global.tables];
 
             _tables.forEach(t => {
