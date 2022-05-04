@@ -364,9 +364,13 @@ $(function() {
             window.addEventListener('keyup', function(e) {
                 if (e.ctrlKey && e.keyCode == 13) {
                     window.opener.execBtn();
-                } else {
-                    window.opener._setData(data.value);
                 }
+            });
+
+            data.addEventListener('keyup', function(e) {
+                console.log('check');
+                window.opener._setData(data.value);
+                window.opener._syncEntities();
             });
 
             window.addEventListener("beforeunload", function() {
@@ -626,7 +630,15 @@ function _setData(data) {
 }
 
 function _uncheckWindowInput() {
-    $('#chkWinInput').prop('checked', false);
+    $('#chkWinInput').trigger('click');
+}
+
+function _syncEntities() {
+    const umlType = $('#umlType').val();
+
+    if (umlType === 'uml') {
+        syncEntities();
+    }
 }
 
 function syncEntities() {
@@ -638,11 +650,13 @@ function syncEntities() {
     const entitiesKey = Object.keys(inputEntities);
     let viewTables = _global.tables.filter(t => t.visible);
 
-    if (entitiesKey.length && (viewTables.length != entitiesKey.length)) {
+    if (viewTables.length != entitiesKey.length) {
         _global.tables.forEach(t => {
             const name = t.tableName.replace(/_/g, '').trim();
             if (inputEntities[name]) {
                 t.visible = 'y';
+            } else {
+                delete t.visible;
             }
         });
 
