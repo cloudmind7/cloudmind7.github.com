@@ -668,7 +668,11 @@ function syncEntities() {
             }
         });
 
-        makeCheckTablesList(_global.tables);
+        const tables = $('#chkViewTable').is(':checked')
+            ? _global.tables.filter(t => t.visible)
+            : _global.tables;
+
+        makeCheckTablesList(tables);
     }
 }
 
