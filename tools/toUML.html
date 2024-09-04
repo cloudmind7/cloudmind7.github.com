@@ -1725,6 +1725,13 @@ function removeLoading() {
 
 function showUMLImage(uml) {
     const src = "https://www.plantuml.com/plantuml/svg/" + uml;
+    fetch(src)
+    .then(response => response.text())
+    .then(svg => {
+      removeLoading();
+      $('#view').html(svg);
+    });
+    /**
     const img = new Image();
     img.onload = () => {
         removeLoading();
@@ -1737,6 +1744,7 @@ function showUMLImage(uml) {
         $('#view').html("<br/><br/>화면을 표시할 수 없습니다.<br/>데이터의 처리량이 허용치를 초과했거나, 데이터 및 조회 조건이 원인일 수 있습니다.");
     };
     img.src = src;
+    */
 }
 
 function formatPlantUML(opts) {
